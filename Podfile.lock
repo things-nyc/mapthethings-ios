@@ -1,0 +1,28 @@
+PODS:
+  - BLEHelper (1.0.1)
+  - Crashlytics (3.7.2):
+    - Fabric (~> 1.6.3)
+  - Fabric (1.6.7)
+  - ReactiveCocoa (4.2.1):
+    - Result (~> 2.0)
+  - Result (2.1.1)
+  - Underscore.m (0.3.0)
+
+DEPENDENCIES:
+  - BLEHelper
+  - Crashlytics
+  - Fabric
+  - ReactiveCocoa
+  - Underscore.m
+
+SPEC CHECKSUMS:
+  BLEHelper: ec81a9bd828723d84c35670993bb0eb5157c9bf8
+  Crashlytics: 130ab943f8c78cda7a814b434f270b2e2c8a3cba
+  Fabric: caf7580c725e64db144f610ac65cd60956911dc7
+  ReactiveCocoa: 5a42745f11ea236f405bb9ce5e97c5e3b23562dd
+  Result: 822c879f145943320cc80a9a8372378e3d699fe4
+  Underscore.m: dc9ca06fe2c9a79d01ce20c3d2c1e8f91f2d92dc
+
+PODFILE CHECKSUM: b4670b70dbb76ded8a44dce9755c508bc363dab7
+
+COCOAPODS: 1.0.1
