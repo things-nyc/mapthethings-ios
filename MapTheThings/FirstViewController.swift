@@ -10,8 +10,6 @@ import UIKit
 import CoreLocation
 import MapKit
 
-    typealias Edges = (ne: CLLocationCoordinate2D, sw: CLLocationCoordinate2D)
-
     // Wrote up here: http://stackoverflow.com/a/38236363/1207583
     extension MKMapView {
         func edgePoints() -> Edges {
