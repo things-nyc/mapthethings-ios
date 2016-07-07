@@ -7,13 +7,55 @@
 //
 
 import UIKit
+import CoreLocation
+import MapKit
 
-class FirstViewController: AppStateUIViewController {
+    typealias Edges = (ne: CLLocationCoordinate2D, sw: CLLocationCoordinate2D)
+
+    // Wrote up here: http://stackoverflow.com/a/38236363/1207583
+    extension MKMapView {
+        func edgePoints() -> Edges {
+            let corners = [
+                CGPoint(x: self.bounds.minX, y: self.bounds.minY),
+                CGPoint(x: self.bounds.minX, y: self.bounds.maxY),
+                CGPoint(x: self.bounds.maxX, y: self.bounds.maxY),
+                CGPoint(x: self.bounds.maxX, y: self.bounds.minY)
+            ]
+            let coords = corners.map { corner in
+                self.convertPoint(corner, toCoordinateFromView: self)
+            }
+            let startBounds = (
+                n: coords[0].latitude, s: coords[0].latitude,
+                e: coords[0].longitude, w: coords[0].longitude)
+            let bounds = coords.reduce(startBounds) { b, c in
+                let n = max(b.n, c.latitude)
+                let s = min(b.s, c.latitude)
+                let e = max(b.e, c.longitude)
+                let w = min(b.w, c.longitude)
+                return (n: n, s: s, e: e, w: w)
+            }
+            return (ne: CLLocationCoordinate2D(latitude: bounds.n, longitude: bounds.e),
+                    sw: CLLocationCoordinate2D(latitude: bounds.s, longitude: bounds.w))
+        }
+    }
+
+class FirstViewController: AppStateUIViewController, MKMapViewDelegate {
     @IBOutlet var timestamp: UILabel!
     @IBOutlet var toggle: UIButton!
+    @IBOutlet var mapView: MKMapView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.mapView.delegate = self
+    }
+
+    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        let edges = mapView.edgePoints()
+        updateAppState { (old) -> AppState in
+            var state = old
+            state.map.bounds = (edges.ne, edges.sw)
+            return state
+        }
     }
     
     @IBAction func toggleTracking(event: UIEvent) {
@@ -27,6 +69,10 @@ class FirstViewController: AppStateUIViewController {
     override func renderAppState(state: AppState) {
         self.timestamp.text = state.now.description
         self.toggle.setTitle("Toggle Tracking: " + (state.map.tracking ? "T" : "F"), forState: UIControlState.Normal)
+        // TODO
+        // - Sync samples in state with markers on map (first, remove all and add new. Then improve performance by remembering the ones already there and adding only new ones/removing no-longer-visible ones.
+        // - In Sampling mode, show last sample info
+        // - Show current location in lat/lon on top of view
     }
 
     override func didReceiveMemoryWarning() {

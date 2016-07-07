@@ -51,6 +51,7 @@
                     </view>
                     <tabBarItem key="tabBarItem" title="First" image="first" id="acW-dT-cKf"/>
                     <connections>
+                        <outlet property="mapView" destination="B2d-66-IzL" id="RK4-zA-sRj"/>
                         <outlet property="timestamp" destination="KQZ-1w-vlD" id="SJV-9Y-XYl"/>
                         <outlet property="toggle" destination="P8h-7Y-wr1" id="aJD-nF-Zck"/>
                     </connections>
