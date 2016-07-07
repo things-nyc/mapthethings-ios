@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreLocation
+import Haneke
 
 func == <T:Equatable> (tuple1:(T,T),tuple2:(T,T)) -> Bool
 {
@@ -22,6 +23,7 @@ func == (a: CLLocationCoordinate2D, b: CLLocationCoordinate2D) -> Bool
 
 class SampleLoader {
     var lastBounds: Edges?
+    let jsonCache = Cache<JSON>(name: "SampleLoader")
     
     init() {
         appStateObservable.observeNext({state in
@@ -44,74 +46,41 @@ class SampleLoader {
             "/\(fmt(bounds.sw.latitude))/\(fmt(bounds.sw.longitude))"
         debugPrint(apiurl)
         let requestURL: NSURL = NSURL(string: apiurl)!
-        let urlRequest: NSMutableURLRequest = NSMutableURLRequest(URL: requestURL)
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(urlRequest) { (data, response, error) -> Void in
-            
-            let httpResponse = response as! NSHTTPURLResponse
-            let statusCode = httpResponse.statusCode
-            
-            if (statusCode == 200) {
-                do {
-                    let json = try NSJSONSerialization.JSONObjectWithData(data!, options:.AllowFragments)
-                    debugPrint("JSON", json)
-                    let gridUrls: NSArray = json as! NSArray
-                    gridUrls.forEach({ (gridUrl: Any) -> (Void) in
-                        let gridUrlString = gridUrl as! String
-                        let requestURL: NSURL = NSURL(string: gridUrlString)!
-                        self.loadGrid(requestURL)
-                    })
-                }
-                catch {
-                    print("Error with grid array: \(error)")
-                }
-             }
-            else {
-                print("Error loading grid array: \(statusCode) \(httpResponse.description)")
-            }
+        jsonCache.fetch(URL: requestURL).onSuccess { json in
+            //debugPrint("JSON", json)
+            let gridUrls = json.array
+            gridUrls.forEach({ (gridUrl: Any) -> (Void) in
+                let gridUrlString = gridUrl as! String
+                let requestURL: NSURL = NSURL(string: gridUrlString)!
+                self.loadGrid(requestURL)
+            })
         }
-        
-        task.resume()
     }
     
     private func loadGrid(gridUrl: NSURL) {
-        let urlRequest: NSMutableURLRequest = NSMutableURLRequest(URL: gridUrl)
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(urlRequest) { (data, response, error) -> Void in
-            if let err = error {
-                print("Error loading grid \(gridUrl): \(err)")
-                return
-            }
-            
-            let httpResponse = response as! NSHTTPURLResponse
-            let statusCode = httpResponse.statusCode
-            
-            if (statusCode == 200) {
-                do {
-                    let json = try NSJSONSerialization.JSONObjectWithData(data!, options:.AllowFragments)
-                    //debugPrint("JSON Grid", json)
-                    let cells = json["cells"]! as! [String : AnyObject]
-                    for (_, cell) in cells {
-                        let clat = (cell["clat"] as! NSNumber).doubleValue
-                        let clon = (cell["clon"] as! NSNumber).doubleValue
-                        let rssiStats = cell["rssi"] as! [String : AnyObject]
-                        let snrStats = cell["lsnr"] as! [String : AnyObject]
-                        let rssi = (rssiStats["avg"] as! NSNumber).floatValue
-                        let snr = (snrStats["avg"] as! NSNumber).floatValue
-                        let s = Sample(location: CLLocationCoordinate2D(latitude: clat, longitude: clon), rssi: rssi, snr: snr, timestamp: nil, seqno: nil)
-                    }
-                }
-                catch {
-                    print("Error parsing grid: \(error)")
-                }
-            }
-            else if (statusCode == 404) {
-                // We expect 404's
-            }
-            else {
-                print("HTTP error loading grid: \(statusCode) \(httpResponse.description)")
-            }
+        jsonCache.fetch(URL: gridUrl).onSuccess { json in
+            //debugPrint("JSON Grid", json)
+            let cells = json.dictionary["cells"]! as! [String : AnyObject]
+            let samples = cells.reduce([], combine: { (r: Array<Sample>, c: (String, AnyObject)) -> Array<Sample> in
+                let cell = c.1
+                let clat = (cell["clat"] as! NSNumber).doubleValue
+                let clon = (cell["clon"] as! NSNumber).doubleValue
+                let rssiStats = cell["rssi"] as! [String : AnyObject]
+                let snrStats = cell["lsnr"] as! [String : AnyObject]
+                let rssi = (rssiStats["avg"] as! NSNumber).floatValue
+                let snr = (snrStats["avg"] as! NSNumber).floatValue
+                let s = Sample(location: CLLocationCoordinate2D(latitude: clat, longitude: clon), rssi: rssi, snr: snr, timestamp: nil, seqno: nil)
+                return r + [s]
+            })
+            self.gotSamples(gridUrl, samples: samples)
         }
-        task.resume()
+    }
+    
+    private func gotSamples(gridUrl: NSURL, samples: Array<Sample>) {
+//        updateAppState { (old) -> AppState in
+//            var state = old
+//            state.map.tracking = !state.map.tracking
+//            return state
+//        }
     }
 }
