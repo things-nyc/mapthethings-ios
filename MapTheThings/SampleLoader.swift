@@ -9,6 +9,7 @@
 import Foundation
 import CoreLocation
 import Haneke
+import PromiseKit
 
 func == <T:Equatable> (tuple1:(T,T),tuple2:(T,T)) -> Bool
 {
@@ -49,38 +50,53 @@ class SampleLoader {
         jsonCache.fetch(URL: requestURL).onSuccess { json in
             //debugPrint("JSON", json)
             let gridUrls = json.array
-            gridUrls.forEach({ (gridUrl: Any) -> (Void) in
+            let sampleLists = gridUrls.map({ (gridUrl: Any) -> (Promise<Array<Sample>>) in
                 let gridUrlString = gridUrl as! String
                 let requestURL: NSURL = NSURL(string: gridUrlString)!
-                self.loadGrid(requestURL)
+                return self.loadGrid(requestURL)
             })
+            when(sampleLists).then { (lists) -> (Void) in
+                let allSamples = lists.reduce([Sample](), combine: { all, list in
+                    return all + list
+                })
+                self.gotSamples(requestURL, samples: allSamples)
+            }
         }
     }
     
-    private func loadGrid(gridUrl: NSURL) {
-        jsonCache.fetch(URL: gridUrl).onSuccess { json in
-            //debugPrint("JSON Grid", json)
-            let cells = json.dictionary["cells"]! as! [String : AnyObject]
-            let samples = cells.reduce([], combine: { (r: Array<Sample>, c: (String, AnyObject)) -> Array<Sample> in
-                let cell = c.1
-                let clat = (cell["clat"] as! NSNumber).doubleValue
-                let clon = (cell["clon"] as! NSNumber).doubleValue
-                let rssiStats = cell["rssi"] as! [String : AnyObject]
-                let snrStats = cell["lsnr"] as! [String : AnyObject]
-                let rssi = (rssiStats["avg"] as! NSNumber).floatValue
-                let snr = (snrStats["avg"] as! NSNumber).floatValue
-                let s = Sample(location: CLLocationCoordinate2D(latitude: clat, longitude: clon), rssi: rssi, snr: snr, timestamp: nil, seqno: nil)
-                return r + [s]
+    private func loadGrid(gridUrl: NSURL) -> Promise<Array<Sample>> {
+        return Promise { fulfill, reject in
+            jsonCache.fetch(URL: gridUrl).onSuccess { json in
+                //debugPrint("JSON Grid", json)
+                let cells = json.dictionary["cells"]! as! [String : AnyObject]
+                let samples = cells.reduce([], combine: { (r: Array<Sample>, c: (String, AnyObject)) -> Array<Sample> in
+                    let cell = c.1
+                    let clat = (cell["clat"] as! NSNumber).doubleValue
+                    let clon = (cell["clon"] as! NSNumber).doubleValue
+                    let rssiStats = cell["rssi"] as! [String : AnyObject]
+                    let snrStats = cell["lsnr"] as! [String : AnyObject]
+                    let rssi = (rssiStats["avg"] as! NSNumber).floatValue
+                    let snr = (snrStats["avg"] as! NSNumber).floatValue
+                    let s = Sample(location: CLLocationCoordinate2D(latitude: clat, longitude: clon), rssi: rssi, snr: snr, timestamp: nil, seqno: nil)
+                    return r + [s]
+                })
+                fulfill(samples)
+            }.onFailure({ (error) in
+                if (error?.code == -402) {
+                    fulfill([Sample]())
+                }
+                else {
+                    reject(error!)
+                }
             })
-            self.gotSamples(gridUrl, samples: samples)
         }
     }
     
     private func gotSamples(gridUrl: NSURL, samples: Array<Sample>) {
-//        updateAppState { (old) -> AppState in
-//            var state = old
-//            state.map.tracking = !state.map.tracking
-//            return state
-//        }
+        updateAppState { (old) -> AppState in
+            var state = old
+            state.map.samples = samples
+            return state
+        }
     }
 }
