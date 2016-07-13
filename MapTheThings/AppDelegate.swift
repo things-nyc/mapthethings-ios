@@ -15,6 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     var timer: NSTimer?
+    var loader: SampleLoader?
     
     func onTick() {
         updateAppState { (old) -> AppState in
@@ -27,6 +28,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         self.timer = NSTimer(timeInterval: 1.0, target: self, selector: #selector(AppDelegate.onTick), userInfo: nil, repeats: true)
         NSRunLoop.currentRunLoop().addTimer(timer!, forMode: NSRunLoopCommonModes)
+        
+        self.loader = SampleLoader()
+
         return true
     }
 
