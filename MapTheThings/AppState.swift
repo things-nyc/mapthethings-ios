@@ -28,14 +28,20 @@ public struct MapState {
     var samples: Array<Sample>
 }
 
-public enum SamplingActive {
+public enum SamplingStrategy {
+    case ConnectedNode // Bluetooth connected node is directed by app to send TTN message
+    //case Periodic // Node sends message periodically.
+}
+
+public enum SamplingMode {
     case Play
     case Pause
     case Stop
 }
 
 public struct SamplingState {
-    var state: SamplingActive
+    var strategy: SamplingStrategy
+    var mode: SamplingMode
     var mostRecentSample: Sample?
 }
 
@@ -53,7 +59,7 @@ private func defaultAppState() -> AppState {
     let nyNE = CLLocationCoordinate2D(latitude: 40.8476, longitude: -73.0543)
     let nySW = CLLocationCoordinate2D(latitude: 40.4976, longitude: -73.8631)
     let mapState = MapState(currentLocation: nil, updated: NSDate(), bounds: (ne: nyNE, sw: nySW), tracking: true, samples: samples)
-    let samplingState = SamplingState(state: SamplingActive.Stop, mostRecentSample: nil)
+    let samplingState = SamplingState(strategy: SamplingStrategy.ConnectedNode, mode: SamplingMode.Stop, mostRecentSample: nil)
     return AppState(now: NSDate(), map: mapState, sampling: samplingState)
 }
 
