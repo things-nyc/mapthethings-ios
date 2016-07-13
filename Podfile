@@ -7,6 +7,8 @@ target 'MapTheThings' do
 
   # Pods for MapTheThings
   pod 'ReactiveCocoa'
+  pod 'HanekeSwift'
+  pod 'PromiseKit', '~> 3.2'
   #pod 'Reachability'
   #pod 'CocoaLumberjack'
   #pod 'JustPromises'

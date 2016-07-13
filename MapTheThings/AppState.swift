@@ -10,8 +10,10 @@ import Foundation
 import CoreLocation
 import ReactiveCocoa
 
+typealias Edges = (ne: CLLocationCoordinate2D, sw: CLLocationCoordinate2D)
+
 public struct Sample {
-    var location: CLLocation
+    var location: CLLocationCoordinate2D
     var rssi: Float
     var snr: Float
     var timestamp: NSDate?
@@ -21,19 +23,25 @@ public struct Sample {
 public struct MapState {
     var currentLocation: CLLocation?
     var updated: NSDate
-    var bounds: (CLLocationCoordinate2D, CLLocationCoordinate2D)
+    var bounds: Edges
     var tracking: Bool
     var samples: Array<Sample>
 }
 
-public enum SamplingActive {
+public enum SamplingStrategy {
+    case ConnectedNode // Bluetooth connected node is directed by app to send TTN message
+    //case Periodic // Node sends message periodically.
+}
+
+public enum SamplingMode {
     case Play
     case Pause
     case Stop
 }
 
 public struct SamplingState {
-    var state: SamplingActive
+    var strategy: SamplingStrategy
+    var mode: SamplingMode
     var mostRecentSample: Sample?
 }
 
@@ -48,10 +56,10 @@ public struct AppState {
 
 private func defaultAppState() -> AppState {
     let samples = Array<Sample>()
-    let nyNW = CLLocationCoordinate2D(latitude: 40.8476, longitude: -73.8631)
-    let nySE = CLLocationCoordinate2D(latitude: 40.4976, longitude: -73.0543)
-    let mapState = MapState(currentLocation: nil, updated: NSDate(), bounds: (nyNW, nySE), tracking: true, samples: samples)
-    let samplingState = SamplingState(state: SamplingActive.Stop, mostRecentSample: nil)
+    let nyNE = CLLocationCoordinate2D(latitude: 40.8476, longitude: -73.0543)
+    let nySW = CLLocationCoordinate2D(latitude: 40.4976, longitude: -73.8631)
+    let mapState = MapState(currentLocation: nil, updated: NSDate(), bounds: (ne: nyNE, sw: nySW), tracking: true, samples: samples)
+    let samplingState = SamplingState(strategy: SamplingStrategy.ConnectedNode, mode: SamplingMode.Stop, mostRecentSample: nil)
     return AppState(now: NSDate(), map: mapState, sampling: samplingState)
 }
 
