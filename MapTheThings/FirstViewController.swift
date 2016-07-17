@@ -66,7 +66,9 @@ class FirstViewController: AppStateUIViewController, MKMapViewDelegate {
     }
     
     override func renderAppState(state: AppState) {
-        self.timestamp.text = state.now.description
+        if let location = state.map.currentLocation {
+            self.timestamp.text = "\(location.coordinate.longitude), \(location.coordinate.latitude)"
+        }
         self.toggle.setTitle("Toggle Tracking: " + (state.map.tracking ? "T" : "F"), forState: UIControlState.Normal)
         // TODO
         // - Sync samples in state with markers on map (first, remove all and add new. Then improve performance by remembering the ones already there and adding only new ones/removing no-longer-visible ones.

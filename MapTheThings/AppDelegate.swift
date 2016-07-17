@@ -17,6 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var timer: NSTimer?
     var loader: SampleLoader?
     var bluetooth: Bluetooth?
+    var location: Location?
     
     func onTick() {
         updateAppState { (old) -> AppState in
@@ -32,6 +33,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         self.loader = SampleLoader()
         self.bluetooth = Bluetooth(savedIdentifiers: [])
+        self.location = Location()
 
         return true
     }

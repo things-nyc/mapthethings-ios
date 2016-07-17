@@ -19,6 +19,8 @@
 		0165DD011D2552F900FFB1A1 /* MapTheThingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0165DD001D2552F900FFB1A1 /* MapTheThingsTests.swift */; };
 		0165DD0C1D2552F900FFB1A1 /* MapTheThingsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0165DD0B1D2552F900FFB1A1 /* MapTheThingsUITests.swift */; };
 		017D67991D2DF187002FF061 /* SampleLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017D67981D2DF187002FF061 /* SampleLoader.swift */; };
+		01A12C5F1D3B28D90045BD42 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A12C5E1D3B28D90045BD42 /* Location.swift */; };
+		01A12C611D3B2CA20045BD42 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01A12C601D3B2CA20045BD42 /* CoreLocation.framework */; };
 		01B542C51D35F17A00DE443B /* MapAnnotations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B542C41D35F17A00DE443B /* MapAnnotations.swift */; };
 		01B542C71D35FCC300DE443B /* MapAnnotationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B542C61D35FCC200DE443B /* MapAnnotationsTests.swift */; };
 		01B542C91D36C3F500DE443B /* Bluetooth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B542C81D36C3F400DE443B /* Bluetooth.swift */; };
@@ -67,6 +69,8 @@
 		0165DD0B1D2552F900FFB1A1 /* MapTheThingsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapTheThingsUITests.swift; sourceTree = "<group>"; };
 		0165DD0D1D2552F900FFB1A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		017D67981D2DF187002FF061 /* SampleLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleLoader.swift; sourceTree = "<group>"; };
+		01A12C5E1D3B28D90045BD42 /* Location.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
+		01A12C601D3B2CA20045BD42 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		01B542C41D35F17A00DE443B /* MapAnnotations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapAnnotations.swift; sourceTree = "<group>"; };
 		01B542C61D35FCC200DE443B /* MapAnnotationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapAnnotationsTests.swift; sourceTree = "<group>"; };
 		01B542C81D36C3F400DE443B /* Bluetooth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bluetooth.swift; sourceTree = "<group>"; };
@@ -86,6 +90,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				01A12C611D3B2CA20045BD42 /* CoreLocation.framework in Frameworks */,
 				015A6B801D2A0BC8001B5E44 /* MapKit.framework in Frameworks */,
 				1714AF3328D553B36089D5C4 /* Pods_MapTheThings.framework in Frameworks */,
 			);
@@ -147,6 +152,7 @@
 				017D67981D2DF187002FF061 /* SampleLoader.swift */,
 				01B542C41D35F17A00DE443B /* MapAnnotations.swift */,
 				01B542C81D36C3F400DE443B /* Bluetooth.swift */,
+				01A12C5E1D3B28D90045BD42 /* Location.swift */,
 			);
 			path = MapTheThings;
 			sourceTree = "<group>";
@@ -186,6 +192,7 @@
 		FD1A6986B2B95C096E44ED3E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				01A12C601D3B2CA20045BD42 /* CoreLocation.framework */,
 				015A6B811D2A0F8B001B5E44 /* BLEHelper.framework */,
 				015A6B821D2A0F8B001B5E44 /* ReactiveCocoa.framework */,
 				015A6B831D2A0F8B001B5E44 /* Result.framework */,
@@ -486,6 +493,7 @@
 				0165DCEE1D2552F900FFB1A1 /* SecondViewController.swift in Sources */,
 				0165DCEA1D2552F900FFB1A1 /* AppDelegate.swift in Sources */,
 				01B542C51D35F17A00DE443B /* MapAnnotations.swift in Sources */,
+				01A12C5F1D3B28D90045BD42 /* Location.swift in Sources */,
 				017D67991D2DF187002FF061 /* SampleLoader.swift in Sources */,
 				015A6B8A1D2A12AA001B5E44 /* AppStateUIViewController.swift in Sources */,
 				0165DCEC1D2552F900FFB1A1 /* FirstViewController.swift in Sources */,
