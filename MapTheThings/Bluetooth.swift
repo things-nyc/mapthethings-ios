@@ -28,7 +28,15 @@ let nodeServices : [CBUUID]? = [loraService, deviceInfoService]
 let loraCommandCharacteristic = CBUUID(string: "00002AD0-0000-1000-8000-00805F9B34FB")
 let loraWritePacketCharacteristic = CBUUID(string: "00002AD1-0000-1000-8000-00805F9B34FB")
 let loraDevAddrCharacteristic = CBUUID(string: "00002AD2-0000-1000-8000-00805F9B34FB")
-let loraNodeCharacteristics : [CBUUID]? = [loraCommandCharacteristic, loraWritePacketCharacteristic, loraDevAddrCharacteristic]
+let loraNwkSKeyCharacteristic = CBUUID(string: "00002AD3-0000-1000-8000-00805F9B34FB")
+let loraAppSKeyCharacteristic = CBUUID(string: "00002AD4-0000-1000-8000-00805F9B34FB")
+let loraNodeCharacteristics : [CBUUID]? = [
+    loraCommandCharacteristic,
+    loraWritePacketCharacteristic,
+    loraDevAddrCharacteristic,
+    loraNwkSKeyCharacteristic,
+    loraAppSKeyCharacteristic,
+]
 
 extension UInt16 {
     var data: NSData {
@@ -85,13 +93,12 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
                 let data = "1234".dataUsingEncoding(NSUTF8StringEncoding)
                 debugPrint("Writing to characteristic", characteristic, data)
                 peripheral.writeValue(data!, forCharacteristic: characteristic, type: CBCharacteristicWriteType.WithResponse)
-                //peripheral.readValueForCharacteristic(characteristic)
             }
-            else if characteristic.UUID.isEqual(loraDevAddrCharacteristic) {
-                let bytes : [UInt8] = [0xAA, 0xBB, 0xCC, 0xFF]
-                let data = NSData(bytes: bytes, length: bytes.count)
-                debugPrint("Writing to characteristic", characteristic, data)
-                peripheral.writeValue(data, forCharacteristic: characteristic, type: CBCharacteristicWriteType.WithResponse)
+            else if characteristic.UUID.isEqual(loraDevAddrCharacteristic) ||
+                characteristic.UUID.isEqual(loraNwkSKeyCharacteristic) ||
+                characteristic.UUID.isEqual(loraAppSKeyCharacteristic)
+            {
+                peripheral.readValueForCharacteristic(characteristic)
             }
             else if characteristic.UUID.isEqual(loraCommandCharacteristic) {
                 let command : UInt16 = 500
@@ -107,6 +114,27 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
     @objc public func peripheral(peripheral: CBPeripheral, didUpdateValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
         let value = String(data: characteristic.value!, encoding: NSUTF8StringEncoding)
         debugPrint("peripheral didUpdateValueForCharacteristic", peripheral.name, characteristic, value, error)
+        updateAppState { (old) -> AppState in
+            var state = old
+            var dev = Device()
+            if let known = state.bluetooth[peripheral.identifier] {
+                dev = known
+            }
+            if characteristic.UUID.isEqual(loraDevAddrCharacteristic) {
+                dev.devAddr = characteristic.value!
+            }
+            else if characteristic.UUID.isEqual(loraNwkSKeyCharacteristic) {
+                dev.nwkSKey = characteristic.value!
+            }
+            else if characteristic.UUID.isEqual(loraAppSKeyCharacteristic) {
+                dev.appSKey = characteristic.value!
+            }
+            else {
+                return old // No changes
+            }
+            state.bluetooth[peripheral.identifier] = dev
+            return state
+        }
     }
     @objc public func peripheral(peripheral: CBPeripheral, didWriteValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
         debugPrint("peripheral didWriteValueForCharacteristic", peripheral.name, characteristic, error)

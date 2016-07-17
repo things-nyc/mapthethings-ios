@@ -21,7 +21,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func onTick() {
         updateAppState { (old) -> AppState in
-            return AppState(now: NSDate(), map: old.map, sampling: old.sampling)
+            return AppState(now: NSDate(), bluetooth: old.bluetooth, map: old.map, sampling: old.sampling)
         }
     }
     

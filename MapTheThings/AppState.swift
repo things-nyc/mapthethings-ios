@@ -45,8 +45,15 @@ public struct SamplingState {
     var mostRecentSample: Sample?
 }
 
+public struct Device {
+    var devAddr: NSData?
+    var nwkSKey: NSData?
+    var appSKey: NSData?
+}
+
 public struct AppState {
     var now: NSDate
+    var bluetooth: Dictionary<NSUUID, Device>
     var map: MapState
     var sampling: SamplingState
     static internal func x() -> Int {
@@ -60,7 +67,7 @@ private func defaultAppState() -> AppState {
     let nySW = CLLocationCoordinate2D(latitude: 40.4976, longitude: -73.8631)
     let mapState = MapState(currentLocation: nil, updated: NSDate(), bounds: (ne: nyNE, sw: nySW), tracking: true, samples: samples)
     let samplingState = SamplingState(strategy: SamplingStrategy.ConnectedNode, mode: SamplingMode.Stop, mostRecentSample: nil)
-    return AppState(now: NSDate(), map: mapState, sampling: samplingState)
+    return AppState(now: NSDate(), bluetooth: Dictionary(), map: mapState, sampling: samplingState)
 }
 
 public var appStateProperty = MutableProperty(defaultAppState())
