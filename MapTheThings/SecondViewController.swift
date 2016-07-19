@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreLocation
 
 extension NSData {
     
@@ -48,6 +49,24 @@ class SecondViewController: AppStateUIViewController {
         }
     }
 
+    @IBAction func sendTestPacket(sender: UIButton) {
+        debugPrint("sendTestPacket")
+        updateAppState { (old) -> AppState in
+            var state = old
+            if state.map.currentLocation==nil {
+                state.map.currentLocation = CLLocation(latitude: 10, longitude: 10)
+            }
+            state.sendPacket = NSUUID() // Each press of command
+            return state
+        }
+    }
+    
+    @IBAction func reconnectBluetooth(sender: UIButton) {
+        debugPrint("reconnectBluetooth")
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        appDelegate.bluetooth!.rescan()
+    }
+    
     override func renderAppState(oldState: AppState, state: AppState) {
         // Update UI according to app state
         if let dev = state.bluetooth.first?.1 {

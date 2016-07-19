@@ -200,10 +200,24 @@
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rda-XO-Wzz">
-                                <rect key="frame" x="251" y="291" width="98" height="30"/>
-                                <state key="normal" title="Send Location"/>
+                                <rect key="frame" x="243" y="291" width="114" height="30"/>
+                                <state key="normal" title="Resend Location"/>
                                 <connections>
                                     <action selector="sendPacket:" destination="8rJ-Kc-sve" eventType="touchUpInside" id="Lef-zl-YfV"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NFz-IE-eIL">
+                                <rect key="frame" x="241" y="329" width="119" height="30"/>
+                                <state key="normal" title="Send Test Packet"/>
+                                <connections>
+                                    <action selector="sendTestPacket:" destination="8rJ-Kc-sve" eventType="touchUpInside" id="va8-yg-kpc"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CWb-Jo-qhU">
+                                <rect key="frame" x="240" y="367" width="121" height="30"/>
+                                <state key="normal" title="Rescan Bluetooth"/>
+                                <connections>
+                                    <action selector="reconnectBluetooth:" destination="8rJ-Kc-sve" eventType="touchUpInside" id="0sp-VR-t6i"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -234,10 +248,12 @@
                             <constraint firstItem="CN1-2C-lkH" firstAttribute="top" secondItem="FAF-Hh-lMP" secondAttribute="bottom" constant="2" id="NCW-g3-3ex"/>
                             <constraint firstItem="0PZ-31-6BT" firstAttribute="top" secondItem="nBU-FU-0xf" secondAttribute="bottom" constant="2" id="NDT-bO-rqy"/>
                             <constraint firstItem="uy6-rN-gOX" firstAttribute="trailing" secondItem="Q2J-OA-iGk" secondAttribute="trailing" id="O26-O1-LP8"/>
+                            <constraint firstItem="CWb-Jo-qhU" firstAttribute="top" secondItem="NFz-IE-eIL" secondAttribute="bottom" constant="8" id="OJO-gr-Y0F"/>
                             <constraint firstItem="n5s-yz-num" firstAttribute="leading" secondItem="oYh-Cn-648" secondAttribute="leading" id="OZw-N8-Rdi"/>
                             <constraint firstItem="mQe-s7-cUP" firstAttribute="leading" secondItem="Q2J-OA-iGk" secondAttribute="leading" id="Pio-dX-VjB"/>
                             <constraint firstItem="PKT-hG-Wdr" firstAttribute="trailing" secondItem="TyN-eP-51z" secondAttribute="trailing" id="PtM-Ng-pp9"/>
                             <constraint firstItem="rda-XO-Wzz" firstAttribute="top" secondItem="CN1-2C-lkH" secondAttribute="bottom" constant="10" id="Qhp-EV-sHV"/>
+                            <constraint firstItem="CWb-Jo-qhU" firstAttribute="centerX" secondItem="QS5-Rx-YEW" secondAttribute="centerX" id="RJJ-hk-p4F"/>
                             <constraint firstItem="dSG-be-nI2" firstAttribute="trailing" secondItem="Q2J-OA-iGk" secondAttribute="trailing" id="RuK-hE-2tG"/>
                             <constraint firstItem="CN1-2C-lkH" firstAttribute="leading" secondItem="uy6-rN-gOX" secondAttribute="trailing" constant="8" id="S7q-ms-wvR"/>
                             <constraint firstItem="QiS-y6-ITf" firstAttribute="top" secondItem="Rjm-X6-P6g" secondAttribute="bottom" constant="2" id="SLB-H7-Xgf"/>
@@ -270,8 +286,10 @@
                             <constraint firstItem="CN1-2C-lkH" firstAttribute="baseline" secondItem="uy6-rN-gOX" secondAttribute="baseline" id="rXe-Ol-clp"/>
                             <constraint firstItem="4gf-KS-7b9" firstAttribute="top" secondItem="0PZ-31-6BT" secondAttribute="bottom" constant="2" id="sLJ-0V-Jba"/>
                             <constraint firstItem="Q2J-OA-iGk" firstAttribute="leading" secondItem="PKT-hG-Wdr" secondAttribute="leading" id="vLh-AC-L5c"/>
+                            <constraint firstItem="NFz-IE-eIL" firstAttribute="centerX" secondItem="QS5-Rx-YEW" secondAttribute="centerX" id="wmi-I3-wej"/>
                             <constraint firstItem="Rjm-X6-P6g" firstAttribute="leading" secondItem="TyN-eP-51z" secondAttribute="trailing" constant="8" id="wwG-Fc-3gw"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Rjm-X6-P6g" secondAttribute="trailing" constant="10" id="yia-Op-evh"/>
+                            <constraint firstItem="NFz-IE-eIL" firstAttribute="top" secondItem="rda-XO-Wzz" secondAttribute="bottom" constant="8" id="ziX-L4-y4m"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Second" image="second" id="cPa-gy-q4n"/>

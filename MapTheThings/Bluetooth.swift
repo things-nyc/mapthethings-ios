@@ -204,8 +204,12 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
             })
         }
         else {
-            self.central!.scanForPeripheralsWithServices(nodeServices, options: nil)
+            rescan()
         }
+    }
+    
+    public func rescan() {
+        self.central!.scanForPeripheralsWithServices(nodeServices, options: nil)
     }
     
     var nodeIdentifiers : [NSUUID] {
