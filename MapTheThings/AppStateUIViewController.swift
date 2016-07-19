@@ -16,10 +16,10 @@ class AppStateUIViewController: UIViewController {
         // Listen for app state changes...
         appStateObservable.observeOn(QueueScheduler.mainQueueScheduler).observeNext({state in
             //print(state)
-            self.renderAppState(state)
+            self.renderAppState(state.old, state: state.new)
         })
     }
     
-    func renderAppState(state: AppState) {
+    func renderAppState(oldState: AppState, state: AppState) {
     }
 }

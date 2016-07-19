@@ -54,7 +54,7 @@ public func ==(lhs: SampleAnnotation, rhs: SampleAnnotation) -> Bool {
 }
 
 
-extension FirstViewController {
+extension MapViewController {
     func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         if let annotation = annotation as? SampleAnnotation {
             let identifier = "pin"

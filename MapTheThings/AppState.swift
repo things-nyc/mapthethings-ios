@@ -9,6 +9,7 @@
 import Foundation
 import CoreLocation
 import ReactiveCocoa
+import enum Result.NoError
 
 typealias Edges = (ne: CLLocationCoordinate2D, sw: CLLocationCoordinate2D)
 
@@ -45,13 +46,26 @@ public struct SamplingState {
     var mostRecentSample: Sample?
 }
 
+public struct Device {
+    public init(uuid: NSUUID) {
+        identifier = uuid
+    }
+    let identifier: NSUUID
+    var devAddr: NSData?
+    var nwkSKey: NSData?
+    var appSKey: NSData?
+    var connected: Bool = false
+    var mode: SamplingMode = SamplingMode.Play
+    var lastLocation: CLLocation?
+    var lastPacket: NSData?
+}
+
 public struct AppState {
     var now: NSDate
+    var bluetooth: Dictionary<NSUUID, Device>
     var map: MapState
     var sampling: SamplingState
-    static internal func x() -> Int {
-        return 1
-    }
+    var sendPacket: NSUUID? = nil
 }
 
 private func defaultAppState() -> AppState {
@@ -60,10 +74,16 @@ private func defaultAppState() -> AppState {
     let nySW = CLLocationCoordinate2D(latitude: 40.4976, longitude: -73.8631)
     let mapState = MapState(currentLocation: nil, updated: NSDate(), bounds: (ne: nyNE, sw: nySW), tracking: true, samples: samples)
     let samplingState = SamplingState(strategy: SamplingStrategy.ConnectedNode, mode: SamplingMode.Stop, mostRecentSample: nil)
-    return AppState(now: NSDate(), map: mapState, sampling: samplingState)
+    return AppState(
+        now: NSDate(),
+        bluetooth: Dictionary(),
+        map: mapState,
+        sampling: samplingState,
+        sendPacket: nil)
 }
 
-public var appStateProperty = MutableProperty(defaultAppState())
+let defaultState = defaultAppState()
+public var appStateProperty = MutableProperty((old: defaultState, new: defaultState))
 public var appStateObservable = appStateProperty.signal
 
 let sq = dispatch_queue_create("AppState", DISPATCH_QUEUE_SERIAL)
@@ -72,7 +92,25 @@ let sq = dispatch_queue_create("AppState", DISPATCH_QUEUE_SERIAL)
 public typealias AppStateUpdateFn = (AppState) -> AppState
 public func updateAppState(fn: AppStateUpdateFn) {
     dispatch_async(sq) {
-        appStateProperty.modify(fn)
+        appStateProperty.modify({ (last: (old: AppState, new: AppState)) -> ((old: AppState, new: AppState)) in
+            let newState = fn(last.new)
+            return (old: last.new, new: newState)
+        })
     }
+}
+
+public func stateValChanged<T : Equatable>(state: (old: AppState, new: AppState), access: (AppState) -> (T?)) -> Bool {
+    let new = access(state.new)
+    let old = access(state.old)
+    var changed = false
+    if let newValue = new {
+        if let oldValue = old {
+            changed = !(newValue==oldValue) // Different from last one?
+        }
+        else {
+            changed = true // New this state!
+        }
+    }
+    return changed
 }
 
