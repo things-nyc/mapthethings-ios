@@ -1,5 +1,5 @@
 //
-//  FirstViewController.swift
+//  MapViewController.swift
 //  MapTheThings
 //
 //  Created by Frank on 2016/6/30.
@@ -37,7 +37,7 @@ extension MKMapView {
     }
 }
 
-class FirstViewController: AppStateUIViewController, MKMapViewDelegate {
+class MapViewController: AppStateUIViewController, MKMapViewDelegate {
     @IBOutlet var timestamp: UILabel!
     @IBOutlet var toggle: UIButton!
     @IBOutlet var mapView: MKMapView!

@@ -1,5 +1,5 @@
 //
-//  SecondViewController.swift
+//  DeviceViewController.swift
 //  MapTheThings
 //
 //  Created by Frank on 2016/6/30.
@@ -25,7 +25,7 @@ extension NSData {
     }
 }
 
-class SecondViewController: AppStateUIViewController {
+class DeviceViewController: AppStateUIViewController {
     @IBOutlet var devAddr: UITextField!
     @IBOutlet var nwkSKey: UITextField!
     @IBOutlet var appSKey: UITextField!
