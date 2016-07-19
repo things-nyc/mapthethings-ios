@@ -20,7 +20,7 @@ extension NSData {
         for i in 0..<self.length {
             hexadecimalString += String(format: "%02x", buffer.advancedBy(i).memory)
         }
-        return hexadecimalString
+        return hexadecimalString.uppercaseString
     }
 }
 
@@ -28,25 +28,48 @@ class SecondViewController: AppStateUIViewController {
     @IBOutlet var devAddr: UITextField!
     @IBOutlet var nwkSKey: UITextField!
     @IBOutlet var appSKey: UITextField!
+    @IBOutlet var connected: UITextField!
+    @IBOutlet var lastLocation: UITextField!
+    @IBOutlet var lastTimestamp: UITextField!
+    @IBOutlet var lastAccuracy: UITextField!
+    @IBOutlet var lastPacket: UITextField!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
     }
+    
+    @IBAction func sendPacket(sender: UIButton) {
+        debugPrint("sendPacket")
+        updateAppState { (old) -> AppState in
+            var state = old
+            state.sendPacket = NSUUID() // Each press of command
+            return state
+        }
+    }
 
-    override func renderAppState(state: AppState) {
+    override func renderAppState(oldState: AppState, state: AppState) {
         // Update UI according to app state
-        let dev = state.bluetooth.first?.1
-        if let devAddr = dev?.devAddr {
-            self.devAddr.text = devAddr.hexadecimalString()
+        if let dev = state.bluetooth.first?.1 {
+            if let devAddr = dev.devAddr {
+                self.devAddr.text = devAddr.hexadecimalString()
+            }
+            if let newSKey = dev.nwkSKey {
+                self.nwkSKey.text = newSKey.hexadecimalString()
+            }
+            if let appSKey = dev.appSKey {
+                self.appSKey.text = appSKey.hexadecimalString()
+            }
+            if let lastLocation = dev.lastLocation {
+                self.lastLocation.text = "\(lastLocation.coordinate.latitude),\(lastLocation.coordinate.longitude)"
+                self.lastTimestamp.text = lastLocation.timestamp.description
+                self.lastAccuracy.text = "\(lastLocation.horizontalAccuracy)"
+            }
+            if let lastPacket = dev.lastPacket {
+                self.lastPacket.text = lastPacket.hexadecimalString()
+            }
+            self.connected.text = dev.connected.description
         }
-        if let newSKey = dev?.nwkSKey {
-            self.nwkSKey.text = newSKey.hexadecimalString()
-        }
-        if let appSKey = dev?.appSKey {
-            self.appSKey.text = appSKey.hexadecimalString()
-        }
-        
     }
 
     override func didReceiveMemoryWarning() {

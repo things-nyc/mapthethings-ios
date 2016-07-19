@@ -45,8 +45,26 @@ extension UInt16 {
     }
 }
 
+extension UInt8 {
+    var data: NSData {
+        var int = self
+        return NSData(bytes: &int, length: sizeof(UInt8))
+    }
+}
+
+extension CBCharacteristic {
+    var nsUUID : NSUUID {
+        var s = self.UUID.UUIDString
+        if s.lengthOfBytesUsingEncoding(NSUTF8StringEncoding)==4 {
+            s = "0000\(s)-0000-1000-8000-00805F9B34FB"
+        }
+        return NSUUID(UUIDString: s)!
+    }
+}
+
 public class BluetoothNode : NSObject, CBPeripheralDelegate {
     let peripheral : CBPeripheral
+    var characteristics : Dictionary<String, CBCharacteristic> = Dictionary()
     
     public init(peripheral : CBPeripheral) {
         self.peripheral = peripheral
@@ -58,6 +76,18 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
     
     public var identifier : NSUUID {
         return self.peripheral.identifier
+    }
+    
+    public func sendPacket(data : NSData) -> Bool {
+        if let characteristic = self.characteristics[loraWritePacketCharacteristic.UUIDString] {
+            debugPrint("Sending packet", data)
+            peripheral.writeValue(data, forCharacteristic: characteristic, type: CBCharacteristicWriteType.WithResponse)
+            return true
+        }
+        else {
+            debugPrint("Unable to send packet - Write Packet characteristic unavailable.")
+            return false
+        }
     }
     
     @objc public func peripheralDidUpdateName(peripheral: CBPeripheral) {
@@ -89,22 +119,19 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
     @objc public func peripheral(peripheral: CBPeripheral, didDiscoverCharacteristicsForService service: CBService, error: NSError?) {
         debugPrint("peripheral didDiscoverCharacteristicsForService", peripheral.name, service, service.characteristics, error)
         service.characteristics!.forEach { (characteristic) in
-            if characteristic.UUID.isEqual(loraWritePacketCharacteristic) {
-                let data = "1234".dataUsingEncoding(NSUTF8StringEncoding)
-                debugPrint("Writing to characteristic", characteristic, data)
-                peripheral.writeValue(data!, forCharacteristic: characteristic, type: CBCharacteristicWriteType.WithResponse)
-            }
-            else if characteristic.UUID.isEqual(loraDevAddrCharacteristic) ||
+            debugPrint("Set characteristic: ", characteristic.nsUUID.UUIDString)
+            self.characteristics[characteristic.nsUUID.UUIDString] = characteristic
+            if characteristic.UUID.isEqual(loraDevAddrCharacteristic) ||
                 characteristic.UUID.isEqual(loraNwkSKeyCharacteristic) ||
                 characteristic.UUID.isEqual(loraAppSKeyCharacteristic)
             {
                 peripheral.readValueForCharacteristic(characteristic)
             }
-            else if characteristic.UUID.isEqual(loraCommandCharacteristic) {
-                let command : UInt16 = 500
-                debugPrint("Writing to characteristic", characteristic, command)
-                peripheral.writeValue(command.data, forCharacteristic: characteristic, type: CBCharacteristicWriteType.WithResponse)
-            }
+//            else if characteristic.UUID.isEqual(loraCommandCharacteristic) {
+//                let command : UInt16 = 500
+//                debugPrint("Writing to characteristic", characteristic, command)
+//                peripheral.writeValue(command.data, forCharacteristic: characteristic, type: CBCharacteristicWriteType.WithResponse)
+//            }
                 
             else {
                 peripheral.readValueForCharacteristic(characteristic)
@@ -112,28 +139,32 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
         }
     }
     @objc public func peripheral(peripheral: CBPeripheral, didUpdateValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
-        let value = String(data: characteristic.value!, encoding: NSUTF8StringEncoding)
-        debugPrint("peripheral didUpdateValueForCharacteristic", peripheral.name, characteristic, value, error)
-        updateAppState { (old) -> AppState in
-            var state = old
-            var dev = Device()
-            if let known = state.bluetooth[peripheral.identifier] {
-                dev = known
+        if let value = characteristic.value {
+            //let s = String(data: value, encoding: NSUTF8StringEncoding)
+            //debugPrint("peripheral didUpdateValueForCharacteristic", peripheral.name, characteristic, s, error)
+            updateAppState { (old) -> AppState in
+                if var dev = old.bluetooth[peripheral.identifier] {
+                    if characteristic.UUID.isEqual(loraDevAddrCharacteristic) {
+                        dev.devAddr = value
+                    }
+                    else if characteristic.UUID.isEqual(loraNwkSKeyCharacteristic) {
+                        dev.nwkSKey = value
+                    }
+                    else if characteristic.UUID.isEqual(loraAppSKeyCharacteristic) {
+                        dev.appSKey = value
+                    }
+                    else {
+                        return old // No changes
+                    }
+                    var state = old
+                    state.bluetooth[peripheral.identifier] = dev
+                    return state
+                }
+                else {
+                    debugPrint("Should find \(peripheral.identifier) in device list")
+                    return old
+                }
             }
-            if characteristic.UUID.isEqual(loraDevAddrCharacteristic) {
-                dev.devAddr = characteristic.value!
-            }
-            else if characteristic.UUID.isEqual(loraNwkSKeyCharacteristic) {
-                dev.nwkSKey = characteristic.value!
-            }
-            else if characteristic.UUID.isEqual(loraAppSKeyCharacteristic) {
-                dev.appSKey = characteristic.value!
-            }
-            else {
-                return old // No changes
-            }
-            state.bluetooth[peripheral.identifier] = dev
-            return state
         }
     }
     @objc public func peripheral(peripheral: CBPeripheral, didWriteValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
@@ -180,6 +211,9 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
     var nodeIdentifiers : [NSUUID] {
         return Array(nodes.keys)
     }
+    public func node(id: NSUUID) -> BluetoothNode? {
+        return nodes[id]
+    }
     @objc public func centralManagerDidUpdateState(central: CBCentralManager) {
         debugPrint("centralManagerDidUpdateState", central.state)
     }
@@ -212,6 +246,18 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
         let node = BluetoothNode(peripheral: peripheral)
         self.nodes[node.identifier] = node
         self.connecting = nil
+
+        updateAppState { (old) -> AppState in
+            var state = old
+            var dev = Device(uuid: peripheral.identifier)
+            if let known = state.bluetooth[peripheral.identifier] {
+                dev = known
+                assert(dev.identifier.isEqual(peripheral.identifier), "Device id should be same as peripheral id")
+            }
+            dev.connected = true // Indicate that the peripheral is connected
+            state.bluetooth[peripheral.identifier] = dev
+            return state
+        }
     }
     
     @objc public func centralManager(central: CBCentralManager, didFailToConnectPeripheral peripheral: CBPeripheral, error: NSError?) {
@@ -220,7 +266,20 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
     }
     
     @objc public func centralManager(central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
+        // Ensure that when bluetooth device is disconnected, the device.connected = false
         debugPrint("centralManager didDisconnectPeripheral", peripheral.name, error)
         attemptConnection()
+        updateAppState { (old) -> AppState in
+            if var dev = old.bluetooth[peripheral.identifier] {
+                assert(dev.identifier.isEqual(peripheral.identifier), "Device id should be same as peripheral id")
+                dev.connected = false // Indicate that the peripheral is disconnected
+                var state = old
+                state.bluetooth[peripheral.identifier] = dev
+                return state
+            }
+            else {
+                return old
+            }
+        }
     }
 }

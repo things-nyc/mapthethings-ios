@@ -62,7 +62,7 @@ public class Location : NSObject, CLLocationManagerDelegate {
         if let location = locations.last {
             let eventDate = location.timestamp
             let howRecent = eventDate.timeIntervalSinceNow
-            if (abs(howRecent) < 15.0) {
+            if (abs(howRecent) < 15.0 /* seconds */ && location.horizontalAccuracy<25 /* meters */) {
                 debugPrint("Got lat/lon", location)
                 updateAppState { (old) -> AppState in
                     var state = old

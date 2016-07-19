@@ -28,7 +28,7 @@ class SampleLoader {
     
     init() {
         appStateObservable.observeNext({state in
-            self.checkBoundsChanged(state.map.bounds)
+            self.checkBoundsChanged(state.new.map.bounds)
         })
     }
     

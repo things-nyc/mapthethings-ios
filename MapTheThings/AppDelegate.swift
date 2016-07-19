@@ -18,10 +18,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var loader: SampleLoader?
     var bluetooth: Bluetooth?
     var location: Location?
+    var tracker: Tracking?
     
     func onTick() {
         updateAppState { (old) -> AppState in
-            return AppState(now: NSDate(), bluetooth: old.bluetooth, map: old.map, sampling: old.sampling)
+            var state = old
+            state.now = NSDate()
+            return state
         }
     }
     
@@ -34,6 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.loader = SampleLoader()
         self.bluetooth = Bluetooth(savedIdentifiers: [])
         self.location = Location()
+        self.tracker = Tracking(bluetooth: self.bluetooth!)
 
         return true
     }

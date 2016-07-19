@@ -65,7 +65,7 @@ class FirstViewController: AppStateUIViewController, MKMapViewDelegate {
         }
     }
     
-    override func renderAppState(state: AppState) {
+    override func renderAppState(oldState: AppState, state: AppState) {
         if let location = state.map.currentLocation {
             self.timestamp.text = "\(location.coordinate.longitude), \(location.coordinate.latitude)"
         }
