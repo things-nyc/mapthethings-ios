@@ -11,8 +11,8 @@
 		015A6B801D2A0BC8001B5E44 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 015A6B7F1D2A0BC8001B5E44 /* MapKit.framework */; };
 		015A6B8A1D2A12AA001B5E44 /* AppStateUIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 015A6B891D2A12AA001B5E44 /* AppStateUIViewController.swift */; };
 		0165DCEA1D2552F900FFB1A1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0165DCE91D2552F900FFB1A1 /* AppDelegate.swift */; };
-		0165DCEC1D2552F900FFB1A1 /* FirstViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0165DCEB1D2552F900FFB1A1 /* FirstViewController.swift */; };
-		0165DCEE1D2552F900FFB1A1 /* SecondViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0165DCED1D2552F900FFB1A1 /* SecondViewController.swift */; };
+		0165DCEC1D2552F900FFB1A1 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0165DCEB1D2552F900FFB1A1 /* MapViewController.swift */; };
+		0165DCEE1D2552F900FFB1A1 /* DeviceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0165DCED1D2552F900FFB1A1 /* DeviceViewController.swift */; };
 		0165DCF11D2552F900FFB1A1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0165DCEF1D2552F900FFB1A1 /* Main.storyboard */; };
 		0165DCF31D2552F900FFB1A1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0165DCF21D2552F900FFB1A1 /* Assets.xcassets */; };
 		0165DCF61D2552F900FFB1A1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0165DCF41D2552F900FFB1A1 /* LaunchScreen.storyboard */; };
@@ -57,8 +57,8 @@
 		015A6B891D2A12AA001B5E44 /* AppStateUIViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppStateUIViewController.swift; sourceTree = "<group>"; };
 		0165DCE61D2552F900FFB1A1 /* MapTheThings.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MapTheThings.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0165DCE91D2552F900FFB1A1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		0165DCEB1D2552F900FFB1A1 /* FirstViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstViewController.swift; sourceTree = "<group>"; };
-		0165DCED1D2552F900FFB1A1 /* SecondViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondViewController.swift; sourceTree = "<group>"; };
+		0165DCEB1D2552F900FFB1A1 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
+		0165DCED1D2552F900FFB1A1 /* DeviceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceViewController.swift; sourceTree = "<group>"; };
 		0165DCF01D2552F900FFB1A1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		0165DCF21D2552F900FFB1A1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0165DCF51D2552F900FFB1A1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -145,8 +145,8 @@
 				015A6B7D1D29FD13001B5E44 /* AppState.swift */,
 				015A6B891D2A12AA001B5E44 /* AppStateUIViewController.swift */,
 				0165DCE91D2552F900FFB1A1 /* AppDelegate.swift */,
-				0165DCEB1D2552F900FFB1A1 /* FirstViewController.swift */,
-				0165DCED1D2552F900FFB1A1 /* SecondViewController.swift */,
+				0165DCEB1D2552F900FFB1A1 /* MapViewController.swift */,
+				0165DCED1D2552F900FFB1A1 /* DeviceViewController.swift */,
 				0165DCEF1D2552F900FFB1A1 /* Main.storyboard */,
 				0165DCF21D2552F900FFB1A1 /* Assets.xcassets */,
 				0165DCF41D2552F900FFB1A1 /* LaunchScreen.storyboard */,
@@ -494,13 +494,13 @@
 			files = (
 				01D14A171D3C1E3D007FBD61 /* Tracking.swift in Sources */,
 				01B542C91D36C3F500DE443B /* Bluetooth.swift in Sources */,
-				0165DCEE1D2552F900FFB1A1 /* SecondViewController.swift in Sources */,
+				0165DCEE1D2552F900FFB1A1 /* DeviceViewController.swift in Sources */,
 				0165DCEA1D2552F900FFB1A1 /* AppDelegate.swift in Sources */,
 				01B542C51D35F17A00DE443B /* MapAnnotations.swift in Sources */,
 				01A12C5F1D3B28D90045BD42 /* Location.swift in Sources */,
 				017D67991D2DF187002FF061 /* SampleLoader.swift in Sources */,
 				015A6B8A1D2A12AA001B5E44 /* AppStateUIViewController.swift in Sources */,
-				0165DCEC1D2552F900FFB1A1 /* FirstViewController.swift in Sources */,
+				0165DCEC1D2552F900FFB1A1 /* MapViewController.swift in Sources */,
 				015A6B7E1D29FD13001B5E44 /* AppState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
