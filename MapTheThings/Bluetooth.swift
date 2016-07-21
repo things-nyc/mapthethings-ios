@@ -23,19 +23,24 @@ import CoreBluetooth
 
 let loraService = CBUUID(string: "00001830-0000-1000-8000-00805F9B34FB")
 let deviceInfoService = CBUUID(string: "0000180A-0000-1000-8000-00805F9B34FB")
-let nodeServices : [CBUUID]? = [loraService, deviceInfoService]
+let batteryService = CBUUID(string: "0000180F-0000-1000-8000-00805F9B34FB")
+let nodeServices : [CBUUID]? = [loraService, deviceInfoService, batteryService]
+
+let batteryLevelCharacteristic = CBUUID(string: "00002A19-0000-1000-8000-00805F9B34FB")
 
 let loraCommandCharacteristic = CBUUID(string: "00002AD0-0000-1000-8000-00805F9B34FB")
 let loraWritePacketCharacteristic = CBUUID(string: "00002AD1-0000-1000-8000-00805F9B34FB")
 let loraDevAddrCharacteristic = CBUUID(string: "00002AD2-0000-1000-8000-00805F9B34FB")
 let loraNwkSKeyCharacteristic = CBUUID(string: "00002AD3-0000-1000-8000-00805F9B34FB")
 let loraAppSKeyCharacteristic = CBUUID(string: "00002AD4-0000-1000-8000-00805F9B34FB")
+let loraSpreadingFactorCharacteristic = CBUUID(string: "00002AD5-0000-1000-8000-00805F9B34FB")
 let loraNodeCharacteristics : [CBUUID]? = [
     loraCommandCharacteristic,
     loraWritePacketCharacteristic,
     loraDevAddrCharacteristic,
     loraNwkSKeyCharacteristic,
     loraAppSKeyCharacteristic,
+    loraSpreadingFactorCharacteristic,
 ]
 
 extension UInt16 {
@@ -62,9 +67,16 @@ extension CBCharacteristic {
     }
 }
 
+func readInteger<T : IntegerType>(data : NSData, start : Int) -> T {
+    var d : T = 0
+    data.getBytes(&d, range: NSRange(location: start, length: sizeof(T)))
+    return d
+}
+
 public class BluetoothNode : NSObject, CBPeripheralDelegate {
     let peripheral : CBPeripheral
     var characteristics : Dictionary<String, CBCharacteristic> = Dictionary()
+    var lastSpreadingFactor : UInt8?
     
     public init(peripheral : CBPeripheral) {
         self.peripheral = peripheral
@@ -72,6 +84,13 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
         
         self.peripheral.delegate = self
         self.peripheral.discoverServices(nodeServices)
+        
+        appStateObservable.observeNext {update in
+            if let dev = update.new.bluetooth[peripheral.identifier],
+               let sf = dev.spreadingFactor {
+                self.setSpreadingFactor(sf)
+            }
+        }
     }
     
     public var identifier : NSUUID {
@@ -86,6 +105,22 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
         }
         else {
             debugPrint("Unable to send packet - Write Packet characteristic unavailable.")
+            return false
+        }
+    }
+    
+    public func setSpreadingFactor(sf : UInt8) -> Bool {
+        if (self.lastSpreadingFactor != nil) && (sf==self.lastSpreadingFactor) {
+            return true // Don't resend same value
+        }
+        if let characteristic = self.characteristics[loraSpreadingFactorCharacteristic.UUIDString] {
+            debugPrint("Setting SF", sf)
+            peripheral.writeValue(sf.data, forCharacteristic: characteristic, type: CBCharacteristicWriteType.WithResponse)
+            self.lastSpreadingFactor = sf
+            return true
+        }
+        else {
+            debugPrint("Unable to set SF - Spreading Factor characteristic unavailable.")
             return false
         }
     }
@@ -123,9 +158,14 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
             self.characteristics[characteristic.nsUUID.UUIDString] = characteristic
             if characteristic.UUID.isEqual(loraDevAddrCharacteristic) ||
                 characteristic.UUID.isEqual(loraNwkSKeyCharacteristic) ||
-                characteristic.UUID.isEqual(loraAppSKeyCharacteristic)
+                characteristic.UUID.isEqual(loraAppSKeyCharacteristic) ||
+                characteristic.UUID.isEqual(loraSpreadingFactorCharacteristic)
             {
                 peripheral.readValueForCharacteristic(characteristic)
+            }
+            else if characteristic.UUID.isEqual(batteryLevelCharacteristic) {
+                debugPrint("Subscribing to characteristic", characteristic)
+                peripheral.setNotifyValue(true, forCharacteristic: characteristic)
             }
 //            else if characteristic.UUID.isEqual(loraCommandCharacteristic) {
 //                let command : UInt16 = 500
@@ -152,6 +192,14 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
                     }
                     else if characteristic.UUID.isEqual(loraAppSKeyCharacteristic) {
                         dev.appSKey = value
+                    }
+                    else if characteristic.UUID.isEqual(batteryLevelCharacteristic) {
+                        dev.battery = readInteger(value, start: 0)
+                    }
+                    else if characteristic.UUID.isEqual(loraSpreadingFactorCharacteristic) {
+                        let sf:UInt8 = readInteger(value, start: 0)
+                        dev.spreadingFactor = sf
+                        self.lastSpreadingFactor = sf
                     }
                     else {
                         return old // No changes

@@ -34,6 +34,8 @@ class DeviceViewController: AppStateUIViewController {
     @IBOutlet var lastTimestamp: UITextField!
     @IBOutlet var lastAccuracy: UITextField!
     @IBOutlet var lastPacket: UITextField!
+    @IBOutlet var batteryLevel: UITextField!
+    @IBOutlet var spreadingFactor: UISegmentedControl!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -67,6 +69,21 @@ class DeviceViewController: AppStateUIViewController {
         appDelegate.bluetooth!.rescan()
     }
     
+    @IBAction func spreadingFactorChange(sender: UISegmentedControl) {
+        debugPrint("setSF: ", sender.selectedSegmentIndex)
+        updateAppState { (old) -> AppState in
+            if var dev = old.bluetooth.first?.1 {
+                var state = old
+                dev.spreadingFactor = UInt8(sender.selectedSegmentIndex) + 7
+                state.bluetooth[dev.identifier] = dev
+                return state
+            }
+            else {
+                return old
+            }
+        }
+    }
+    
     override func renderAppState(oldState: AppState, state: AppState) {
         // Update UI according to app state
         if let dev = state.bluetooth.first?.1 {
@@ -87,7 +104,11 @@ class DeviceViewController: AppStateUIViewController {
             if let lastPacket = dev.lastPacket {
                 self.lastPacket.text = lastPacket.hexadecimalString()
             }
+            self.batteryLevel.text = dev.battery.description
             self.connected.text = dev.connected.description
+            if let sf = dev.spreadingFactor {
+                self.spreadingFactor.selectedSegmentIndex = Int(sf) - 7
+            }
         }
     }
 

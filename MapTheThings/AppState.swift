@@ -58,6 +58,8 @@ public struct Device {
     var mode: SamplingMode = SamplingMode.Play
     var lastLocation: CLLocation?
     var lastPacket: NSData?
+    var battery: UInt8 = 100
+    var spreadingFactor: UInt8?
 }
 
 public struct AppState {
