@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "127AF659D7BA7672333DEA34CCA3060B9EBCE8BD",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "208BE3FC4DD8ED3B422337B75275D2C4E46F255C" : 0,
+    "127AF659D7BA7672333DEA34CCA3060B9EBCE8BD" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "7F6AB7D1-71C5-4AF2-8FEB-1574227D822D",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "208BE3FC4DD8ED3B422337B75275D2C4E46F255C" : "",
+    "127AF659D7BA7672333DEA34CCA3060B9EBCE8BD" : "mapthethings-ios\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "MapTheThings",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "MapTheThings.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/things-nyc\/mapthethings-ios.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "127AF659D7BA7672333DEA34CCA3060B9EBCE8BD"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/forrestfiller\/InstagramAPI.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "208BE3FC4DD8ED3B422337B75275D2C4E46F255C"
+    }
+  ]
+}
