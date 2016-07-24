@@ -64,8 +64,14 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate {
             return state
         }
     }
-    
+    //check hot to follow user location with mapkit on stackoverflow
     override func renderAppState(oldState: AppState, state: AppState) {
+        self.mapView.showsUserLocation = true
+        // set up the tracking here
+//        if state.map.tracking != self.mapView.tracking{
+            // Update map view to correct tracking state.
+            // Make a button on the footer to set up the toggle
+//        }
         if let location = state.map.currentLocation {
             self.timestamp.text = "\(location.coordinate.longitude), \(location.coordinate.latitude)"
         }

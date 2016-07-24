@@ -6,7 +6,7 @@
 //  Copyright © 2016 The Things Network New York. All rights reserved.
 //
 
-import Foundation
+//import Foundation
 import CoreLocation
 import ReactiveCocoa
 import enum Result.NoError
@@ -24,7 +24,7 @@ public struct Sample {
 public struct MapState {
     var currentLocation: CLLocation?
     var updated: NSDate
-    var bounds: Edges
+    var bounds: Edges      // n e s w coordinates
     var tracking: Bool
     var samples: Array<Sample>
 }
@@ -50,8 +50,9 @@ public struct Device {
     public init(uuid: NSUUID) {
         identifier = uuid
     }
-    let identifier: NSUUID
-    var devAddr: NSData?
+    let identifier: NSUUID // from the core bluetooth library
+    var devAddr: NSData? // within TTN, when you send from a device, that transmistion is tagged with a four bite address.  The ACTUAL address of thigns are 8 bite addresses.
+    // node needs to know the following two vars. The network needs to be able to unwrap these, and the handler server needs these. They are "private"; one level of encryption here.
     var nwkSKey: NSData?
     var appSKey: NSData?
     var connected: Bool = false
@@ -63,8 +64,8 @@ public struct Device {
 }
 
 public struct AppState {
-    var now: NSDate
-    var bluetooth: Dictionary<NSUUID, Device>
+    var now: NSDate //updates once a second
+    var bluetooth: Dictionary<NSUUID, Device> //this is a dictionary of nodes that the app is currently connected to; session keys
     var map: MapState
     var sampling: SamplingState
     var sendPacket: NSUUID? = nil
@@ -85,6 +86,7 @@ private func defaultAppState() -> AppState {
 }
 
 let defaultState = defaultAppState()
+// "MutableProperty" below is from the reactive cocoa, subscribes to changes...wanted surscribers to get, when it changes, want a copy of old state and new state, so I can see if there has been a change I care about. So made it a propoerty of a tuple of old and new so that listeners can detect edges (edges refers to changes from hardware).
 public var appStateProperty = MutableProperty((old: defaultState, new: defaultState))
 public var appStateObservable = appStateProperty.signal
 
@@ -100,7 +102,7 @@ public func updateAppState(fn: AppStateUpdateFn) {
         })
     }
 }
-
+// allows me to see if a specific changed that I am interested in...
 public func stateValChanged<T : Equatable>(state: (old: AppState, new: AppState), access: (AppState) -> (T?)) -> Bool {
     let new = access(state.new)
     let old = access(state.old)
