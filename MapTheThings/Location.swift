@@ -10,6 +10,8 @@ import Foundation
 import UIKit
 import CoreLocation
 
+let MINIMUM_HORIZONTAL_ACCURACY_METERS = 25.0
+
 public class Location : NSObject, CLLocationManagerDelegate {
     let locationManager : CLLocationManager
     
@@ -58,11 +60,9 @@ public class Location : NSObject, CLLocationManagerDelegate {
     }
     
     public func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        // If it's a relatively recent event, turn off updates to save power.
+        // Ignore updates that aren't at least accurate to 25 meters
         if let location = locations.last {
-            let eventDate = location.timestamp
-            let howRecent = eventDate.timeIntervalSinceNow
-            if (abs(howRecent) < 15.0 /* seconds */ && location.horizontalAccuracy<25 /* meters */) {
+            if (location.horizontalAccuracy<MINIMUM_HORIZONTAL_ACCURACY_METERS) {
                 debugPrint("Got lat/lon", location)
                 updateAppState { (old) -> AppState in
                     var state = old

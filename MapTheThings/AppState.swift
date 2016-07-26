@@ -6,7 +6,6 @@
 //  Copyright © 2016 The Things Network New York. All rights reserved.
 //
 
-import Foundation
 import CoreLocation
 import ReactiveCocoa
 import enum Result.NoError

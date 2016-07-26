@@ -25,6 +25,20 @@ extension NSData {
     }
 }
 
+func stringFromTimeInterval(interval:NSTimeInterval) -> String {
+    
+    let ti = NSInteger(interval)
+    
+    //let ms = Int((interval % 1) * 1000)
+    
+    let seconds = ti % 60
+    let minutes = (ti / 60) % 60
+    let hours = (ti / 3600)
+    
+    //return NSString(format: "%0.2d:%0.2d:%0.2d.%0.3d",hours,minutes,seconds,ms) as String
+    return String(format: "%0.2d:%0.2d:%0.2d",hours,minutes,seconds)
+}
+
 class DeviceViewController: AppStateUIViewController {
     @IBOutlet var devAddr: UITextField!
     @IBOutlet var nwkSKey: UITextField!
@@ -36,6 +50,7 @@ class DeviceViewController: AppStateUIViewController {
     @IBOutlet var lastPacket: UITextField!
     @IBOutlet var batteryLevel: UITextField!
     @IBOutlet var spreadingFactor: UISegmentedControl!
+    @IBOutlet var debugView: UITextView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -97,8 +112,8 @@ class DeviceViewController: AppStateUIViewController {
                 self.appSKey.text = appSKey.hexadecimalString()
             }
             if let lastLocation = dev.lastLocation {
-                self.lastLocation.text = "\(lastLocation.coordinate.latitude),\(lastLocation.coordinate.longitude)"
-                self.lastTimestamp.text = lastLocation.timestamp.description
+                self.lastLocation.text = String(format: "%0.5f, %0.5f", lastLocation.coordinate.latitude, lastLocation.coordinate.longitude)
+                self.lastTimestamp.text = stringFromTimeInterval(-lastLocation.timestamp.timeIntervalSinceNow) + " ago"
                 self.lastAccuracy.text = "\(lastLocation.horizontalAccuracy)"
             }
             if let lastPacket = dev.lastPacket {
@@ -109,6 +124,27 @@ class DeviceViewController: AppStateUIViewController {
             if let sf = dev.spreadingFactor {
                 self.spreadingFactor.selectedSegmentIndex = Int(sf) - 7
             }
+            
+            var text = "Debug View\n"
+            if let currentLocation = state.map.currentLocation {
+                let locAge = fabs(currentLocation.timestamp.timeIntervalSinceNow)
+                text += "Location age: \(stringFromTimeInterval(locAge))\n"
+                let isCurrentLocation = locAge < CURRENT_LOCATION_EXPIRY
+                text += "Location is current: \(isCurrentLocation)\n"
+                
+                if let lastLocation = dev.lastLocation {
+                    let d = lastLocation.distanceFromLocation(currentLocation) // in meters
+                    text += String(format: "Distance (sent vs latest): %0.1f meters\n", d)
+                    let t = lastLocation.timestamp.timeIntervalSinceDate(currentLocation.timestamp)
+                    text += "Time (sent vs latest): \(stringFromTimeInterval(fabs(t)))\n"
+                }
+
+            }
+            else {
+                text += "No current location"
+            }
+
+            self.debugView?.text = text
         }
     }
 

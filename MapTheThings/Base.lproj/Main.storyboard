@@ -109,7 +109,7 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Connected" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mQe-s7-cUP">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Linked" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mQe-s7-cUP">
                                 <rect key="frame" x="30" y="126" width="73" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="73" id="wqf-b6-vGp"/>
@@ -127,7 +127,7 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Timestamp" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="n5s-yz-num">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sent" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="n5s-yz-num">
                                 <rect key="frame" x="30" y="190" width="73" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="73" id="OUO-Jn-z5Z"/>
@@ -220,7 +220,7 @@
                                 </connections>
                             </button>
                             <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" translatesAutoresizingMaskIntoConstraints="NO" id="ZQS-Cv-YyZ">
-                                <rect key="frame" x="210.5" y="437" width="179" height="29"/>
+                                <rect key="frame" x="210" y="437" width="179" height="29"/>
                                 <segments>
                                     <segment title="SF7"/>
                                     <segment title="SF8"/>
@@ -231,6 +231,13 @@
                                     <action selector="spreadingFactorChange:" destination="8rJ-Kc-sve" eventType="valueChanged" id="xBa-Vb-9mE"/>
                                 </connections>
                             </segmentedControl>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="23l-RJ-CQF">
+                                <rect key="frame" x="30" y="473" width="540" height="70"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
@@ -254,8 +261,10 @@
                             <constraint firstItem="n5s-yz-num" firstAttribute="leading" secondItem="Q2J-OA-iGk" secondAttribute="leading" id="H0W-jK-r4P"/>
                             <constraint firstAttribute="trailingMargin" secondItem="4gf-KS-7b9" secondAttribute="trailing" constant="10" id="HlL-E1-cW0"/>
                             <constraint firstItem="TyN-eP-51z" firstAttribute="leading" secondItem="QS5-Rx-YEW" secondAttribute="leadingMargin" constant="10" id="I0K-Oo-p5X"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="23l-RJ-CQF" secondAttribute="trailing" constant="10" id="IWC-YM-6dY"/>
                             <constraint firstItem="Q2J-OA-iGk" firstAttribute="trailing" secondItem="PKT-hG-Wdr" secondAttribute="trailing" id="Jeu-QY-5qM"/>
                             <constraint firstItem="uy6-rN-gOX" firstAttribute="leading" secondItem="dSG-be-nI2" secondAttribute="leading" id="L7h-gL-g7M"/>
+                            <constraint firstItem="Djb-ko-YwX" firstAttribute="top" secondItem="23l-RJ-CQF" secondAttribute="bottom" constant="8" id="LaE-DD-Fmh"/>
                             <constraint firstAttribute="trailingMargin" secondItem="0PZ-31-6BT" secondAttribute="trailing" constant="10" id="LjJ-bc-frF"/>
                             <constraint firstAttribute="trailingMargin" secondItem="FAF-Hh-lMP" secondAttribute="trailing" constant="10" id="Mgp-YB-g7o"/>
                             <constraint firstItem="Rjm-X6-P6g" firstAttribute="baseline" secondItem="TyN-eP-51z" secondAttribute="baseline" id="MwA-hc-Zaj"/>
@@ -293,6 +302,7 @@
                             <constraint firstItem="uy6-rN-gOX" firstAttribute="leading" secondItem="Q2J-OA-iGk" secondAttribute="leading" id="ee6-Se-kLw"/>
                             <constraint firstItem="FAF-Hh-lMP" firstAttribute="baseline" secondItem="dSG-be-nI2" secondAttribute="baseline" id="esA-qt-Pwx"/>
                             <constraint firstItem="QiS-y6-ITf" firstAttribute="leading" secondItem="PKT-hG-Wdr" secondAttribute="trailing" constant="8" id="hel-Zd-cnJ"/>
+                            <constraint firstItem="23l-RJ-CQF" firstAttribute="top" secondItem="ZQS-Cv-YyZ" secondAttribute="bottom" constant="8" id="hfk-t6-VAP"/>
                             <constraint firstItem="lMR-Mp-Z7D" firstAttribute="baseline" secondItem="n5s-yz-num" secondAttribute="baseline" id="jL9-uI-Xjq"/>
                             <constraint firstItem="ZQS-Cv-YyZ" firstAttribute="centerX" secondItem="QS5-Rx-YEW" secondAttribute="centerX" id="l7t-L1-Txi"/>
                             <constraint firstItem="PKT-hG-Wdr" firstAttribute="leading" secondItem="TyN-eP-51z" secondAttribute="leading" id="lf8-qB-9LP"/>
@@ -305,6 +315,7 @@
                             <constraint firstItem="CN1-2C-lkH" firstAttribute="baseline" secondItem="uy6-rN-gOX" secondAttribute="baseline" id="rXe-Ol-clp"/>
                             <constraint firstItem="4gf-KS-7b9" firstAttribute="top" secondItem="0PZ-31-6BT" secondAttribute="bottom" constant="2" id="sLJ-0V-Jba"/>
                             <constraint firstItem="rda-XO-Wzz" firstAttribute="top" secondItem="d58-Ae-xrP" secondAttribute="bottom" constant="10" id="t6y-P1-4bz"/>
+                            <constraint firstItem="23l-RJ-CQF" firstAttribute="leading" secondItem="QS5-Rx-YEW" secondAttribute="leadingMargin" constant="10" id="tFA-aW-9cS"/>
                             <constraint firstItem="Q2J-OA-iGk" firstAttribute="leading" secondItem="PKT-hG-Wdr" secondAttribute="leading" id="vLh-AC-L5c"/>
                             <constraint firstItem="NFz-IE-eIL" firstAttribute="centerX" secondItem="QS5-Rx-YEW" secondAttribute="centerX" id="wmi-I3-wej"/>
                             <constraint firstItem="Rjm-X6-P6g" firstAttribute="leading" secondItem="TyN-eP-51z" secondAttribute="trailing" constant="8" id="wwG-Fc-3gw"/>
@@ -317,6 +328,7 @@
                         <outlet property="appSKey" destination="nBU-FU-0xf" id="JSd-V4-bLz"/>
                         <outlet property="batteryLevel" destination="d58-Ae-xrP" id="pY9-aq-nNj"/>
                         <outlet property="connected" destination="0PZ-31-6BT" id="Krs-6t-wPp"/>
+                        <outlet property="debugView" destination="23l-RJ-CQF" id="atF-EI-VeO"/>
                         <outlet property="devAddr" destination="Rjm-X6-P6g" id="qem-uO-jKK"/>
                         <outlet property="lastAccuracy" destination="FAF-Hh-lMP" id="1J0-Fr-FAe"/>
                         <outlet property="lastLocation" destination="4gf-KS-7b9" id="7Ne-iv-KEp"/>
