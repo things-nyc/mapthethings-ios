@@ -44,44 +44,6 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate {
     var lastSamples: Set<SampleAnnotation>?
     var currentLocation: CLLocation!
     
-    // from previous project: https://github.com/forrestfiller/Places-hw/blob/master/Places-hw/Places-hw/MapViewController.swift
-//    
-//    override func loadView() {
-//        let frame = UIScreen.mainScreen().bounds
-//        let view = UIView(frame: frame)
-//        view.backgroundColor = .greenColor()
-//        
-//        self.mapView = MKMapView(frame: frame)
-//        //self.mapView.centerCoordinate = self.currentLocation.coordinate
-//        
-//        let dist = CLLocationDistance(500)
-//        let region = MKCoordinateRegionMakeWithDistance(
-//            self.mapView.centerCoordinate,
-//            dist,
-//            dist
-//        )
-//        self.mapView.setRegion(region, animated: true)
-//        view.addSubview(self.mapView)
-//        self.view = view
-//    }
-    
-    
-    // from here: https://raw.githubusercontent.com/goto10/EBCExtensions/master/EBC_MapKitExtentions.swift
-//    func setCenterCoordinate(centerCoordinate: CLLocationCoordinate2D, zoomLevel: Int, animated: Bool) {
-//        
-//        // clamp large numbers to 28
-//        let zoom = min(zoomLevel, 28)
-//        
-//        // use the zoom level to compute the region
-//        let span = self.coordinateSpanWithMapView(self, centerCoordinate:centerCoordinate, andZoomLevel:zoom)
-//        let region = MKCoordinateRegionMake(centerCoordinate, span)
-//        
-//        // set the region like normal
-//        self.setRegion(region, animated:animated)
-//        
-//    }
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.mapView.delegate = self
@@ -106,10 +68,16 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate {
     }
     
     override func renderAppState(oldState: AppState, state: AppState) {
+        
         if let location = state.map.currentLocation {
-            self.timestamp.text = "\(location.coordinate.longitude), \(location.coordinate.latitude)"
+            
+            let cordinateLong = location.coordinate.longitude
+            let cordinateLat = location.coordinate.latitude
+            let truncatedCoordinates = String(format: "Lat: %.2f, Lng: %.2f", cordinateLat, cordinateLong)
+            
+            self.timestamp.text = truncatedCoordinates
         }
-        self.toggle.setTitle("Toggle Tracking: " + (state.map.tracking ? "T" : "F"), forState: UIControlState.Normal)
+        self.toggle.setTitle("Toggle Tracking: " + (state.map.tracking ? "True" : "False"), forState: UIControlState.Normal)
         // TODO
         // - Sync samples in state with markers on map (first, remove all and add new. Then improve performance by remembering the ones already there and adding only new ones/removing no-longer-visible ones.
         // - In Sampling mode, show last sample info
