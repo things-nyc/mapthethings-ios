@@ -10,6 +10,7 @@
 		015A6B7E1D29FD13001B5E44 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 015A6B7D1D29FD13001B5E44 /* AppState.swift */; };
 		015A6B801D2A0BC8001B5E44 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 015A6B7F1D2A0BC8001B5E44 /* MapKit.framework */; };
 		015A6B8A1D2A12AA001B5E44 /* AppStateUIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 015A6B891D2A12AA001B5E44 /* AppStateUIViewController.swift */; };
+		016304CE1D465E58009488AC /* TrackingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 016304CD1D465E58009488AC /* TrackingTests.swift */; };
 		0165DCEA1D2552F900FFB1A1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0165DCE91D2552F900FFB1A1 /* AppDelegate.swift */; };
 		0165DCEC1D2552F900FFB1A1 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0165DCEB1D2552F900FFB1A1 /* MapViewController.swift */; };
 		0165DCEE1D2552F900FFB1A1 /* DeviceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0165DCED1D2552F900FFB1A1 /* DeviceViewController.swift */; };
@@ -55,6 +56,7 @@
 		015A6B831D2A0F8B001B5E44 /* Result.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Result.framework; path = "../../../Library/Developer/Xcode/DerivedData/MapTheThings-csldoafshwlhbscqdgzsdydcrxvi/Build/Products/Debug-iphonesimulator/Result/Result.framework"; sourceTree = "<group>"; };
 		015A6B841D2A0F8B001B5E44 /* Underscore_m.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Underscore_m.framework; path = "../../../Library/Developer/Xcode/DerivedData/MapTheThings-csldoafshwlhbscqdgzsdydcrxvi/Build/Products/Debug-iphonesimulator/Underscore.m/Underscore_m.framework"; sourceTree = "<group>"; };
 		015A6B891D2A12AA001B5E44 /* AppStateUIViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppStateUIViewController.swift; sourceTree = "<group>"; };
+		016304CD1D465E58009488AC /* TrackingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingTests.swift; sourceTree = "<group>"; };
 		0165DCE61D2552F900FFB1A1 /* MapTheThings.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MapTheThings.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0165DCE91D2552F900FFB1A1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0165DCEB1D2552F900FFB1A1 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
@@ -166,6 +168,7 @@
 				0165DD001D2552F900FFB1A1 /* MapTheThingsTests.swift */,
 				0165DD021D2552F900FFB1A1 /* Info.plist */,
 				01B542C61D35FCC200DE443B /* MapAnnotationsTests.swift */,
+				016304CD1D465E58009488AC /* TrackingTests.swift */,
 			);
 			path = MapTheThingsTests;
 			sourceTree = "<group>";
@@ -510,6 +513,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0165DD011D2552F900FFB1A1 /* MapTheThingsTests.swift in Sources */,
+				016304CE1D465E58009488AC /* TrackingTests.swift in Sources */,
 				01B542C71D35FCC300DE443B /* MapAnnotationsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

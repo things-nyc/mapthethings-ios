@@ -6,8 +6,11 @@
 //  Copyright © 2016 The Things Network New York. All rights reserved.
 //
 
-import Foundation
 import CoreLocation
+
+let CURRENT_LOCATION_EXPIRY = 15.0  // How many seconds a current location remains valid
+let DISTANCE_BETWEEN_SAMPLES = 10.0 // Don't report samples closer than this number of meters
+let TIME_BETWEEN_SAMPLES = 12.0     // Don't report samples more often than this number of seconds
 
 extension CLLocation {
     var data48: NSData? {
@@ -28,57 +31,75 @@ extension CLLocation {
 }
 
 public class Tracking {
+    private static func makePacket(location: CLLocation) -> NSData? {
+        if let data = NSMutableData(capacity: 7) {
+            data.appendData(UInt8(0x01).data)
+            if let ld = location.data48 {
+                data.appendData(ld)
+                assert(7==data.length, "Expected to make 7 byte coordinate")
+                return data
+            }
+        }
+        else {
+            NSLog("Warning: Unable to allocate location data")
+        }
+        return nil
+    }
+    
+    private static func sendPacket(location: CLLocation, bluetooth: Bluetooth) -> ((NSUUID, Device) -> Void) {
+        return { (uuid: NSUUID, _: Device) in
+            // Send it to the Bluetooth peripheral
+            if let data = Tracking.makePacket(location),
+                node = bluetooth.node(uuid) {
+                let sent = node.sendPacket(data)
+                if sent {
+                    updateAppState { (old) -> AppState in
+                        var state = old
+                        state.bluetooth[uuid]?.lastPacket = data
+                        state.bluetooth[uuid]?.lastLocation = location
+                        return state
+                    }
+                }
+            }
+        }
+    }
+    
+    public static func shouldSend(currentLocation: CLLocation, manualSend: Bool) -> ((NSUUID, Device) -> Bool) {
+        if manualSend {
+            return { _,_ in true }
+        }
+        
+        // Sampled in last 15 seconds. We don't want to be moving, get a location, and attempt to transmit it 
+        // when we've moved to a different location.
+        let isCurrentLocation = fabs(currentLocation.timestamp.timeIntervalSinceNow) < CURRENT_LOCATION_EXPIRY
+        
+        return { (_, dev) -> Bool in
+            // Confirm different in time and distance
+            var movedSignificantly = true // If first location
+            if let lastLoc = dev.lastLocation {
+                let d = lastLoc.distanceFromLocation(currentLocation) // in meters
+                let t = lastLoc.timestamp.timeIntervalSinceDate(currentLocation.timestamp)
+                movedSignificantly = d > DISTANCE_BETWEEN_SAMPLES && fabs(t) > TIME_BETWEEN_SAMPLES
+            }
+            return isCurrentLocation && movedSignificantly && dev.mode==SamplingMode.Play
+        }
+    }
+    
     public init(bluetooth: Bluetooth) {
         // Listen for app state changes...
         appStateObservable.observeNext({update in
             if let location = update.new.map.currentLocation {
-                let manualSend = stateValChanged(update, access: { (state) -> (NSUUID?) in
+                let manualSend = stateValChanged(update) { (state) -> (NSUUID?) in
                     state.sendPacket
-                })
-                let locUpdate = stateValChanged(update, access: { (state) -> (CLLocation?) in
-                    state.map.currentLocation
-                })
+                }
                 
-                // Make a packet of the location
-                update.new.bluetooth
-                .filter({ (uuid, dev) -> Bool in
-                    // Find all devices which are connected and currently tracking (Play)
-                    return dev.connected
+                let state = update.new
+                state.bluetooth
+                .filter({ _,dev in
+                    dev.connected // Only devices that are connected
                 })
-                .filter({ (uuid, dev) -> Bool in
-                    // Confirm different in time and distance
-                    var moved = false
-                    if let lastLoc = dev.lastLocation {
-                        let d = lastLoc.distanceFromLocation(location)
-                        let t = lastLoc.timestamp.timeIntervalSinceDate(location.timestamp)
-                        moved = d > 10 || fabs(t) > 60
-                    }
-                    return ((locUpdate || moved) && dev.mode==SamplingMode.Play) || manualSend
-                })
-                .forEach({ (uuid, dev) in
-                    // Send it to the Bluetooth peripheral
-                    if let data = NSMutableData(capacity: 7) {
-                        data.appendData(UInt8(0x01).data)
-                        if let ld = location.data48 {
-                            data.appendData(ld)
-                            assert(7==data.length, "Expected to make 7 byte coordinate")
-                            if let node = bluetooth.node(uuid) {
-                                let sent = node.sendPacket(data)
-                                if sent {
-                                    updateAppState { (old) -> AppState in
-                                        var state = old
-                                        state.bluetooth[uuid]?.lastPacket = data
-                                        state.bluetooth[uuid]?.lastLocation = location
-                                        return state
-                                    }
-                                }
-                            }
-                        }
-                        else {
-                            debugPrint("Unable to allocate location data")
-                        }
-                    }
-                })
+                .filter(Tracking.shouldSend(location, manualSend: manualSend))
+                .forEach(Tracking.sendPacket(location, bluetooth: bluetooth))
             }
         })
     }

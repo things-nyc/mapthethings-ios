@@ -42,10 +42,50 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate {
     @IBOutlet var toggle: UIButton!
     @IBOutlet var mapView: MKMapView!
     var lastSamples: Set<SampleAnnotation>?
+    var currentLocation: CLLocation!
+    
+    // from previous project: https://github.com/forrestfiller/Places-hw/blob/master/Places-hw/Places-hw/MapViewController.swift
+//    
+//    override func loadView() {
+//        let frame = UIScreen.mainScreen().bounds
+//        let view = UIView(frame: frame)
+//        view.backgroundColor = .greenColor()
+//        
+//        self.mapView = MKMapView(frame: frame)
+//        //self.mapView.centerCoordinate = self.currentLocation.coordinate
+//        
+//        let dist = CLLocationDistance(500)
+//        let region = MKCoordinateRegionMakeWithDistance(
+//            self.mapView.centerCoordinate,
+//            dist,
+//            dist
+//        )
+//        self.mapView.setRegion(region, animated: true)
+//        view.addSubview(self.mapView)
+//        self.view = view
+//    }
+    
+    
+    // from here: https://raw.githubusercontent.com/goto10/EBCExtensions/master/EBC_MapKitExtentions.swift
+//    func setCenterCoordinate(centerCoordinate: CLLocationCoordinate2D, zoomLevel: Int, animated: Bool) {
+//        
+//        // clamp large numbers to 28
+//        let zoom = min(zoomLevel, 28)
+//        
+//        // use the zoom level to compute the region
+//        let span = self.coordinateSpanWithMapView(self, centerCoordinate:centerCoordinate, andZoomLevel:zoom)
+//        let region = MKCoordinateRegionMake(centerCoordinate, span)
+//        
+//        // set the region like normal
+//        self.setRegion(region, animated:animated)
+//        
+//    }
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.mapView.delegate = self
+        //self.mapView.centerCoordinate = self.currentLocation.coordinate
     }
 
     func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
@@ -64,14 +104,8 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate {
             return state
         }
     }
-    //check hot to follow user location with mapkit on stackoverflow
+    
     override func renderAppState(oldState: AppState, state: AppState) {
-        self.mapView.showsUserLocation = true
-        // set up the tracking here
-//        if state.map.tracking != self.mapView.tracking{
-            // Update map view to correct tracking state.
-            // Make a button on the footer to set up the toggle
-//        }
         if let location = state.map.currentLocation {
             self.timestamp.text = "\(location.coordinate.longitude), \(location.coordinate.latitude)"
         }

@@ -21,5 +21,6 @@ class AppStateUIViewController: UIViewController {
     }
     
     func renderAppState(oldState: AppState, state: AppState) {
+        preconditionFailure("This method must be overridden")
     }
 }
