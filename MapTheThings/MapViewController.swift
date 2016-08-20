@@ -47,7 +47,13 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.mapView.delegate = self
-        //self.mapView.centerCoordinate = self.currentLocation.coordinate
+    }
+    // Added by Jordan @CocoaPods
+    override func viewDidAppear(animated: Bool) {
+        let span = MKCoordinateSpanMake(0.250, 0.250)
+        let location = CLLocation(latitude: 40.759211, longitude: -73.984638)
+        let region = MKCoordinateRegion(center: location.coordinate, span: span)
+        mapView.setRegion(region, animated: true)
     }
 
     func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
@@ -73,6 +79,7 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate {
             
             let cordinateLong = location.coordinate.longitude
             let cordinateLat = location.coordinate.latitude
+            // Help from Mike @Cocoapods to truncate the significant digits
             let truncatedCoordinates = String(format: "Lat: %.2f, Lng: %.2f", cordinateLat, cordinateLong)
             
             self.timestamp.text = truncatedCoordinates
