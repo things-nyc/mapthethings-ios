@@ -48,9 +48,10 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate {
         super.viewDidLoad()
         self.mapView.delegate = self
     }
-    // Added by Jordan @CocoaPods
+    // Help from Jordan @CocoaPods
     override func viewDidAppear(animated: Bool) {
         let span = MKCoordinateSpanMake(0.250, 0.250)
+        // hard coded for simulator
         let location = CLLocation(latitude: 40.759211, longitude: -73.984638)
         let region = MKCoordinateRegion(center: location.coordinate, span: span)
         mapView.setRegion(region, animated: true)
