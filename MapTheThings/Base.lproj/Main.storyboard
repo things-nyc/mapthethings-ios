@@ -23,7 +23,7 @@
                             </mapView>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" text="First View" textAlignment="center" lineBreakMode="tailTruncation" minimumFontSize="10" translatesAutoresizingMaskIntoConstraints="NO" id="KQZ-1w-vlD">
                                 <rect key="frame" x="40" y="30" width="520" height="35"/>
-                                <color key="backgroundColor" white="1" alpha="0.51320043103448276" colorSpace="calibratedWhite"/>
+                                <color key="backgroundColor" white="1" alpha="0.74797952586206895" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" name="Helvetica" family="Helvetica" pointSize="30"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
@@ -234,7 +234,7 @@
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="23l-RJ-CQF">
                                 <rect key="frame" x="30" y="473" width="540" height="70"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <mutableString key="text">Shabby chic brooklyn banh mi aesthetic, single-origin coffee pabst flexitarian man braid kinfolk. Mustache art party pork belly ugh. Heirloom readymade ugh +1 ramps, fingerstache VHS shoreditch fixie pop-up swag vegan scenester fanny pack thundercats. Godard irony 3 wolf moon poutine semiotics taxidermy vegan, single-origin coffee affogato forage franzen street art. Heirloom chia slow-carb cray helvetica, blue bottle disrupt man bun sriracha. Gochujang plaid vice, franzen helvetica gluten-free selfies tumblr yuccie disrupt sartorial freegan irony. </mutableString>
+                                <string key="text">Shabby chic brooklyn banh mi aesthetic, single-origin coffee pabst flexitarian man braid kinfolk. Mustache art party pork belly ugh. Heirloom readymade ugh +1 ramps, fingerstache VHS shoreditch fixie pop-up swag vegan scenester fanny pack thundercats. Godard irony 3 wolf moon poutine semiotics taxidermy vegan, single-origin coffee affogato forage franzen street art. Heirloom chia slow-carb cray helvetica, blue bottle disrupt man bun sriracha. Gochujang plaid vice, franzen helvetica gluten-free selfies tumblr yuccie disrupt sartorial freegan irony. </string>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
