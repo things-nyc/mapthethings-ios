@@ -43,9 +43,9 @@ class SampleLoader {
     private func load(bounds: Edges) {
         let fmt =  { (x: Double) -> (String) in return String(format: "%0.6f", x) }
         let apiurl = "http://map.thethings.nyc/api/v0/grids" +
-            "/\(fmt(bounds.ne.latitude))/\(fmt(bounds.ne.longitude))" +
-            "/\(fmt(bounds.sw.latitude))/\(fmt(bounds.sw.longitude))"
-        debugPrint(apiurl)
+            "/\(fmt(bounds.ne.latitude))/\(fmt(bounds.sw.longitude))" +
+            "/\(fmt(bounds.sw.latitude))/\(fmt(bounds.ne.longitude))"
+        debugPrint("Fetching grids for \(apiurl)")
         let requestURL: NSURL = NSURL(string: apiurl)!
         jsonCache.fetch(URL: requestURL).onSuccess { json in
             //debugPrint("JSON", json)
