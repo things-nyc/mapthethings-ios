@@ -1,4 +1,4 @@
-![Travis Build Status](https://travis-ci.org/things-nyc/mapthethings-ios.svg?branch=master)
+[![Build Status](https://travis-ci.org/things-nyc/mapthethings-ios.svg?branch=master)](https://travis-ci.org/things-nyc/mapthethings-ios)
 # MapTheThings-iOS
 
 The iOS app portion of [MapTheThings](http://map.thethings.nyc), the
