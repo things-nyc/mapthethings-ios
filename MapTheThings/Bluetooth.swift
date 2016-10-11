@@ -19,21 +19,27 @@ import CoreBluetooth
  type="org.bluetooth.characteristic.firmware_revision_string" uuid="2A26" name="Firmware Revision String"
  "Firmware Revision": utf8s
  
+ TODO: Add TXresult characteristic to loraService
  */
 
 let loraService = CBUUID(string: "00001830-0000-1000-8000-00805F9B34FB")
 let deviceInfoService = CBUUID(string: "0000180A-0000-1000-8000-00805F9B34FB")
 let batteryService = CBUUID(string: "0000180F-0000-1000-8000-00805F9B34FB")
-let nodeServices : [CBUUID]? = [loraService, deviceInfoService, batteryService]
+let logService = CBUUID(string: "00001831-0000-1000-8000-00805F9B34FB")
+let nodeServices : [CBUUID]? = [loraService, deviceInfoService, batteryService, logService]
 
-let batteryLevelCharacteristic = CBUUID(string: "00002A19-0000-1000-8000-00805F9B34FB")
+let batteryLevelCharacteristic =    CBUUID(string: "00002A19-0000-1000-8000-00805F9B34FB")
+let logStringCharacteristic =       CBUUID(string: "00002AD6-0000-1000-8000-00805F9B34FB")
+let transmitResultCharacteristic =  CBUUID(string: "00002AD7-0000-1000-8000-00805F9B34FB")
 
-let loraCommandCharacteristic = CBUUID(string: "00002AD0-0000-1000-8000-00805F9B34FB")
+let loraCommandCharacteristic =     CBUUID(string: "00002AD0-0000-1000-8000-00805F9B34FB")
 let loraWritePacketCharacteristic = CBUUID(string: "00002AD1-0000-1000-8000-00805F9B34FB")
-let loraDevAddrCharacteristic = CBUUID(string: "00002AD2-0000-1000-8000-00805F9B34FB")
-let loraNwkSKeyCharacteristic = CBUUID(string: "00002AD3-0000-1000-8000-00805F9B34FB")
-let loraAppSKeyCharacteristic = CBUUID(string: "00002AD4-0000-1000-8000-00805F9B34FB")
-let loraSpreadingFactorCharacteristic = CBUUID(string: "00002AD5-0000-1000-8000-00805F9B34FB")
+let loraDevAddrCharacteristic =     CBUUID(string: "00002AD2-0000-1000-8000-00805F9B34FB")
+let loraNwkSKeyCharacteristic =     CBUUID(string: "00002AD3-0000-1000-8000-00805F9B34FB")
+let loraAppSKeyCharacteristic =     CBUUID(string: "00002AD4-0000-1000-8000-00805F9B34FB")
+let loraSpreadingFactorCharacteristic =
+                                    CBUUID(string: "00002AD5-0000-1000-8000-00805F9B34FB")
+
 let loraNodeCharacteristics : [CBUUID]? = [
     loraCommandCharacteristic,
     loraWritePacketCharacteristic,
@@ -143,6 +149,9 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
             if service.UUID.isEqual(loraService) {
                 peripheral.discoverCharacteristics(loraNodeCharacteristics, forService: service)
             }
+            else if service.UUID.isEqual(loraService) {
+                peripheral.discoverCharacteristics([logStringCharacteristic], forService: service)
+            }
             else {
                 peripheral.discoverCharacteristics(nil, forService: service)
             }
@@ -163,7 +172,8 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
             {
                 peripheral.readValueForCharacteristic(characteristic)
             }
-            else if characteristic.UUID.isEqual(batteryLevelCharacteristic) {
+            else if characteristic.UUID.isEqual(batteryLevelCharacteristic) ||
+                characteristic.UUID.isEqual(logStringCharacteristic) {
                 debugPrint("Subscribing to characteristic", characteristic)
                 peripheral.setNotifyValue(true, forCharacteristic: characteristic)
             }
@@ -195,6 +205,10 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
                     }
                     else if characteristic.UUID.isEqual(batteryLevelCharacteristic) {
                         dev.battery = readInteger(value, start: 0)
+                    }
+                    else if characteristic.UUID.isEqual(logStringCharacteristic) {
+                        let msg = String(data: value, encoding: NSUTF8StringEncoding)!
+                        dev.log.append(msg)
                     }
                     else if characteristic.UUID.isEqual(loraSpreadingFactorCharacteristic) {
                         let sf:UInt8 = readInteger(value, start: 0)
@@ -242,18 +256,23 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
     public init(savedIdentifiers: [NSUUID]) {
         super.init()
         
-        self.central = CBCentralManager.init(delegate: self, queue: self.queue)
+        self.central = CBCentralManager.init(delegate: self, queue: self.queue,
+                                            options: [CBCentralManagerOptionRestoreIdentifierKey: "MapTheThingsManager"])
         
-        let knownPeripherals =
-            self.central!.retrievePeripheralsWithIdentifiers(savedIdentifiers)
-        if !knownPeripherals.isEmpty {
-            knownPeripherals.forEach({ (p) in
-                self.central!.connectPeripheral(p, options: nil)
+        dispatch_after(
+            dispatch_time(DISPATCH_TIME_NOW, (Int64)(5 * NSEC_PER_SEC)),
+            dispatch_get_main_queue(), {
+                let knownPeripherals =
+                    self.central!.retrievePeripheralsWithIdentifiers(savedIdentifiers)
+                if !knownPeripherals.isEmpty {
+                    knownPeripherals.forEach({ (p) in
+                        self.central!.connectPeripheral(p, options: nil)
+                    })
+                }
+                else {
+                    self.rescan()
+                }
             })
-        }
-        else {
-            rescan()
-        }
     }
     
     public func rescan() {
