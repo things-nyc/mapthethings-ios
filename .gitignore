@@ -37,3 +37,6 @@ Backup[ ]of[ ]*.numbers/
 
 # Cocoapods
 Pods/
+
+# Scratch Pad
+Logo/
