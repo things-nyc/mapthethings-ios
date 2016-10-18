@@ -15,7 +15,7 @@ target 'MapTheThings' do
   pod 'Underscore.m'
   #pod 'Masonry'
   pod 'Fabric'
-  pod 'Crashlytics'
+  pod 'Crashlytics', '~> 3.8.3'
   pod 'BLEHelper'
 
   target 'MapTheThingsTests' do
