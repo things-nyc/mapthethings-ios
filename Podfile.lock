@@ -1,6 +1,6 @@
 PODS:
   - BLEHelper (1.0.1)
-  - Crashlytics (3.8.2):
+  - Crashlytics (3.8.3):
     - Fabric (~> 1.6.3)
   - Fabric (1.6.9)
   - HanekeSwift (0.10.1)
@@ -39,7 +39,7 @@ DEPENDENCIES:
 
 SPEC CHECKSUMS:
   BLEHelper: ec81a9bd828723d84c35670993bb0eb5157c9bf8
-  Crashlytics: 27acca95a01b042a8294291dd6dff27f8f6af6d7
+  Crashlytics: 2b6dbe138a42395577cfa73dfa1aa7248cadf39e
   Fabric: bc5bec42cef4bcf1ee3ce0e218fc518e4b44dfbb
   HanekeSwift: '08e47d3d0f2899ec58e5d257beba0de619aca9e8'
   OMGHTTPURLRQ: 1e54807cb7d5dbb506926e53498e1e9ac5720c79
