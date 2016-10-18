@@ -30,7 +30,7 @@ PODS:
 
 DEPENDENCIES:
   - BLEHelper
-  - Crashlytics
+  - Crashlytics (~> 3.8)
   - Fabric
   - HanekeSwift
   - PromiseKit (~> 3.2)
@@ -48,6 +48,6 @@ SPEC CHECKSUMS:
   Result: 18e1a7597fbcca5923c565b40a25a98afafdee02
   Underscore.m: dc9ca06fe2c9a79d01ce20c3d2c1e8f91f2d92dc
 
-PODFILE CHECKSUM: b01d2bfeca03b146d01c8219d71bb0187c868bd9
+PODFILE CHECKSUM: f44cca00d0a7f6d682d506b51be788c6bf3735b1
 
 COCOAPODS: 1.0.1
