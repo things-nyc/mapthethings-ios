@@ -4,7 +4,7 @@
 The iOS app portion of [MapTheThings](http://map.thethings.nyc), the
 global coverage map for The Things Network (TTN).
 
-## Using the App
+## Using the App - (Sometime in the future)
 - Launch to the Map view - Shows local map with latest sample data
 - Switch to Sampling view because I'm ready to add my own data.
 - Log in with email and selected service (Ideally any of Google, Twitter, FB, Github)

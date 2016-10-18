@@ -143,7 +143,8 @@ class DeviceViewController: AppStateUIViewController {
             else {
                 text += "No current location"
             }
-
+            text = text + "\n\n"
+            text = dev.log.reduce(text) {(t, l) -> String in return t + l }
             self.debugView?.text = text
         }
     }
