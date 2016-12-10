@@ -2,26 +2,26 @@ PODS:
   - BLEHelper (1.0.1)
   - Crashlytics (3.8.3):
     - Fabric (~> 1.6.3)
-  - Fabric (1.6.9)
+  - Fabric (1.6.11)
   - HanekeSwift (0.10.1)
-  - OMGHTTPURLRQ (3.2.0):
-    - OMGHTTPURLRQ/RQ (= 3.2.0)
-  - OMGHTTPURLRQ/FormURLEncode (3.2.0)
-  - OMGHTTPURLRQ/RQ (3.2.0):
+  - OMGHTTPURLRQ (3.2.2):
+    - OMGHTTPURLRQ/RQ (= 3.2.2)
+  - OMGHTTPURLRQ/FormURLEncode (3.2.2)
+  - OMGHTTPURLRQ/RQ (3.2.2):
     - OMGHTTPURLRQ/FormURLEncode
     - OMGHTTPURLRQ/UserAgent
-  - OMGHTTPURLRQ/UserAgent (3.2.0)
-  - PromiseKit (3.5.1):
-    - PromiseKit/Foundation (= 3.5.1)
-    - PromiseKit/QuartzCore (= 3.5.1)
-    - PromiseKit/UIKit (= 3.5.1)
-  - PromiseKit/CorePromise (3.5.1)
-  - PromiseKit/Foundation (3.5.1):
+  - OMGHTTPURLRQ/UserAgent (3.2.2)
+  - PromiseKit (3.5.3):
+    - PromiseKit/Foundation (= 3.5.3)
+    - PromiseKit/QuartzCore (= 3.5.3)
+    - PromiseKit/UIKit (= 3.5.3)
+  - PromiseKit/CorePromise (3.5.3)
+  - PromiseKit/Foundation (3.5.3):
     - OMGHTTPURLRQ (~> 3.2.0)
     - PromiseKit/CorePromise
-  - PromiseKit/QuartzCore (3.5.1):
+  - PromiseKit/QuartzCore (3.5.3):
     - PromiseKit/CorePromise
-  - PromiseKit/UIKit (3.5.1):
+  - PromiseKit/UIKit (3.5.3):
     - PromiseKit/CorePromise
   - ReactiveCocoa (4.2.2):
     - Result (~> 2.0)
@@ -40,14 +40,14 @@ DEPENDENCIES:
 SPEC CHECKSUMS:
   BLEHelper: ec81a9bd828723d84c35670993bb0eb5157c9bf8
   Crashlytics: 2b6dbe138a42395577cfa73dfa1aa7248cadf39e
-  Fabric: bc5bec42cef4bcf1ee3ce0e218fc518e4b44dfbb
+  Fabric: 5911403591946b8228ab1c51d98f1d7137e863c6
   HanekeSwift: '08e47d3d0f2899ec58e5d257beba0de619aca9e8'
-  OMGHTTPURLRQ: 1e54807cb7d5dbb506926e53498e1e9ac5720c79
-  PromiseKit: 99ea973444a4bff6c38ffb97fa1bb175e619bcf0
+  OMGHTTPURLRQ: edb14c7d28add69226b79d826f930805927a0ffa
+  PromiseKit: d3393df0dfd7ed208cec0267dce13c66d9c09d0a
   ReactiveCocoa: 72263e7ac0770c274617ccd345e01049d0ca38ae
   Result: 18e1a7597fbcca5923c565b40a25a98afafdee02
   Underscore.m: dc9ca06fe2c9a79d01ce20c3d2c1e8f91f2d92dc
 
 PODFILE CHECKSUM: 9bc65c3a45520cabdf2d24fe110e59fa4afad7f5
 
-COCOAPODS: 1.0.1
+COCOAPODS: 1.1.1

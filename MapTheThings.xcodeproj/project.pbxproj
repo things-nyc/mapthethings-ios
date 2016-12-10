@@ -27,7 +27,6 @@
 		01B542C91D36C3F500DE443B /* Bluetooth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B542C81D36C3F400DE443B /* Bluetooth.swift */; };
 		01D14A171D3C1E3D007FBD61 /* Tracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01D14A161D3C1E3D007FBD61 /* Tracking.swift */; };
 		01F5F2091DA69BFC0097B6F0 /* .travis.yml in Resources */ = {isa = PBXBuildFile; fileRef = 01F5F2081DA69BFC0097B6F0 /* .travis.yml */; };
-		01F5F20B1DA69CC90097B6F0 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 01F5F20A1DA69CC90097B6F0 /* README.md */; };
 		1714AF3328D553B36089D5C4 /* Pods_MapTheThings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D117795337AE262DBA1B3CEC /* Pods_MapTheThings.framework */; };
 		41582B4DE73743951E62C555 /* Pods_MapTheThingsTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A8377A08A01EA8AE4A8C7C0 /* Pods_MapTheThingsTests.framework */; };
 		F240A312F98D86917B014192 /* Pods_MapTheThingsUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4564707B0A38A409C4F3FA5 /* Pods_MapTheThingsUITests.framework */; };
@@ -271,6 +270,7 @@
 				0165DD041D2552F900FFB1A1 /* Frameworks */,
 				0165DD051D2552F900FFB1A1 /* Resources */,
 				776FB9B3E0F197CFC6D95C22 /* [CP] Copy Pods Resources */,
+				83571B123241DDBF358CEC06 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -289,11 +289,12 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0800;
+				LastUpgradeCheck = 0810;
 				ORGANIZATIONNAME = "The Things Network New York";
 				TargetAttributes = {
 					0165DCE51D2552F900FFB1A1 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = AKU2ZDCF98;
 						LastSwiftMigration = 0800;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
@@ -423,6 +424,21 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MapTheThingsUITests/Pods-MapTheThingsUITests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		83571B123241DDBF358CEC06 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MapTheThingsUITests/Pods-MapTheThingsUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		839019AEC4CF5869D5DF326C /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -435,7 +451,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		AC313D1B54EF7EF0CBEE24AE /* [CP] Copy Pods Resources */ = {
@@ -465,7 +481,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		F215B7CC28C2F2C9F0C5B724 /* [CP] Embed Pods Frameworks */ = {
@@ -495,7 +511,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -514,7 +530,6 @@
 				017D67991D2DF187002FF061 /* SampleLoader.swift in Sources */,
 				015A6B8A1D2A12AA001B5E44 /* AppStateUIViewController.swift in Sources */,
 				0165DCEC1D2552F900FFB1A1 /* MapViewController.swift in Sources */,
-				01F5F20B1DA69CC90097B6F0 /* README.md in Sources */,
 				015A6B7E1D29FD13001B5E44 /* AppState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -670,6 +685,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = AKU2ZDCF98;
 				INFOPLIST_FILE = MapTheThings/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = nyc.thethings.MapTheThings;
@@ -684,6 +700,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = AKU2ZDCF98;
 				INFOPLIST_FILE = MapTheThings/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = nyc.thethings.MapTheThings;

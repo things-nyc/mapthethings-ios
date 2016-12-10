@@ -20,12 +20,18 @@ public struct Sample {
     var seqno: Int32?
 }
 
+public struct GridCell {
+    var nw: CLLocationCoordinate2D
+    var se: CLLocationCoordinate2D
+}
+
 public struct MapState {
     var currentLocation: CLLocation?
     var updated: NSDate
     var bounds: Edges
     var tracking: Bool
     var samples: Array<Sample>
+    var cells: Array<GridCell>
 }
 
 public enum SamplingStrategy {
@@ -59,6 +65,7 @@ public struct Device {
     var lastPacket: NSData?
     var battery: UInt8 = 100
     var spreadingFactor: UInt8?
+    var log: [String] = []
 }
 
 public struct AppState {
@@ -71,9 +78,10 @@ public struct AppState {
 
 private func defaultAppState() -> AppState {
     let samples = Array<Sample>()
+    let cells = Array<GridCell>()
     let nyNE = CLLocationCoordinate2D(latitude: 40.8476, longitude: -73.0543)
     let nySW = CLLocationCoordinate2D(latitude: 40.4976, longitude: -73.8631)
-    let mapState = MapState(currentLocation: nil, updated: NSDate(), bounds: (ne: nyNE, sw: nySW), tracking: true, samples: samples)
+    let mapState = MapState(currentLocation: nil, updated: NSDate(), bounds: (ne: nyNE, sw: nySW), tracking: true, samples: samples, cells: cells)
     let samplingState = SamplingState(strategy: SamplingStrategy.ConnectedNode, mode: SamplingMode.Stop, mostRecentSample: nil)
     return AppState(
         now: NSDate(),

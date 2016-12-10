@@ -59,12 +59,15 @@ class SampleLoader {
                 let allSamples = lists.reduce([Sample](), combine: { all, list in
                     return all + list
                 })
-                self.gotSamples(requestURL, samples: allSamples)
+                self.gotSamples(allSamples)
             }
+
+            self.gotCells(gridUrls)
         }
     }
     
     private func loadGrid(gridUrl: NSURL) -> Promise<Array<Sample>> {
+        //debugPrint("loadGrid(\(gridUrl))")
         return Promise { fulfill, reject in
             jsonCache.fetch(URL: gridUrl).onSuccess { json in
                 //debugPrint("JSON Grid", json)
@@ -92,7 +95,74 @@ class SampleLoader {
         }
     }
     
-    private func gotSamples(gridUrl: NSURL, samples: Array<Sample>) {
+    private func hashToGridCell(hash: String) -> GridCell {
+        let hexhash = hash.substringFromIndex(hash.startIndex.advancedBy(1))
+
+        // Based on https://github.com/kungfoo/geohash-java/blob/master/src/main/java/ch/hsr/geohash/GeoHash.java#L95
+        
+        func divideRangeDecode(range: [Double], b: Bool) -> [Double] {
+            let mid = (range[0] + range[1]) / 2.0;
+            if (b) {
+//                hash.addOnBitToEnd();
+                return [mid, range[1]]
+            } else {
+//                hash.addOffBitToEnd();
+                return [range[0], mid]
+            }
+        }
+
+        let startLatitudeRange = [ -90.0, 90.0 ]
+        let startLongitudeRange = [ -180.0, 180.0 ]
+        var isEvenBit = true;
+        // TODO: have to prefix binary string with 0 bits as determined by hash prefix character
+        let (latitudeRange, longitudeRange) = hexhash.characters.reduce(
+            (startLatitudeRange, startLongitudeRange),
+            combine: { (latLon, hexChar) -> ([Double], [Double]) in
+            let cd = Int("\(hexChar)", radix: 16)!
+            var latitudeRange = latLon.0
+            var longitudeRange = latLon.1
+            for j in (0...3).reverse() {
+                let mask = 1 << j
+                if (isEvenBit) {
+                    longitudeRange = divideRangeDecode(longitudeRange, b: (cd & mask) != 0)
+                } else {
+                    latitudeRange = divideRangeDecode(latitudeRange, b: (cd & mask) != 0)
+                }
+                isEvenBit = !isEvenBit;
+            }
+            return (latitudeRange, longitudeRange)
+        })
+
+//        let latitude = (latitudeRange[0] + latitudeRange[1]) / 2.0;
+//        let longitude = (longitudeRange[0] + longitudeRange[1]) / 2.0;
+
+        debugPrint("Hex \(hexhash) resolves to \(latitudeRange) vs \(longitudeRange)")
+        let nw = CLLocationCoordinate2D(latitude: latitudeRange[1], longitude: longitudeRange[0])
+        let se = CLLocationCoordinate2D(latitude: latitudeRange[0], longitude: longitudeRange[1])
+        return GridCell(nw: nw, se: se)
+    }
+    
+    private func gotCells(urls: [AnyObject]) {
+        let cells = urls.map({ (gridUrl: Any) -> GridCell in
+            let gridUrlString = gridUrl as! String
+            // https://s3.amazonaws.com/nyc.thethings.map.grids/ED2791W-v0
+            let regex = try! NSRegularExpression(pattern: "/([^/]+)-v\\d$", options: [])
+            let matches = regex.matchesInString(gridUrlString,
+                options: [], range: NSMakeRange(0, gridUrlString.characters.count))
+            let range = matches.first!.rangeAtIndex(1) // Group
+            let r = gridUrlString.startIndex.advancedBy(range.location) ..<
+                gridUrlString.startIndex.advancedBy(range.location+range.length)
+            let hash = String(gridUrlString.substringWithRange(r).characters.reverse())
+            return self.hashToGridCell(hash)
+        })
+        updateAppState { (old) -> AppState in
+            var state = old
+            state.map.cells = cells
+            return state
+        }
+    }
+    
+    private func gotSamples(samples: Array<Sample>) {
         updateAppState { (old) -> AppState in
             var state = old
             state.map.samples = samples
