@@ -32,6 +32,9 @@ There is a node in the same location as the iOS device running the app. The node
 - Listener Collect mode - App subscribes to MQTT and posts on packet received.
 There is a node in the same location as the iOS device running the app. The node transmits packets periodically. The app is subscribed to MQTT and when it receives a packet from the device, it posts the packet data and lat/lon to the API. This is how ttnmapper.org collects info.
 
+## Developer Notes
+- Fake a Device - Set FakeDevice=true in Info.plist to fake a device when you don't have a hardware node. The app will act like it has a MapTheThings node to talk to.
+
 ## People
 - Frank - Focused on working example of Active Collection. Bluetooth communication. Sync GPS samples with server.
 - Forrest - Putting burgeoning Swift skills to work.

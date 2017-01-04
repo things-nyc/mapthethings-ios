@@ -39,6 +39,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.location = Location()
         self.tracker = Tracking(bluetooth: self.bluetooth!)
 
+        if let fakeDevice = NSBundle.mainBundle().objectForInfoDictionaryKey("FakeDevice") as? Bool
+            where fakeDevice {
+            self.bluetooth?.addFakeNode()
+        }
+       
         return true
     }
 

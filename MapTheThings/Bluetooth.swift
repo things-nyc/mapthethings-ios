@@ -79,10 +79,84 @@ func readInteger<T : IntegerType>(data : NSData, start : Int) -> T {
     return d
 }
 
-public class BluetoothNode : NSObject, CBPeripheralDelegate {
+func setAppStateDeviceAttribute(id: NSUUID, name: String?, characteristic: CBCharacteristic, value: NSData, error: NSError?) {
+    let s = String(data: value, encoding: NSUTF8StringEncoding)
+    debugPrint("peripheral didUpdateValueForCharacteristic", name, characteristic, s, error)
+    updateAppState { (old) -> AppState in
+        if var dev = old.bluetooth[id] {
+            switch characteristic.UUID {
+            case loraDevAddrCharacteristic:
+                dev.devAddr = value
+            case loraNwkSKeyCharacteristic:
+                dev.nwkSKey = value
+            case loraAppSKeyCharacteristic:
+                dev.appSKey = value
+            case batteryLevelCharacteristic:
+                dev.battery = readInteger(value, start: 0)
+            case logStringCharacteristic:
+                let msg = String(data: value, encoding: NSUTF8StringEncoding)!
+                dev.log.append(msg)
+            case loraSpreadingFactorCharacteristic:
+                let sf:UInt8 = readInteger(value, start: 0)
+                dev.spreadingFactor = sf
+            default:
+                return old // No changes
+            }
+            var state = old
+            state.bluetooth[id] = dev
+            return state
+        }
+        else {
+            debugPrint("Should find \(id) in device list")
+            return old
+        }
+    }
+}
+
+public protocol LoraNode {
+    var  identifier : NSUUID { get }
+    func sendPacket(data : NSData) -> Bool
+    func setSpreadingFactor(sf: UInt8) -> Bool
+}
+
+func observeSpreadingFactor(device: LoraNode) {
+    appStateObservable.observeNext {update in
+        let oldDev = update.old.bluetooth[device.identifier]
+        if let dev = update.new.bluetooth[device.identifier],
+            let sf = dev.spreadingFactor
+            where oldDev==nil || oldDev!.spreadingFactor==nil || sf != oldDev!.spreadingFactor! {
+            device.setSpreadingFactor(sf)
+        }
+    }
+}
+
+public class FakeBluetoothNode : NSObject, LoraNode {
+    let uuid: NSUUID
+    
+    override public init() {
+        self.uuid = NSUUID()
+        super.init()
+        observeSpreadingFactor(self)
+    }
+    
+    public var identifier : NSUUID {
+        return self.uuid
+    }
+
+    public func setSpreadingFactor(sf: UInt8) -> Bool {
+        debugPrint("Set spreading factor: \(sf)")
+        return true
+    }
+    
+    public func sendPacket(data : NSData) -> Bool {
+        debugPrint("Sending fake packet: \(data)")
+        return true
+    }
+}
+
+public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
     let peripheral : CBPeripheral
     var characteristics : Dictionary<String, CBCharacteristic> = Dictionary()
-    var lastSpreadingFactor : UInt8?
     
     public init(peripheral : CBPeripheral) {
         self.peripheral = peripheral
@@ -91,12 +165,7 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
         self.peripheral.delegate = self
         self.peripheral.discoverServices(nodeServices)
         
-        appStateObservable.observeNext {update in
-            if let dev = update.new.bluetooth[peripheral.identifier],
-               let sf = dev.spreadingFactor {
-                self.setSpreadingFactor(sf)
-            }
-        }
+        observeSpreadingFactor(self)
     }
     
     public var identifier : NSUUID {
@@ -116,13 +185,9 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
     }
     
     public func setSpreadingFactor(sf : UInt8) -> Bool {
-        if (self.lastSpreadingFactor != nil) && (sf==self.lastSpreadingFactor) {
-            return true // Don't resend same value
-        }
         if let characteristic = self.characteristics[loraSpreadingFactorCharacteristic.UUIDString] {
             debugPrint("Setting SF", sf)
             peripheral.writeValue(sf.data, forCharacteristic: characteristic, type: CBCharacteristicWriteType.WithResponse)
-            self.lastSpreadingFactor = sf
             return true
         }
         else {
@@ -190,43 +255,7 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
     }
     @objc public func peripheral(peripheral: CBPeripheral, didUpdateValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
         if let value = characteristic.value {
-            //let s = String(data: value, encoding: NSUTF8StringEncoding)
-            //debugPrint("peripheral didUpdateValueForCharacteristic", peripheral.name, characteristic, s, error)
-            updateAppState { (old) -> AppState in
-                if var dev = old.bluetooth[peripheral.identifier] {
-                    if characteristic.UUID.isEqual(loraDevAddrCharacteristic) {
-                        dev.devAddr = value
-                    }
-                    else if characteristic.UUID.isEqual(loraNwkSKeyCharacteristic) {
-                        dev.nwkSKey = value
-                    }
-                    else if characteristic.UUID.isEqual(loraAppSKeyCharacteristic) {
-                        dev.appSKey = value
-                    }
-                    else if characteristic.UUID.isEqual(batteryLevelCharacteristic) {
-                        dev.battery = readInteger(value, start: 0)
-                    }
-                    else if characteristic.UUID.isEqual(logStringCharacteristic) {
-                        let msg = String(data: value, encoding: NSUTF8StringEncoding)!
-                        dev.log.append(msg)
-                    }
-                    else if characteristic.UUID.isEqual(loraSpreadingFactorCharacteristic) {
-                        let sf:UInt8 = readInteger(value, start: 0)
-                        dev.spreadingFactor = sf
-                        self.lastSpreadingFactor = sf
-                    }
-                    else {
-                        return old // No changes
-                    }
-                    var state = old
-                    state.bluetooth[peripheral.identifier] = dev
-                    return state
-                }
-                else {
-                    debugPrint("Should find \(peripheral.identifier) in device list")
-                    return old
-                }
-            }
+            setAppStateDeviceAttribute(peripheral.identifier, name: peripheral.name, characteristic: characteristic, value: value, error: error)
         }
     }
     @objc public func peripheral(peripheral: CBPeripheral, didWriteValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
@@ -249,7 +278,7 @@ public class BluetoothNode : NSObject, CBPeripheralDelegate {
 public class Bluetooth : NSObject, CBCentralManagerDelegate {
     let queue = dispatch_queue_create("Bluetooth", DISPATCH_QUEUE_SERIAL)
     var central : CBCentralManager? = nil
-    var nodes : Dictionary<NSUUID, BluetoothNode> = Dictionary()
+    var nodes : Dictionary<NSUUID, LoraNode> = Dictionary()
     var connections : Array<CBPeripheral> = Array()
     var connecting : CBPeripheral? = nil
     
@@ -275,6 +304,12 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
             })
     }
     
+    public func addFakeNode() -> FakeBluetoothNode {
+        let fake = FakeBluetoothNode()
+        connectNode(fake)
+        return fake
+    }
+    
     public func rescan() {
         self.central!.scanForPeripheralsWithServices(nodeServices, options: nil)
     }
@@ -282,7 +317,7 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
     var nodeIdentifiers : [NSUUID] {
         return Array(nodes.keys)
     }
-    public func node(id: NSUUID) -> BluetoothNode? {
+    public func node(id: NSUUID) -> LoraNode? {
         return nodes[id]
     }
     @objc public func centralManagerDidUpdateState(central: CBCentralManager) {
@@ -315,18 +350,23 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
         debugPrint("centralManager didConnectPeripheral", peripheral.name)
         
         let node = BluetoothNode(peripheral: peripheral)
+        
+        connectNode(node)
+    }
+    
+    public func connectNode(node: LoraNode) {
         self.nodes[node.identifier] = node
         self.connecting = nil
 
         updateAppState { (old) -> AppState in
             var state = old
-            var dev = Device(uuid: peripheral.identifier)
-            if let known = state.bluetooth[peripheral.identifier] {
+            var dev = Device(uuid: node.identifier)
+            if let known = state.bluetooth[node.identifier] {
                 dev = known
-                assert(dev.identifier.isEqual(peripheral.identifier), "Device id should be same as peripheral id")
+                assert(dev.identifier.isEqual(node.identifier), "Device id should be same as peripheral id")
             }
             dev.connected = true // Indicate that the peripheral is connected
-            state.bluetooth[peripheral.identifier] = dev
+            state.bluetooth[node.identifier] = dev
             return state
         }
     }
