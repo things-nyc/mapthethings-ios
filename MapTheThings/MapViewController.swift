@@ -107,28 +107,32 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate, UIGestureR
         }
         
         // TODO
-        // - Sync samples in state with markers on map (first, remove all and add new. Then improve performance by remembering the ones already there and adding only new ones/removing no-longer-visible ones.
         // - In Sampling mode, show last sample info
-        let annotations = state.map.samples.map { (s) -> SampleAnnotation in
-            return SampleAnnotation(coordinate: s.location)
+        let samples = state.map.samples.map { (s) -> SampleAnnotation in
+            return SampleAnnotation(coordinate: s.location, type: SampleAnnotationType.Summary)
         }
-        let new = Set<SampleAnnotation>(annotations)
+        let transmissions = state.map.transmissions.map { (s) -> SampleAnnotation in
+            return SampleAnnotation(coordinate: s.location, type: SampleAnnotationType.Transmission)
+        }
+        let new = Set<SampleAnnotation>(samples).union(Set<SampleAnnotation>(transmissions))
         if let last = self.lastSamples {
+            // Figure out what remains, what gets added, and what gets removed
             let same = last.intersect(new)
             let add = new.subtract(same)
             let remove = last.subtract(same)
             if !remove.isEmpty {
                 debugPrint("Removing", remove.count)
+                self.mapView.removeAnnotations([SampleAnnotation](remove))
             }
             if !add.isEmpty {
                 debugPrint("Adding", add.count)
+                self.mapView.addAnnotations([SampleAnnotation](add))
             }
-            self.mapView.removeAnnotations(Array<SampleAnnotation>(remove))
-            self.mapView.addAnnotations(Array<SampleAnnotation>(add))
             self.lastSamples = same.union(add)
         }
         else {
-            self.mapView.addAnnotations(annotations)
+            // No prior samples - add all annotations
+            self.mapView.addAnnotations([SampleAnnotation](new))
             self.lastSamples = new
         }
     }

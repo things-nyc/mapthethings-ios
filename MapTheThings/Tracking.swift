@@ -5,6 +5,11 @@
 //  Created by Frank on 2016/7/17.
 //  Copyright © 2016 The Things Network New York. All rights reserved.
 //
+//  - Create BT-transaction ID
+//  - Send packet with BT-transaction ID
+//  - Store last packet data and location
+//  - Store record in DB
+//  - On successful transmit mark
 
 import CoreLocation
 
@@ -46,19 +51,41 @@ public class Tracking {
         return nil
     }
     
-    private static func sendPacket(location: CLLocation, bluetooth: Bluetooth) -> ((NSUUID, Device) -> Void) {
-        return { (uuid: NSUUID, _: Device) in
+    private static func sendPacket(location: CLLocation, bluetooth: Bluetooth, dataController: DataController) -> ((NSUUID, Device) -> Void) {
+        return { (uuid: NSUUID, device: Device) in
             // Send it to the Bluetooth peripheral
             if let data = Tracking.makePacket(location),
                 node = bluetooth.node(uuid) {
-                let sent = node.sendPacket(data)
-                if sent {
-                    updateAppState { (old) -> AppState in
-                        var state = old
-                        state.bluetooth[uuid]?.lastPacket = data
-                        state.bluetooth[uuid]?.lastLocation = location
-                        return state
+                do {
+                    let sent = node.sendPacket(data)
+                    if sent {
+                        let tx = try Transmission.create(
+                            dataController.managedObjectContext,
+                            latitude: location.coordinate.latitude,
+                            longitude: location.coordinate.longitude,
+                            altitude: location.altitude,
+                            packet: data,
+                            device: device.identifier)
+                        let (objectID, created) = try performAndWaitInContext(dataController.managedObjectContext) {
+                            return (tx.objectID, tx.created)
+                        }
+                        let ts = TransSample(location: location.coordinate, altitude: location.altitude, timestamp: created)
+                        updateAppState { (old) -> AppState in
+                            var state = old
+                            state.map.transmissions.append(ts)
+                            state.bluetooth[uuid]?.lastPacket = data
+                            state.bluetooth[uuid]?.lastLocation = location
+                            state.bluetooth[uuid]?.lastTransmission = objectID
+                            return state
+                        }
                     }
+                }
+                catch let error as NSError {
+                    setAppError(error, fn: "sendPacket", domain: "database")
+                }
+                catch let error {
+                    let nserr = NSError(domain: "database", code: 1, userInfo: [NSLocalizedDescriptionKey: "\(error)"])
+                    setAppError(nserr, fn: "sendPacket", domain: "database")
                 }
             }
         }
@@ -85,11 +112,11 @@ public class Tracking {
         }
     }
     
-    public init(bluetooth: Bluetooth) {
+    public init(bluetooth: Bluetooth, dataController: DataController) {
         // Listen for app state changes...
         appStateObservable.observeNext({update in
             if let location = update.new.map.currentLocation {
-                let manualSend = stateValChanged(update) { (state) -> (NSUUID?) in
+                let manualSend: Bool = stateValChanged(update) { (state) -> (NSUUID?) in
                     state.sendPacket
                 }
                 
@@ -99,7 +126,7 @@ public class Tracking {
                     dev.connected // Only devices that are connected
                 })
                 .filter(Tracking.shouldSend(location, manualSend: manualSend))
-                .forEach(Tracking.sendPacket(location, bluetooth: bluetooth))
+                    .forEach(Tracking.sendPacket(location, bluetooth: bluetooth, dataController: dataController))
             }
         })
     }

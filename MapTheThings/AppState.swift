@@ -6,9 +6,12 @@
 //  Copyright © 2016 The Things Network New York. All rights reserved.
 //
 
+import CoreData
 import CoreLocation
 import ReactiveCocoa
 import enum Result.NoError
+import Crashlytics
+
 
 typealias Edges = (ne: CLLocationCoordinate2D, sw: CLLocationCoordinate2D)
 
@@ -18,6 +21,13 @@ public struct Sample {
     var snr: Float
     var timestamp: NSDate?
     var seqno: Int32?
+}
+
+public struct TransSample {
+    var location: CLLocationCoordinate2D
+    var altitude: Double
+    var timestamp: NSDate?
+//    var seqno: Int32?
 }
 
 public struct GridCell {
@@ -30,8 +40,9 @@ public struct MapState {
     var updated: NSDate
     var bounds: Edges
     var tracking: Bool
-    var samples: Array<Sample>
-    var cells: Array<GridCell>
+    var samples: [Sample]
+    var cells: [GridCell]
+    var transmissions: [TransSample]
 }
 
 public enum SamplingStrategy {
@@ -63,6 +74,7 @@ public struct Device {
     var mode: SamplingMode = SamplingMode.Play
     var lastLocation: CLLocation?
     var lastPacket: NSData?
+    var lastTransmission: NSManagedObjectID?
     var battery: UInt8 = 100
     var spreadingFactor: UInt8?
     var log: [String] = []
@@ -70,6 +82,7 @@ public struct Device {
 
 public struct AppState {
     var now: NSDate
+    var error: [String]
     var bluetooth: Dictionary<NSUUID, Device>
     var map: MapState
     var sampling: SamplingState
@@ -77,14 +90,16 @@ public struct AppState {
 }
 
 private func defaultAppState() -> AppState {
-    let samples = Array<Sample>()
-    let cells = Array<GridCell>()
+    let samples = [Sample]()
+    let cells = [GridCell]()
+    let transmissions = [TransSample]()
     let nyNE = CLLocationCoordinate2D(latitude: 40.8476, longitude: -73.0543)
     let nySW = CLLocationCoordinate2D(latitude: 40.4976, longitude: -73.8631)
-    let mapState = MapState(currentLocation: nil, updated: NSDate(), bounds: (ne: nyNE, sw: nySW), tracking: true, samples: samples, cells: cells)
+    let mapState = MapState(currentLocation: nil, updated: NSDate(), bounds: (ne: nyNE, sw: nySW), tracking: true, samples: samples, cells: cells, transmissions: transmissions)
     let samplingState = SamplingState(strategy: SamplingStrategy.ConnectedNode, mode: SamplingMode.Stop, mostRecentSample: nil)
     return AppState(
         now: NSDate(),
+        error: [],
         bluetooth: Dictionary(),
         map: mapState,
         sampling: samplingState,
@@ -120,6 +135,21 @@ public func stateValChanged<T : Equatable>(state: (old: AppState, new: AppState)
             changed = true // New this state!
         }
     }
+    else if (old != nil) {
+        changed = true // Was set, now it isn't
+    }
     return changed
 }
+
+public func setAppError(error: NSError, fn: String, domain: String) {
+    let msg = "Error in \(domain)/\(fn): \(error)"
+    debugPrint(msg)
+    Crashlytics.sharedInstance().recordError(error, withAdditionalUserInfo: ["domain": domain, "function": fn])
+    updateAppState { (old) -> AppState in
+        var state = old
+        state.error.append(msg)
+        return state
+    }
+}
+
 
