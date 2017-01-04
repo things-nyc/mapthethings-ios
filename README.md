@@ -37,6 +37,11 @@ There is a node in the same location as the iOS device running the app. The node
 - Forrest - Putting burgeoning Swift skills to work.
 - ???
 
+## Thanks
+Forrest would like to thank
+ - Jordan @CocoaPods with MKCoordinateSpanMake and re-centering
+ - Mike @Cocoapods with formatting floats
+
 ## License
 Source code for Map The Things is released under the MIT License,
 which can be found in the [LICENSE](LICENSE) file.

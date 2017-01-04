@@ -37,26 +37,39 @@ extension MKMapView {
     }
 }
 
-class MapViewController: AppStateUIViewController, MKMapViewDelegate {
+class MapViewController: AppStateUIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
     @IBOutlet var timestamp: UILabel!
     @IBOutlet var toggle: UIButton!
     @IBOutlet var mapView: MKMapView!
     var lastSamples: Set<SampleAnnotation>?
-    var currentLocation: CLLocation!
+    var mapDragRecognizer: UIPanGestureRecognizer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.mapView.delegate = self
+        mapView.delegate = self
+        
+        // Wire up gesture recognizer so that we can stop tracking when the user moves map elsewhere
+        mapDragRecognizer = UIPanGestureRecognizer(target: self, action: #selector(didDragMap))
+        mapDragRecognizer.delegate = self
+        mapView.addGestureRecognizer(mapDragRecognizer)
     }
-    // Help from Jordan @CocoaPods
-    override func viewDidAppear(animated: Bool) {
-        let span = MKCoordinateSpanMake(0.250, 0.250)
-        // hard coded for simulator
-        let location = CLLocation(latitude: 40.759211, longitude: -73.984638)
-        let region = MKCoordinateRegion(center: location.coordinate, span: span)
-        mapView.setRegion(region, animated: true)
+    
+    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer
+        otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        // Thanks http://stackoverflow.com/a/5089553/1207583
+        return true
     }
-
+    
+    func didDragMap(gestureRecognizer: UIGestureRecognizer) {
+        if (gestureRecognizer.state == .Began) {
+            updateAppState { (old) -> AppState in
+                var state = old
+                state.map.tracking = false
+                return state
+            }
+        }
+    }
+    
     func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         let edges = mapView.edgePoints()
         updateAppState { (old) -> AppState in
@@ -77,19 +90,25 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate {
     override func renderAppState(oldState: AppState, state: AppState) {
         
         if let location = state.map.currentLocation {
-            
+            // Show current location in lat/lon on top of view
             let cordinateLong = location.coordinate.longitude
             let cordinateLat = location.coordinate.latitude
-            // Help from Mike @Cocoapods to truncate the significant digits
-            let truncatedCoordinates = String(format: "Lat: %.2f, Lng: %.2f", cordinateLat, cordinateLong)
-            
+            let truncatedCoordinates = String(format: "Lat: %.3f, Lon: %.3f", cordinateLat, cordinateLong)
             self.timestamp.text = truncatedCoordinates
+            
         }
+        
         self.toggle.setTitle("Toggle Tracking: " + (state.map.tracking ? "True" : "False"), forState: UIControlState.Normal)
+        if (state.map.tracking) {
+            mapView.setUserTrackingMode(MKUserTrackingMode.Follow, animated:true)
+        }
+        else {
+            mapView.setUserTrackingMode(MKUserTrackingMode.None, animated:true)
+        }
+        
         // TODO
         // - Sync samples in state with markers on map (first, remove all and add new. Then improve performance by remembering the ones already there and adding only new ones/removing no-longer-visible ones.
         // - In Sampling mode, show last sample info
-        // - Show current location in lat/lon on top of view
         let annotations = state.map.samples.map { (s) -> SampleAnnotation in
             return SampleAnnotation(coordinate: s.location)
         }
