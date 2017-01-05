@@ -59,14 +59,16 @@ public class Tracking {
                 do {
                     let sent = node.sendPacket(data)
                     if sent {
+                        // Write packet data. Not ready to sync until we hear that it was 
+                        // sent successfully and learn the seq_no.
                         let tx = try Transmission.create(
-                            dataController.managedObjectContext,
+                            dataController,
                             latitude: location.coordinate.latitude,
                             longitude: location.coordinate.longitude,
                             altitude: location.altitude,
                             packet: data,
                             device: device.identifier)
-                        let (objectID, created) = try performAndWaitInContext(dataController.managedObjectContext) {
+                        let (objectID, created) = try dataController.performAndWaitInContext() { _ in
                             return (tx.objectID, tx.created)
                         }
                         let ts = TransSample(location: location.coordinate, altitude: location.altitude, timestamp: created)

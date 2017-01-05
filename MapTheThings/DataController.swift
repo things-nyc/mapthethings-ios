@@ -48,25 +48,25 @@ public class DataController: NSObject {
             block(moc: self.managedObjectContext)
         }
     }
-}
 
-/* Performs get block on NSManagedObjectContext queue and returns result on synchronously.
- If get block throws an exception, this function rethrows the same exception to the caller. */
-public func performAndWaitInContext<T : Any>(moc: NSManagedObjectContext, get: () throws -> T) throws -> T {
-    var result: T?
-    var throwError: ErrorType?
-    print("performBlockAndWait: \(String(UTF8String: dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL))!)")
-    moc.performBlockAndWait {
+    /* Performs get block on NSManagedObjectContext queue and returns result on synchronously.
+     If get block throws an exception, this function rethrows the same exception to the caller. */
+    public func performAndWaitInContext<T : Any>(get: (moc: NSManagedObjectContext) throws -> T) throws -> T {
+        var result: T?
+        var throwError: ErrorType?
         print("performBlockAndWait: \(String(UTF8String: dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL))!)")
-        do {
-            result = try get()
+        managedObjectContext.performBlockAndWait {
+            print("performBlockAndWait: \(String(UTF8String: dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL))!)")
+            do {
+                result = try get(moc: self.managedObjectContext)
+            }
+            catch let error {
+                throwError = error
+            }
         }
-        catch let error {
-            throwError = error
+        if let error = throwError {
+            throw error
         }
+        return result!
     }
-    if let error = throwError {
-        throw error
-    }
-    return result!
 }

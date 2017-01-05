@@ -1,5 +1,5 @@
 # Uncomment this line to define a global platform for your project
-platform :ios, '9.0'
+platform :ios, '9.3'
 
 target 'MapTheThings' do
   # Comment this line if you're not using Swift and don't want to use dynamic frameworks
@@ -8,6 +8,8 @@ target 'MapTheThings' do
   # Pods for MapTheThings
   pod 'ReactiveCocoa'
   pod 'HanekeSwift'
+  pod 'Alamofire', '~> 3'
+  #pod 'PromiseKit/Alamofire', '~> 4.0'
   pod 'PromiseKit', '~> 3.2'
   #pod 'Reachability'
   #pod 'CocoaLumberjack'

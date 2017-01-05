@@ -82,6 +82,12 @@ public struct Device {
     var log: [String] = []
 }
 
+public struct SyncState {
+    var working: Bool
+    var lastPost: NSDate?
+    var countToSync: Int
+}
+
 public struct AppState {
     var now: NSDate
     var host: String
@@ -90,6 +96,7 @@ public struct AppState {
     var map: MapState
     var sampling: SamplingState
     var sendPacket: NSUUID? = nil
+    var syncState: SyncState
 }
 
 private func defaultAppState() -> AppState {
@@ -113,7 +120,8 @@ private func defaultAppState() -> AppState {
         bluetooth: Dictionary(),
         map: mapState,
         sampling: samplingState,
-        sendPacket: nil)
+        sendPacket: nil,
+        syncState: SyncState(working: false, lastPost: nil, countToSync: 0))
 }
 
 let defaultState = defaultAppState()
@@ -155,6 +163,18 @@ public func setAppError(error: NSError, fn: String, domain: String) {
     let msg = "Error in \(domain)/\(fn): \(error)"
     debugPrint(msg)
     Crashlytics.sharedInstance().recordError(error, withAdditionalUserInfo: ["domain": domain, "function": fn])
+    updateAppState { (old) -> AppState in
+        var state = old
+        state.error.append(msg)
+        return state
+    }
+}
+
+public func setAppError(error: ErrorType, fn: String, domain: String) {
+    let msg = "Error in \(domain)/\(fn): \(error)"
+    debugPrint(msg)
+    let nserr = NSError(domain: domain, code: 0, userInfo: [NSLocalizedDescriptionKey: "\(error)"])
+    Crashlytics.sharedInstance().recordError(nserr, withAdditionalUserInfo: ["domain": domain, "function": fn])
     updateAppState { (old) -> AppState in
         var state = old
         state.error.append(msg)
