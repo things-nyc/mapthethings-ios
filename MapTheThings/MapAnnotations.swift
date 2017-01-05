@@ -11,6 +11,7 @@ import MapKit
 public enum SampleAnnotationType {
     case Summary
     case Transmission
+    case DeadZone
 }
 
 public class SampleAnnotation : NSObject, MKAnnotation {
@@ -32,6 +33,7 @@ public class SampleAnnotation : NSObject, MKAnnotation {
         switch self.type {
         case .Summary: return UIColor.greenColor()
         case .Transmission: return UIColor.orangeColor()
+        case .DeadZone: return UIColor.grayColor()
         }
     }
     

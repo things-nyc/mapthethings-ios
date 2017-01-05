@@ -16,6 +16,8 @@ import Crashlytics
 typealias Edges = (ne: CLLocationCoordinate2D, sw: CLLocationCoordinate2D)
 
 public struct Sample {
+    var count: Int32
+    var attempts: Int32
     var location: CLLocationCoordinate2D
     var rssi: Float
     var snr: Float

@@ -80,7 +80,15 @@ class SampleLoader {
                     let snrStats = cell["lsnr"] as! [String : AnyObject]
                     let rssi = (rssiStats["avg"] as! NSNumber).floatValue
                     let snr = (snrStats["avg"] as! NSNumber).floatValue
-                    let s = Sample(location: CLLocationCoordinate2D(latitude: clat, longitude: clon), rssi: rssi, snr: snr, timestamp: nil, seqno: nil)
+
+                    let count = (cell["count"] as! NSNumber).intValue
+                    let attempts = (cell["attempt-cnt"] as! NSNumber).intValue
+                    
+                    // timestamp = cell["timestamp"]
+                    let s = Sample(count: count, attempts: attempts,
+                        location: CLLocationCoordinate2D(latitude: clat, longitude: clon),
+                        rssi: rssi, snr: snr,
+                        timestamp: nil, seqno: nil)
                     return r + [s]
                 })
                 fulfill(samples)

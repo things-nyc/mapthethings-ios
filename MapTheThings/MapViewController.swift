@@ -109,7 +109,11 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate, UIGestureR
         // TODO
         // - In Sampling mode, show last sample info
         let samples = state.map.samples.map { (s) -> SampleAnnotation in
-            return SampleAnnotation(coordinate: s.location, type: SampleAnnotationType.Summary)
+            var typ = SampleAnnotationType.Summary
+            if (s.attempts>0 && s.count==0) {
+                typ = SampleAnnotationType.DeadZone
+            }
+            return SampleAnnotation(coordinate: s.location, type: typ)
         }
         let transmissions = state.map.transmissions.map { (s) -> SampleAnnotation in
             return SampleAnnotation(coordinate: s.location, type: SampleAnnotationType.Transmission)
