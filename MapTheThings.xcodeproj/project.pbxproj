@@ -3,10 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 48;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		011AC5BA1E1E88CB002446FF /* AppStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 011AC5B91E1E88CB002446FF /* AppStateTests.swift */; };
+		011AC5C41E1E9DFB002446FF /* Result.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 015A6B831D2A0F8B001B5E44 /* Result.framework */; };
+		011AC5C61E1EA0B0002446FF /* TestingAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 011AC5C51E1EA0B0002446FF /* TestingAppDelegate.swift */; };
+		011AC5C81E1EA0D9002446FF /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 011AC5C71E1EA0D9002446FF /* main.swift */; };
 		01351C861DB5490D006A82B7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 01351C851DB5490D006A82B7 /* Assets.xcassets */; };
 		01444FDF1E1A000C00CDB5AF /* Transmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01444FDE1E1A000C00CDB5AF /* Transmission.swift */; };
 		01444FE11E1A04EE00CDB5AF /* DataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01444FE01E1A04EE00CDB5AF /* DataController.swift */; };
@@ -74,6 +78,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		011AC5B91E1E88CB002446FF /* AppStateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
+		011AC5C51E1EA0B0002446FF /* TestingAppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestingAppDelegate.swift; sourceTree = "<group>"; };
+		011AC5C71E1EA0D9002446FF /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		01351C851DB5490D006A82B7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = MapTheThings/Assets.xcassets; sourceTree = "<group>"; };
 		01444FDE1E1A000C00CDB5AF /* Transmission.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transmission.swift; sourceTree = "<group>"; };
 		01444FE01E1A04EE00CDB5AF /* DataController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataController.swift; sourceTree = "<group>"; };
@@ -155,6 +162,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				011AC5C41E1E9DFB002446FF /* Result.framework in Frameworks */,
 				41582B4DE73743951E62C555 /* Pods_MapTheThingsTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -260,21 +268,23 @@
 		0165DCE81D2552F900FFB1A1 /* MapTheThings */ = {
 			isa = PBXGroup;
 			children = (
+				0165DCE91D2552F900FFB1A1 /* AppDelegate.swift */,
 				015A6B7D1D29FD13001B5E44 /* AppState.swift */,
 				015A6B891D2A12AA001B5E44 /* AppStateUIViewController.swift */,
-				0165DCE91D2552F900FFB1A1 /* AppDelegate.swift */,
-				0165DCEB1D2552F900FFB1A1 /* MapViewController.swift */,
-				0165DCED1D2552F900FFB1A1 /* DeviceViewController.swift */,
-				0165DCEF1D2552F900FFB1A1 /* Main.storyboard */,
-				0165DCF41D2552F900FFB1A1 /* LaunchScreen.storyboard */,
-				0165DCF71D2552F900FFB1A1 /* Info.plist */,
-				017D67981D2DF187002FF061 /* SampleLoader.swift */,
-				01B542C41D35F17A00DE443B /* MapAnnotations.swift */,
 				01B542C81D36C3F400DE443B /* Bluetooth.swift */,
+				01444FE01E1A04EE00CDB5AF /* DataController.swift */,
+				0165DCED1D2552F900FFB1A1 /* DeviceViewController.swift */,
+				0165DCF71D2552F900FFB1A1 /* Info.plist */,
+				0165DCF41D2552F900FFB1A1 /* LaunchScreen.storyboard */,
 				01A12C5E1D3B28D90045BD42 /* Location.swift */,
+				0165DCEF1D2552F900FFB1A1 /* Main.storyboard */,
+				011AC5C71E1EA0D9002446FF /* main.swift */,
+				01B542C41D35F17A00DE443B /* MapAnnotations.swift */,
+				0165DCEB1D2552F900FFB1A1 /* MapViewController.swift */,
+				017D67981D2DF187002FF061 /* SampleLoader.swift */,
+				011AC5C51E1EA0B0002446FF /* TestingAppDelegate.swift */,
 				01D14A161D3C1E3D007FBD61 /* Tracking.swift */,
 				01444FDE1E1A000C00CDB5AF /* Transmission.swift */,
-				01444FE01E1A04EE00CDB5AF /* DataController.swift */,
 			);
 			path = MapTheThings;
 			sourceTree = "<group>";
@@ -282,9 +292,10 @@
 		0165DCFF1D2552F900FFB1A1 /* MapTheThingsTests */ = {
 			isa = PBXGroup;
 			children = (
-				0165DD001D2552F900FFB1A1 /* MapTheThingsTests.swift */,
+				011AC5B91E1E88CB002446FF /* AppStateTests.swift */,
 				0165DD021D2552F900FFB1A1 /* Info.plist */,
 				01B542C61D35FCC200DE443B /* MapAnnotationsTests.swift */,
+				0165DD001D2552F900FFB1A1 /* MapTheThingsTests.swift */,
 				016304CD1D465E58009488AC /* TrackingTests.swift */,
 			);
 			path = MapTheThingsTests;
@@ -653,6 +664,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				011AC5C61E1EA0B0002446FF /* TestingAppDelegate.swift in Sources */,
 				01D14A171D3C1E3D007FBD61 /* Tracking.swift in Sources */,
 				01B542C91D36C3F500DE443B /* Bluetooth.swift in Sources */,
 				0165DCEE1D2552F900FFB1A1 /* DeviceViewController.swift in Sources */,
@@ -662,6 +674,7 @@
 				01A12C5F1D3B28D90045BD42 /* Location.swift in Sources */,
 				017D67991D2DF187002FF061 /* SampleLoader.swift in Sources */,
 				015A6B8A1D2A12AA001B5E44 /* AppStateUIViewController.swift in Sources */,
+				011AC5C81E1EA0D9002446FF /* main.swift in Sources */,
 				0165DCEC1D2552F900FFB1A1 /* MapViewController.swift in Sources */,
 				0144500C1E1BF2EF00CDB5AF /* README.md in Sources */,
 				015A6B7E1D29FD13001B5E44 /* AppState.swift in Sources */,
@@ -677,6 +690,7 @@
 				0165DD011D2552F900FFB1A1 /* MapTheThingsTests.swift in Sources */,
 				016304CE1D465E58009488AC /* TrackingTests.swift in Sources */,
 				01B542C71D35FCC300DE443B /* MapAnnotationsTests.swift in Sources */,
+				011AC5BA1E1E88CB002446FF /* AppStateTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
