@@ -86,6 +86,8 @@
 	</array>
 	<key>FakeDevice</key>
 	<false/>
+	<key>zTestHost</key>
+	<string>192.168.17.117:5000</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

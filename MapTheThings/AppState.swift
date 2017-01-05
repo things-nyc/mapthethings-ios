@@ -82,6 +82,7 @@ public struct Device {
 
 public struct AppState {
     var now: NSDate
+    var host: String
     var error: [String]
     var bluetooth: Dictionary<NSUUID, Device>
     var map: MapState
@@ -97,8 +98,15 @@ private func defaultAppState() -> AppState {
     let nySW = CLLocationCoordinate2D(latitude: 40.4976, longitude: -73.8631)
     let mapState = MapState(currentLocation: nil, updated: NSDate(), bounds: (ne: nyNE, sw: nySW), tracking: true, samples: samples, cells: cells, transmissions: transmissions)
     let samplingState = SamplingState(strategy: SamplingStrategy.ConnectedNode, mode: SamplingMode.Stop, mostRecentSample: nil)
+
+    var host = "map.thethings.nyc"
+    if let testHost = NSBundle.mainBundle().objectForInfoDictionaryKey("TestHost") as? String {
+        host = testHost
+    }
+
     return AppState(
         now: NSDate(),
+        host: host,
         error: [],
         bluetooth: Dictionary(),
         map: mapState,
