@@ -535,7 +535,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Fabric/run\" fe94f5bf9e7fe1cec1ef97a4966456a3a7d0e94f 66132cceb6cf3da52d2d1f9d3f7f67218dd2f961ef59bfebca4c5a5072027550";
+			shellScript = "function prop {\n    grep \"${1}\" private.env | cut -d'=' -f2\n}\n\n\"${PODS_ROOT}/Fabric/run\" $(prop 'FABRIC_API_KEY') $(prop 'FABRIC_BUILD_SECRET')";
 		};
 		5337C2E2ADCBCA337F95359E /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;

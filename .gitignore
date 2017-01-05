@@ -41,6 +41,9 @@ Pods/
 # Scratch Pad
 Logo/
 
+# Environment
+private.env
+
 # Fastlane
 Preview.html
 fastlane/**/README.*
