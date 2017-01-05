@@ -40,3 +40,9 @@ Pods/
 
 # Scratch Pad
 Logo/
+
+# Fastlane
+Preview.html
+fastlane/**/README.*
+fastlane/report.xml
+fastlane/test_output/
