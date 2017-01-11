@@ -22,14 +22,18 @@ public struct Sample {
     var rssi: Float
     var snr: Float
     var timestamp: NSDate?
-    var seqno: Int32?
 }
 
 public struct TransSample {
     var location: CLLocationCoordinate2D
     var altitude: Double
     var timestamp: NSDate?
-//    var seqno: Int32?
+
+    var device: NSUUID? // LoraNode ID - device+ble_seq uniquely identify BLE transmit
+    var ble_seq: UInt8?
+    
+    var lora_seq: UInt32?
+    var objectID: NSManagedObjectID? // Where to write lora_seq when we get it back
 }
 
 public struct GridCell {
@@ -76,16 +80,18 @@ public struct Device {
     var mode: SamplingMode = SamplingMode.Play
     var lastLocation: CLLocation?
     var lastPacket: NSData?
-    var lastTransmission: NSManagedObjectID?
     var battery: UInt8 = 100
     var spreadingFactor: UInt8?
     var log: [String] = []
 }
 
 public struct SyncState {
-    var working: Bool
+    var syncWorking: Bool
+    var syncPendingCount: Int
     var lastPost: NSDate?
-    var countToSync: Int
+
+    var recordWorking: Bool
+    var recordLoraToObject: [(NSManagedObjectID, UInt32)]
 }
 
 public struct AppState {
@@ -121,7 +127,7 @@ private func defaultAppState() -> AppState {
         map: mapState,
         sampling: samplingState,
         sendPacket: nil,
-        syncState: SyncState(working: false, lastPost: nil, countToSync: 0))
+        syncState: SyncState(syncWorking: false, syncPendingCount: 0, lastPost: nil, recordWorking: false, recordLoraToObject: []))
 }
 
 let defaultState = defaultAppState()

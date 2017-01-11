@@ -51,17 +51,21 @@ public class Transmission: NSManagedObject {
     }
     
     public static func loadTransmissions(data: DataController) {
+        // NOTE: The following code represents a pattern regarding idempotency of work
+        // that is emerging in the AppState logic. I expect I'll add some code to 
+        // explicitly support the pattern when I get a chance.
+        
         // Recognize that there is work to do and flag that it should happen
         appStateObservable.observeNext { (old, new) in
-            if (!new.syncState.working
-                && new.syncState.countToSync>0) {
+            if (!new.syncState.syncWorking
+                && new.syncState.syncPendingCount>0) {
                 // Don't just start async work here. There's a chance with 
                 // multiple enqueued updates to AppState that this method will be called 
                 // many times in the same state of needing to start work. We wouldn't want to 
                 // start doing the same work every time.
                 updateAppState({ (old) -> AppState in
                     var state = old
-                    state.syncState.working = true
+                    state.syncState.syncWorking = true
                     return state
                 })
             }
@@ -69,9 +73,29 @@ public class Transmission: NSManagedObject {
         
         // Recognize that the work flag went up and do the work.
         appStateObservable.observeNext { (old, new) in
-            if (!old.syncState.working && new.syncState.working) {
+            if (!old.syncState.syncWorking && new.syncState.syncWorking) {
                 debugPrint("Sync one: \(new.syncState)")
                 syncOneTransmission(data, host: new.host)
+            }
+        }
+
+        // Recognize that there is work to do and flag that it should happen
+        appStateObservable.observeNext { (old, new) in
+            if (!new.syncState.recordWorking
+                && new.syncState.recordLoraToObject.count>0) {
+                updateAppState({ (old) -> AppState in
+                    var state = old
+                    state.syncState.recordWorking = true
+                    return state
+                })
+            }
+        }
+        
+        // Recognize that the work flag went up and do the work.
+        appStateObservable.observeNext { (old, new) in
+            if (!old.syncState.recordWorking && new.syncState.recordWorking) {
+                debugPrint("Record one: \(new.syncState)")
+                recordOneLoraSeqNo(data, update: new.syncState.recordLoraToObject)
             }
         }
 
@@ -84,7 +108,9 @@ public class Transmission: NSManagedObject {
                     fetch.predicate = NSPredicate(format: "created > %@", earlier)
                     let transmissions = try moc.executeFetchRequest(fetch) as! [Transmission]
                     let samples = transmissions.map { (tx) in
-                        return TransSample(location: CLLocationCoordinate2D(latitude: tx.latitude, longitude: tx.longitude), altitude: tx.altitude, timestamp: tx.created)
+                        return TransSample(location: CLLocationCoordinate2D(latitude: tx.latitude, longitude: tx.longitude), altitude: tx.altitude, timestamp: tx.created,
+                            device: nil, ble_seq: nil, // Not live transmission, so nil OK
+                            lora_seq: tx.seq_no?.unsignedIntValue, objectID: nil)
                     }
                     
                     updateAppState({ (old) -> AppState in
@@ -98,7 +124,7 @@ public class Transmission: NSManagedObject {
                 let syncReady = try moc.countForFetchRequest(fetch)
                 updateAppState { old in
                     var state = old
-                    state.syncState.countToSync = syncReady
+                    state.syncState.syncPendingCount = syncReady
                     return state
                 }
                 fetch.predicate = NSPredicate(format: "synced = nil")
@@ -115,6 +141,35 @@ public class Transmission: NSManagedObject {
         }
     }
     
+    static func recordOneLoraSeqNo(data: DataController, update: [(NSManagedObjectID, UInt32)]) {
+        if (update.isEmpty) {
+            return
+        }
+        data.performInContext() { moc in
+            let (objID, loraSeq) = update.first!
+            do {
+                let tx = try moc.existingObjectWithID(objID) as! Transmission
+                tx.seq_no = NSNumber(unsignedInt: loraSeq)
+                try moc.save()
+            }
+            catch let error as NSError {
+                setAppError(error, fn: "applicationDidFinishLaunchingWithOptions", domain: "database")
+            }
+            catch let error {
+                let nserr = NSError(domain: "database", code: 1, userInfo: [NSLocalizedDescriptionKey: "\(error)"])
+                setAppError(nserr, fn: "applicationDidFinishLaunchingWithOptions", domain: "database")
+            }
+            updateAppState({ (old) -> AppState in
+                var state = old
+                state.syncState.recordWorking = false
+                state.syncState.recordLoraToObject = state.syncState.recordLoraToObject.filter({ pair -> Bool in
+                    return pair.0 != objID
+                })
+                return state
+            })
+        }
+    }
+    
     static func formatterForJSONDate() -> NSDateFormatter {
         let formatter = NSDateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
@@ -127,7 +182,7 @@ public class Transmission: NSManagedObject {
         data.performInContext() { moc in
             do {
                 let fetch = NSFetchRequest(entityName: "Transmission")
-                fetch.predicate = NSPredicate(format: "synced = nil")
+                fetch.predicate = NSPredicate(format: "synced = nil and seq_no != nil")
                 fetch.fetchLimit = 1
                 let transmissions = try moc.executeFetchRequest(fetch) as! [Transmission]
                 if (transmissions.count>=1) {
@@ -188,10 +243,10 @@ public class Transmission: NSManagedObject {
                 updateAppState({ (old) -> AppState in
                     var state = old
                     state.syncState.lastPost = now
-                    if (state.syncState.countToSync>0) {
-                        state.syncState.countToSync -= 1;
+                    if (state.syncState.syncPendingCount>0) {
+                        state.syncState.syncPendingCount -= 1;
                     }
-                    state.syncState.working = false
+                    state.syncState.syncWorking = false
                     return state
                 })
             }
@@ -201,7 +256,7 @@ public class Transmission: NSManagedObject {
             updateAppState({ (old) -> AppState in
                 var state = old
                 state.syncState.lastPost = NSDate()
-                state.syncState.working = false
+                state.syncState.syncWorking = false
                 return state
             })
         }

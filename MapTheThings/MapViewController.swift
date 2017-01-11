@@ -116,7 +116,17 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate, UIGestureR
             return SampleAnnotation(coordinate: s.location, type: typ)
         }
         let transmissions = state.map.transmissions.map { (s) -> SampleAnnotation in
-            return SampleAnnotation(coordinate: s.location, type: SampleAnnotationType.Transmission)
+            var type: SampleAnnotationType
+            if s.ble_seq==nil {
+                type = SampleAnnotationType.TransmissionUntracked
+            }
+            else if s.lora_seq==nil {
+                type = SampleAnnotationType.TransmissionTracked
+            }
+            else {
+                type = SampleAnnotationType.TransmissionSuccess
+            }
+            return SampleAnnotation(coordinate: s.location, type: type)
         }
         let new = Set<SampleAnnotation>(samples).union(Set<SampleAnnotation>(transmissions))
         if let last = self.lastSamples {
@@ -126,7 +136,10 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate, UIGestureR
             let remove = last.subtract(same)
             if !remove.isEmpty {
                 debugPrint("Removing", remove.count)
-                self.mapView.removeAnnotations([SampleAnnotation](remove))
+                switch remove.count {
+                case 1: self.mapView.removeAnnotation(remove.first!)
+                default: self.mapView.removeAnnotations([SampleAnnotation](remove))
+                }
             }
             if !add.isEmpty {
                 debugPrint("Adding", add.count)

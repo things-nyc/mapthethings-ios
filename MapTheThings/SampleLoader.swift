@@ -88,7 +88,7 @@ class SampleLoader {
                     let s = Sample(count: count, attempts: attempts,
                         location: CLLocationCoordinate2D(latitude: clat, longitude: clon),
                         rssi: rssi, snr: snr,
-                        timestamp: nil, seqno: nil)
+                        timestamp: nil)
                     return r + [s]
                 })
                 fulfill(samples)

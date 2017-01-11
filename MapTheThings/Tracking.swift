@@ -36,9 +36,9 @@ extension CLLocation {
 }
 
 public class Tracking {
-    private static func makePacket(location: CLLocation) -> NSData? {
+    private static func makePacket(version: UInt8, location: CLLocation) -> NSData? {
         if let data = NSMutableData(capacity: 7) {
-            data.appendData(UInt8(0x01).data)
+            data.appendData(version.data)
             if let ld = location.data48 {
                 data.appendData(ld)
                 assert(7==data.length, "Expected to make 7 byte coordinate")
@@ -52,12 +52,24 @@ public class Tracking {
     }
     
     private static func sendPacket(location: CLLocation, bluetooth: Bluetooth, dataController: DataController) -> ((NSUUID, Device) -> Void) {
-        return { (uuid: NSUUID, device: Device) in
+        return { (deviceId: NSUUID, device: Device) in
             // Send it to the Bluetooth peripheral
-            if let data = Tracking.makePacket(location),
-                node = bluetooth.node(uuid) {
+            if let v2data = Tracking.makePacket(2, location: location),
+                v1data = Tracking.makePacket(1, location: location),
+                node = bluetooth.node(deviceId) {
                 do {
-                    let sent = node.sendPacket(data)
+                    var sent = false
+                    var ble_seq:UInt8? = nil
+                    var sent_data = v2data
+                    ble_seq = node.sendPacketWithAck(v2data)
+                    if ble_seq==nil {
+                        // Tracked send not available, try regular send
+                        sent = node.sendPacket(v1data)
+                        sent_data = v1data
+                    }
+                    else {
+                        sent = true
+                    }
                     if sent {
                         // Write packet data. Not ready to sync until we hear that it was 
                         // sent successfully and learn the seq_no.
@@ -66,18 +78,17 @@ public class Tracking {
                             latitude: location.coordinate.latitude,
                             longitude: location.coordinate.longitude,
                             altitude: location.altitude,
-                            packet: data,
+                            packet: sent_data,
                             device: device.identifier)
                         let (objectID, created) = try dataController.performAndWaitInContext() { _ in
                             return (tx.objectID, tx.created)
                         }
-                        let ts = TransSample(location: location.coordinate, altitude: location.altitude, timestamp: created)
+                        let ts = TransSample(location: location.coordinate, altitude: location.altitude, timestamp: created, device: deviceId, ble_seq: ble_seq, lora_seq: nil, objectID: objectID)
                         updateAppState { (old) -> AppState in
                             var state = old
                             state.map.transmissions.append(ts)
-                            state.bluetooth[uuid]?.lastPacket = data
-                            state.bluetooth[uuid]?.lastLocation = location
-                            state.bluetooth[uuid]?.lastTransmission = objectID
+                            state.bluetooth[deviceId]?.lastPacket = sent_data
+                            state.bluetooth[deviceId]?.lastLocation = location
                             return state
                         }
                     }

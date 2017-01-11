@@ -54,7 +54,7 @@
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Get current location for sample</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We don't use Photos but I haven't figured out how to not require this.</string>
+	<string>We don&apos;t use Photos but I haven&apos;t figured out how to not require this.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>

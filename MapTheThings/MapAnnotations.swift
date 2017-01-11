@@ -10,8 +10,12 @@ import MapKit
 
 public enum SampleAnnotationType {
     case Summary
-    case Transmission
     case DeadZone
+
+    case TransmissionUntracked
+    case TransmissionTracked
+    case TransmissionSuccess
+    case TransmissionError
 }
 
 public class SampleAnnotation : NSObject, MKAnnotation {
@@ -31,9 +35,13 @@ public class SampleAnnotation : NSObject, MKAnnotation {
     
     public func pinTintColor() -> UIColor {
         switch self.type {
-        case .Summary: return UIColor.greenColor()
-        case .Transmission: return UIColor.orangeColor()
+        case .Summary: return UIColor.blueColor()
         case .DeadZone: return UIColor.grayColor()
+
+        case .TransmissionUntracked: return UIColor.yellowColor()
+        case .TransmissionTracked: return UIColor(red: 0.6, green: 1, blue: 0.6, alpha: 0.5)
+        case .TransmissionSuccess: return UIColor.greenColor()
+        case .TransmissionError: return UIColor.redColor()
         }
     }
     
@@ -66,7 +74,8 @@ func dEq(a: Double, b: Double) -> Bool {
 }
 public func ==(lhs: SampleAnnotation, rhs: SampleAnnotation) -> Bool {
     let eq = dEq(lhs.coordinate.latitude, b: rhs.coordinate.latitude) &&
-            dEq(lhs.coordinate.longitude, b: rhs.coordinate.longitude)
+            dEq(lhs.coordinate.longitude, b: rhs.coordinate.longitude) &&
+            lhs.type==rhs.type
     return eq
 }
 

@@ -18,8 +18,7 @@ import CoreBluetooth
  
  type="org.bluetooth.characteristic.firmware_revision_string" uuid="2A26" name="Firmware Revision String"
  "Firmware Revision": utf8s
- 
- TODO: Add TXresult characteristic to loraService
+
  */
 
 let loraService = CBUUID(string: "00001830-0000-1000-8000-00805F9B34FB")
@@ -30,23 +29,27 @@ let nodeServices : [CBUUID]? = [loraService, deviceInfoService, batteryService, 
 
 let batteryLevelCharacteristic =    CBUUID(string: "00002A19-0000-1000-8000-00805F9B34FB")
 let logStringCharacteristic =       CBUUID(string: "00002AD6-0000-1000-8000-00805F9B34FB")
-let transmitResultCharacteristic =  CBUUID(string: "00002AD7-0000-1000-8000-00805F9B34FB")
 
 let loraCommandCharacteristic =     CBUUID(string: "00002AD0-0000-1000-8000-00805F9B34FB")
 let loraWritePacketCharacteristic = CBUUID(string: "00002AD1-0000-1000-8000-00805F9B34FB")
+let loraWritePacketWithAckCharacteristic =
+                                    CBUUID(string: "00002ADB-0000-1000-8000-00805F9B34FB")
 let loraDevAddrCharacteristic =     CBUUID(string: "00002AD2-0000-1000-8000-00805F9B34FB")
 let loraNwkSKeyCharacteristic =     CBUUID(string: "00002AD3-0000-1000-8000-00805F9B34FB")
 let loraAppSKeyCharacteristic =     CBUUID(string: "00002AD4-0000-1000-8000-00805F9B34FB")
 let loraSpreadingFactorCharacteristic =
                                     CBUUID(string: "00002AD5-0000-1000-8000-00805F9B34FB")
+let transmitResultCharacteristic =  CBUUID(string: "00002ADA-0000-1000-8000-00805F9B34FB")
 
 let loraNodeCharacteristics : [CBUUID]? = [
     loraCommandCharacteristic,
     loraWritePacketCharacteristic,
+    loraWritePacketWithAckCharacteristic,
     loraDevAddrCharacteristic,
     loraNwkSKeyCharacteristic,
     loraAppSKeyCharacteristic,
     loraSpreadingFactorCharacteristic,
+    transmitResultCharacteristic,
 ]
 
 extension UInt16 {
@@ -79,11 +82,35 @@ func readInteger<T : IntegerType>(data : NSData, start : Int) -> T {
     return d
 }
 
+func storeLoraSeq(old_state: AppState, device: NSUUID, ble_seq: UInt8, lora_seq: UInt32) -> AppState {
+    debugPrint("storeLoraSeq \(lora_seq) for ble: \(ble_seq)")
+    var state = old_state
+    // Find transmission with this device+ble_seq
+    for (index, tx) in state.map.transmissions.enumerate() {
+        if let tx_ble_seq = tx.ble_seq, tx_dev = tx.device
+            where ble_seq==tx_ble_seq && device==tx_dev && tx.lora_seq==nil {
+            // There could be the same device+ble with lora_seq already set
+            // - because BLE seq numbers repeat - hence lora_seq nil check.
+            // TODO: Not good enough - could have failed to receive lora seq.
+            // We should assume most recent is the one we just got.
+            state.map.transmissions[index].lora_seq = lora_seq
+            if let objID = state.map.transmissions[index].objectID {
+                state.syncState.recordLoraToObject.append((objID, lora_seq))
+            }
+            else {
+                debugPrint("No object ID to record lora seq no")
+            }
+        }
+    }
+    return state
+}
+
 func setAppStateDeviceAttribute(id: NSUUID, name: String?, characteristic: CBCharacteristic, value: NSData, error: NSError?) {
     let s = String(data: value, encoding: NSUTF8StringEncoding)
     debugPrint("peripheral didUpdateValueForCharacteristic", name, characteristic, s, error)
     updateAppState { (old) -> AppState in
         if var dev = old.bluetooth[id] {
+            var state = old
             switch characteristic.UUID {
             case loraDevAddrCharacteristic:
                 dev.devAddr = value
@@ -91,6 +118,25 @@ func setAppStateDeviceAttribute(id: NSUUID, name: String?, characteristic: CBCha
                 dev.nwkSKey = value
             case loraAppSKeyCharacteristic:
                 dev.appSKey = value
+            case transmitResultCharacteristic:
+                //                      format         ble_seq          error           lora_seq
+                assert(value.length==(sizeof(UInt8)+sizeof(UInt8)+sizeof(UInt16)+sizeof(UInt32)))
+                debugPrint("TX result: \(value)")
+                let result_format:UInt8 = readInteger(value, start: 0)
+                if result_format==1 {
+                    let ble_seq:UInt8 = readInteger(value, start: sizeof(UInt8))
+                    let error:UInt16 = readInteger(value, start: 2*sizeof(UInt8))
+                    let lora_seq:UInt32 = readInteger(value, start: 2*sizeof(UInt8)+sizeof(UInt16))
+                    if error==0 {
+                        state = storeLoraSeq(state, device: id, ble_seq: ble_seq, lora_seq: lora_seq)
+                    }
+                    else {
+                        debugPrint("Received tx error result: \(error)")
+                    }
+                }
+                else {
+                    debugPrint("Received unknown result format: \(result_format)")
+                }
             case batteryLevelCharacteristic:
                 dev.battery = readInteger(value, start: 0)
             case logStringCharacteristic:
@@ -102,7 +148,6 @@ func setAppStateDeviceAttribute(id: NSUUID, name: String?, characteristic: CBCha
             default:
                 return old // No changes
             }
-            var state = old
             state.bluetooth[id] = dev
             return state
         }
@@ -116,6 +161,7 @@ func setAppStateDeviceAttribute(id: NSUUID, name: String?, characteristic: CBCha
 public protocol LoraNode {
     var  identifier : NSUUID { get }
     func sendPacket(data : NSData) -> Bool
+    func sendPacketWithAck(data : NSData) -> UInt8? // ble sequence number, or null on failure or unavailable
     func setSpreadingFactor(sf: UInt8) -> Bool
 }
 
@@ -132,6 +178,8 @@ func observeSpreadingFactor(device: LoraNode) {
 
 public class FakeBluetoothNode : NSObject, LoraNode {
     let uuid: NSUUID
+    var lora_seq: UInt32 = 100;
+    var ble_seq: UInt8 = 1 // Rolling sequence number that lets us link ack messages to sends
     
     override public init() {
         self.uuid = NSUUID()
@@ -147,16 +195,38 @@ public class FakeBluetoothNode : NSObject, LoraNode {
         debugPrint("Set spreading factor: \(sf)")
         return true
     }
-    
+
     public func sendPacket(data : NSData) -> Bool {
         debugPrint("Sending fake packet: \(data)")
         return true
+    }
+    public func sendPacketWithAck(data: NSData) -> UInt8? {
+        let ble_seq = self.ble_seq
+        self.ble_seq += 1
+        
+        let lora_seq = self.lora_seq
+        self.lora_seq += 1
+        
+        let tracked = NSMutableData(data: ble_seq.data)
+        tracked.appendData(data)
+
+        sendPacket(tracked)
+        
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(10 * NSEC_PER_SEC)),
+                       dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), {
+                        debugPrint("Writing response sequence no \(self.ble_seq)")
+                        updateAppState { (old) -> AppState in
+                            return storeLoraSeq(old, device: self.uuid, ble_seq: ble_seq, lora_seq: lora_seq)
+                        }
+        });
+        return ble_seq
     }
 }
 
 public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
     let peripheral : CBPeripheral
     var characteristics : Dictionary<String, CBCharacteristic> = Dictionary()
+    var ble_seq: UInt8 = 1
     
     public init(peripheral : CBPeripheral) {
         self.peripheral = peripheral
@@ -183,7 +253,26 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
             return false
         }
     }
-    
+    public func sendPacketWithAck(data: NSData) -> UInt8? {
+        if let characteristic = self.characteristics[loraWritePacketWithAckCharacteristic.UUIDString] {
+            debugPrint("Sending packet with ack", data)
+            let ble_seq = self.ble_seq
+            self.ble_seq += 1
+            
+            // Prepend ble_seq to actual data. ble_seq will be included in tx result report.
+            let tracked = NSMutableData(data: ble_seq.data)
+            tracked.appendData(data)
+            
+            peripheral.writeValue(tracked, forCharacteristic: characteristic,
+                                  type: CBCharacteristicWriteType.WithResponse)
+            return ble_seq
+        }
+        else {
+            debugPrint("Write Packet with ack characteristic unavailable.")
+            return nil
+        }
+    }
+   
     public func setSpreadingFactor(sf : UInt8) -> Bool {
         if let characteristic = self.characteristics[loraSpreadingFactorCharacteristic.UUIDString] {
             debugPrint("Setting SF", sf)
@@ -211,13 +300,12 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
     @objc public func peripheral(peripheral: CBPeripheral, didDiscoverServices error: NSError?) {
         debugPrint("peripheral didDiscoverServices", peripheral.name, peripheral.services, error)
         peripheral.services?.forEach({ (service) in
-            if service.UUID.isEqual(loraService) {
+            switch service.UUID {
+            case loraService:
                 peripheral.discoverCharacteristics(loraNodeCharacteristics, forService: service)
-            }
-            else if service.UUID.isEqual(loraService) {
+            case logService:
                 peripheral.discoverCharacteristics([logStringCharacteristic], forService: service)
-            }
-            else {
+            default:
                 peripheral.discoverCharacteristics(nil, forService: service)
             }
         })
@@ -230,25 +318,23 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
         service.characteristics!.forEach { (characteristic) in
             debugPrint("Set characteristic: ", characteristic.nsUUID.UUIDString)
             self.characteristics[characteristic.nsUUID.UUIDString] = characteristic
-            if characteristic.UUID.isEqual(loraDevAddrCharacteristic) ||
-                characteristic.UUID.isEqual(loraNwkSKeyCharacteristic) ||
-                characteristic.UUID.isEqual(loraAppSKeyCharacteristic) ||
-                characteristic.UUID.isEqual(loraSpreadingFactorCharacteristic)
-            {
+            switch characteristic.UUID {
+            case loraDevAddrCharacteristic,
+                loraAppSKeyCharacteristic,
+                loraNwkSKeyCharacteristic,
+                loraSpreadingFactorCharacteristic:
                 peripheral.readValueForCharacteristic(characteristic)
-            }
-            else if characteristic.UUID.isEqual(batteryLevelCharacteristic) ||
-                characteristic.UUID.isEqual(logStringCharacteristic) {
+            case batteryLevelCharacteristic,
+                transmitResultCharacteristic,
+                logStringCharacteristic:
                 debugPrint("Subscribing to characteristic", characteristic)
                 peripheral.setNotifyValue(true, forCharacteristic: characteristic)
-            }
-//            else if characteristic.UUID.isEqual(loraCommandCharacteristic) {
+//          case loraCommandCharacteristic:
 //                let command : UInt16 = 500
 //                debugPrint("Writing to characteristic", characteristic, command)
-//                peripheral.writeValue(command.data, forCharacteristic: characteristic, type: CBCharacteristicWriteType.WithResponse)
-//            }
-                
-            else {
+//                peripheral.writeValue(command.data, forCharacteristic: characteristic,
+//                  type:CBCharacteristicWriteType.WithResponse)
+            default:
                 peripheral.readValueForCharacteristic(characteristic)
             }
         }

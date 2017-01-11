@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreLocation
+import Crashlytics
 
 extension NSData {
     
@@ -55,10 +56,11 @@ class DeviceViewController: AppStateUIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        Answers.logContentViewWithName("DeviceView", contentType: "View", contentId: "DeviceView", customAttributes: nil)
     }
     
     @IBAction func sendPacket(sender: UIButton) {
-        debugPrint("sendPacket")
+        debugPrint("sendPacket button pressed")
         updateAppState { (old) -> AppState in
             var state = old
             state.sendPacket = NSUUID() // Each press of command
@@ -67,7 +69,7 @@ class DeviceViewController: AppStateUIViewController {
     }
 
     @IBAction func sendTestPacket(sender: UIButton) {
-        debugPrint("sendTestPacket")
+        debugPrint("sendTestPacket button pressed")
         updateAppState { (old) -> AppState in
             var state = old
             if state.map.currentLocation==nil {
@@ -79,17 +81,20 @@ class DeviceViewController: AppStateUIViewController {
     }
     
     @IBAction func reconnectBluetooth(sender: UIButton) {
+        Answers.logCustomEventWithName("ReconnectBT", customAttributes: nil)
         debugPrint("reconnectBluetooth")
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         appDelegate.bluetooth!.rescan()
     }
     
     @IBAction func spreadingFactorChange(sender: UISegmentedControl) {
-        debugPrint("setSF: ", sender.selectedSegmentIndex)
+        let sf = UInt8(sender.selectedSegmentIndex) + 7
+        Answers.logCustomEventWithName("SetSF", customAttributes: ["SF": NSNumber(unsignedChar: sf)])
+        debugPrint("setSF: \(sf)")
         updateAppState { (old) -> AppState in
             if var dev = old.bluetooth.first?.1 {
                 var state = old
-                dev.spreadingFactor = UInt8(sender.selectedSegmentIndex) + 7
+                dev.spreadingFactor = sf
                 state.bluetooth[dev.identifier] = dev
                 return state
             }
