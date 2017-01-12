@@ -294,7 +294,7 @@
 				TargetAttributes = {
 					0165DCE51D2552F900FFB1A1 = {
 						CreatedOnToolsVersion = 7.3.1;
-						DevelopmentTeam = AKU2ZDCF98;
+						DevelopmentTeam = 8WVD5SW854;
 						LastSwiftMigration = 0800;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
@@ -307,11 +307,13 @@
 					};
 					0165DCFB1D2552F900FFB1A1 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = 8WVD5SW854;
 						LastSwiftMigration = 0800;
 						TestTargetID = 0165DCE51D2552F900FFB1A1;
 					};
 					0165DD061D2552F900FFB1A1 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = 8WVD5SW854;
 						LastSwiftMigration = 0800;
 						TestTargetID = 0165DCE51D2552F900FFB1A1;
 					};
@@ -685,7 +687,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = AKU2ZDCF98;
+				DEVELOPMENT_TEAM = 8WVD5SW854;
 				INFOPLIST_FILE = MapTheThings/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = nyc.thethings.MapTheThings;
@@ -700,7 +702,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = AKU2ZDCF98;
+				DEVELOPMENT_TEAM = 8WVD5SW854;
 				INFOPLIST_FILE = MapTheThings/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = nyc.thethings.MapTheThings;
@@ -714,6 +716,7 @@
 			baseConfigurationReference = FC95F3D7CB42F9BB055F6696 /* Pods-MapTheThingsTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 8WVD5SW854;
 				INFOPLIST_FILE = MapTheThingsTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = nyc.thethings.MapTheThingsTests;
@@ -728,6 +731,7 @@
 			baseConfigurationReference = 787D45900BE726E63051CBFB /* Pods-MapTheThingsTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 8WVD5SW854;
 				INFOPLIST_FILE = MapTheThingsTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = nyc.thethings.MapTheThingsTests;
@@ -741,6 +745,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 426939B63027F6706ED801A6 /* Pods-MapTheThingsUITests.debug.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = 8WVD5SW854;
 				INFOPLIST_FILE = MapTheThingsUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = nyc.thethings.MapTheThingsUITests;
@@ -754,6 +759,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7A5F7AA2372CE5EA3603F491 /* Pods-MapTheThingsUITests.release.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = 8WVD5SW854;
 				INFOPLIST_FILE = MapTheThingsUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = nyc.thethings.MapTheThingsUITests;
