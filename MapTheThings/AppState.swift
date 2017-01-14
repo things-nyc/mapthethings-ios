@@ -76,6 +76,9 @@ public struct Device {
     var devAddr: NSData?
     var nwkSKey: NSData?
     var appSKey: NSData?
+    var appKey: NSData?
+    var appEUI: NSData?
+    var devEUI: NSData?
     var connected: Bool = false
     var mode: SamplingMode = SamplingMode.Play
     var lastLocation: CLLocation?

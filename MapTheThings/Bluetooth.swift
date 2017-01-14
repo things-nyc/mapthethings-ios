@@ -40,6 +40,9 @@ let loraAppSKeyCharacteristic =     CBUUID(string: "00002AD4-0000-1000-8000-0080
 let loraSpreadingFactorCharacteristic =
                                     CBUUID(string: "00002AD5-0000-1000-8000-00805F9B34FB")
 let transmitResultCharacteristic =  CBUUID(string: "00002ADA-0000-1000-8000-00805F9B34FB")
+let loraAppKeyCharacteristic =      CBUUID(string: "00002AD7-0000-1000-8000-00805F9B34FB")
+let loraAppEUICharacteristic =      CBUUID(string: "00002AD8-0000-1000-8000-00805F9B34FB")
+let loraDevEUICharacteristic =      CBUUID(string: "00002AD9-0000-1000-8000-00805F9B34FB")
 
 let loraNodeCharacteristics : [CBUUID]? = [
     loraCommandCharacteristic,
@@ -50,6 +53,9 @@ let loraNodeCharacteristics : [CBUUID]? = [
     loraAppSKeyCharacteristic,
     loraSpreadingFactorCharacteristic,
     transmitResultCharacteristic,
+    loraAppKeyCharacteristic,
+    loraAppEUICharacteristic,
+    loraDevEUICharacteristic,
 ]
 
 extension UInt16 {
@@ -118,6 +124,12 @@ func setAppStateDeviceAttribute(id: NSUUID, name: String?, characteristic: CBCha
                 dev.nwkSKey = value
             case loraAppSKeyCharacteristic:
                 dev.appSKey = value
+            case loraAppKeyCharacteristic:
+                dev.appKey = value
+            case loraAppEUICharacteristic:
+                dev.appEUI = value
+            case loraDevEUICharacteristic:
+                dev.devEUI = value
             case transmitResultCharacteristic:
                 //                      format         ble_seq          error           lora_seq
                 assert(value.length==(sizeof(UInt8)+sizeof(UInt8)+sizeof(UInt16)+sizeof(UInt32)))
@@ -322,6 +334,9 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
             case loraDevAddrCharacteristic,
                 loraAppSKeyCharacteristic,
                 loraNwkSKeyCharacteristic,
+                loraAppKeyCharacteristic,
+                loraAppEUICharacteristic,
+                loraDevEUICharacteristic,
                 loraSpreadingFactorCharacteristic:
                 peripheral.readValueForCharacteristic(characteristic)
             case batteryLevelCharacteristic,
