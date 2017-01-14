@@ -76,6 +76,8 @@ class DevicesViewController: UITableViewController {
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        let (oldState, state) = appStateProperty.value
+        renderAppState(oldState, state: state)
     }
 
     @IBAction func rescanBluetooth(sender: UIButton) {

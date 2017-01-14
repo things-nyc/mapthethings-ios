@@ -95,12 +95,14 @@ class DeviceViewController: AppStateUIViewController {
     }
     
     @IBAction func toggleProvisioningView(sender: UIButton) {
-        self.provisioningContainer.hidden = !self.provisioningContainer.hidden
-        var title = "Hide"
-        if self.provisioningContainer.hidden {
-            title = "Show"
+        updateAppState { (old) -> AppState in
+            var state = old
+            if let devID = state.viewDetailDeviceID, var dev = state.bluetooth[devID] {
+                dev.hideProvisioning = !dev.hideProvisioning
+                state.bluetooth[devID] = dev
+            }
+            return state
         }
-        self.toggleProvisioningButton.setTitle(title, forState: UIControlState.Normal)
     }
     
     @IBAction func sendTestPacket(sender: UIButton) {
@@ -151,7 +153,7 @@ class DeviceViewController: AppStateUIViewController {
         }
     }
     
-    override func renderAppState(oldState: AppState, state: AppState) {
+    override func renderAppState(_: AppState, state: AppState) {
         // Update UI according to app state
         if let devID = state.viewDetailDeviceID, dev = state.bluetooth[devID] {
             if let devAddr = dev.devAddr {
@@ -187,7 +189,10 @@ class DeviceViewController: AppStateUIViewController {
             }
             self.toggleConnection.setTitle(dev.connected ? "Disconnect" : "Connect",
                                            forState:UIControlState.Normal)
-            
+            self.provisioningContainer.hidden = dev.hideProvisioning
+            self.toggleProvisioningButton.setTitle(dev.hideProvisioning ? "Show" : "Hide",
+                                                   forState: UIControlState.Normal)
+
             var text = "Debug View\n"
             if let currentLocation = state.map.currentLocation {
                 let locAge = fabs(currentLocation.timestamp.timeIntervalSinceNow)

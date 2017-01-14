@@ -88,6 +88,7 @@ public struct Device {
     var battery: UInt8 = 100
     var spreadingFactor: UInt8?
     var log: [String] = []
+    var hideProvisioning: Bool = false
 }
 
 public struct SyncState {
