@@ -40,16 +40,29 @@ func stringFromTimeInterval(interval:NSTimeInterval) -> String {
     return String(format: "%0.2d:%0.2d:%0.2d",hours,minutes,seconds)
 }
 
+class ProvisioningViewController: UITableViewController {
+    @IBOutlet weak var devAddr: UILabel!
+    @IBOutlet weak var nwkSKey: UILabel!
+    @IBOutlet weak var appSKey: UILabel!
+
+    @IBOutlet weak var appKey: UILabel!
+    @IBOutlet weak var appEUI: UILabel!
+    @IBOutlet weak var devEUI: UILabel!
+}
+
+class StatusViewController: UITableViewController {
+    @IBOutlet weak var connected: UILabel!
+    @IBOutlet weak var lastLocation: UILabel!
+    @IBOutlet weak var lastTimestamp: UILabel!
+    @IBOutlet weak var lastAccuracy: UILabel!
+    @IBOutlet weak var lastPacket: UILabel!
+    @IBOutlet weak var batteryLevel: UILabel!
+}
+
 class DeviceViewController: AppStateUIViewController {
-    @IBOutlet weak var devAddr: UITextField!
-    @IBOutlet weak var nwkSKey: UITextField!
-    @IBOutlet weak var appSKey: UITextField!
-    @IBOutlet weak var connected: UITextField!
-    @IBOutlet weak var lastLocation: UITextField!
-    @IBOutlet weak var lastTimestamp: UITextField!
-    @IBOutlet weak var lastAccuracy: UITextField!
-    @IBOutlet weak var lastPacket: UITextField!
-    @IBOutlet weak var batteryLevel: UITextField!
+    var provisioningView: ProvisioningViewController?
+    var statusView: StatusViewController?
+    
     @IBOutlet weak var spreadingFactor: UISegmentedControl!
     @IBOutlet weak var debugView: UITextView!
     @IBOutlet weak var toggleConnection: UIButton!
@@ -137,24 +150,24 @@ class DeviceViewController: AppStateUIViewController {
         // Update UI according to app state
         if let devID = state.viewDetailDeviceID, dev = state.bluetooth[devID] {
             if let devAddr = dev.devAddr {
-                self.devAddr.text = devAddr.hexadecimalString()
+                self.provisioningView!.devAddr.text = devAddr.hexadecimalString()
             }
             if let newSKey = dev.nwkSKey {
-                self.nwkSKey.text = newSKey.hexadecimalString()
+                self.provisioningView!.nwkSKey.text = newSKey.hexadecimalString()
             }
             if let appSKey = dev.appSKey {
-                self.appSKey.text = appSKey.hexadecimalString()
+                self.provisioningView!.appSKey.text = appSKey.hexadecimalString()
             }
             if let lastLocation = dev.lastLocation {
-                self.lastLocation.text = String(format: "%0.5f, %0.5f", lastLocation.coordinate.latitude, lastLocation.coordinate.longitude)
-                self.lastTimestamp.text = stringFromTimeInterval(-lastLocation.timestamp.timeIntervalSinceNow) + " ago"
-                self.lastAccuracy.text = "\(lastLocation.horizontalAccuracy)"
+                self.statusView!.lastLocation.text = String(format: "%0.5f, %0.5f", lastLocation.coordinate.latitude, lastLocation.coordinate.longitude)
+                self.statusView!.lastTimestamp.text = stringFromTimeInterval(-lastLocation.timestamp.timeIntervalSinceNow) + " ago"
+                self.statusView!.lastAccuracy.text = "\(lastLocation.horizontalAccuracy)"
             }
             if let lastPacket = dev.lastPacket {
-                self.lastPacket.text = lastPacket.hexadecimalString()
+                self.statusView!.lastPacket.text = lastPacket.hexadecimalString()
             }
-            self.batteryLevel.text = dev.battery.description
-            self.connected.text = dev.connected.description
+            self.statusView!.batteryLevel.text = dev.battery.description
+            self.statusView!.connected.text = dev.connected.description
             if let sf = dev.spreadingFactor {
                 self.spreadingFactor.selectedSegmentIndex = Int(sf) - 7
             }
@@ -190,6 +203,13 @@ class DeviceViewController: AppStateUIViewController {
         // Dispose of any resources that can be recreated.
     }
 
-
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if (segue.identifier=="provisioningView") {
+            self.provisioningView = segue.destinationViewController as? ProvisioningViewController
+        }
+        else if (segue.identifier=="statusView") {
+            self.statusView = segue.destinationViewController as? StatusViewController
+        }
+    }
 }
 
