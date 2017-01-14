@@ -54,11 +54,6 @@ class DeviceViewController: AppStateUIViewController {
     @IBOutlet weak var debugView: UITextView!
     @IBOutlet weak var toggleConnection: UIButton!
     
-    @IBAction func cancel(sender: UIBarButtonItem) {
-        debugPrint("Back button")
-        self.dismissViewControllerAnimated(true, completion: nil)
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
