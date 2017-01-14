@@ -12,6 +12,7 @@
 //  - On successful transmit mark
 
 import CoreLocation
+//import ReactiveCocoa
 
 let CURRENT_LOCATION_EXPIRY = 15.0  // How many seconds a current location remains valid
 let DISTANCE_BETWEEN_SAMPLES = 10.0 // Don't report samples closer than this number of meters
@@ -36,6 +37,8 @@ extension CLLocation {
 }
 
 public class Tracking {
+//    var sendDisposer: Disposable?
+    
     private static func makePacket(version: UInt8, location: CLLocation) -> NSData? {
         if let data = NSMutableData(capacity: 7) {
             data.appendData(version.data)
@@ -128,6 +131,7 @@ public class Tracking {
     public init(bluetooth: Bluetooth, dataController: DataController) {
         // Listen for app state changes...
         appStateObservable.observeNext({update in
+//        self.sendDisposer =
             if let location = update.new.map.currentLocation {
                 let manualSend: Bool = stateValChanged(update) { (state) -> (NSUUID?) in
                     state.sendPacket

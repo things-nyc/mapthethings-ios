@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreBluetooth
+import ReactiveCocoa
 
 /*
 "Device Name" type="org.bluetooth.characteristic.gap.device_name" uuid="2A00"
@@ -180,11 +181,12 @@ public class FakeBluetoothNode : NSObject, LoraNode {
     let uuid: NSUUID
     var lora_seq: UInt32 = 100;
     var ble_seq: UInt8 = 1 // Rolling sequence number that lets us link ack messages to sends
+    var sfDisposer: Disposable?
     
     override public init() {
         self.uuid = NSUUID()
         super.init()
-        observeSpreadingFactor(self)
+        self.sfDisposer = observeSpreadingFactor(self)
     }
     
     public var identifier : NSUUID {
@@ -227,6 +229,7 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
     let peripheral : CBPeripheral
     var characteristics : Dictionary<String, CBCharacteristic> = Dictionary()
     var ble_seq: UInt8 = 1
+    var sfDisposer: Disposable?
     
     public init(peripheral : CBPeripheral) {
         self.peripheral = peripheral
@@ -235,7 +238,7 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
         self.peripheral.delegate = self
         self.peripheral.discoverServices(nodeServices)
         
-        observeSpreadingFactor(self)
+        self.sfDisposer = observeSpreadingFactor(self)
     }
     
     public var identifier : NSUUID {

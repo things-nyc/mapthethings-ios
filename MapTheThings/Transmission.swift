@@ -11,6 +11,7 @@ import Foundation
 import MapKit
 import Alamofire
 import PromiseKit
+import ReactiveCocoa
 
 public class Transmission: NSManagedObject {
     @NSManaged var created: NSDate
@@ -26,6 +27,11 @@ public class Transmission: NSManagedObject {
 
     // Date transmission was stored at server
     @NSManaged var synced: NSDate?
+    
+    static var syncWorkDisposer: Disposable?
+    static var syncDisposer: Disposable?
+    static var recordWorkDisposer: Disposable?
+    static var recordDisposer: Disposable?
     
     override public func awakeFromInsert() {
         super.awakeFromInsert()
@@ -56,7 +62,7 @@ public class Transmission: NSManagedObject {
         // explicitly support the pattern when I get a chance.
         
         // Recognize that there is work to do and flag that it should happen
-        appStateObservable.observeNext { (old, new) in
+        self.syncWorkDisposer = appStateObservable.observeNext { (old, new) in
             if (!new.syncState.syncWorking
                 && new.syncState.syncPendingCount>0) {
                 // Don't just start async work here. There's a chance with 
@@ -72,7 +78,7 @@ public class Transmission: NSManagedObject {
         }
         
         // Recognize that the work flag went up and do the work.
-        appStateObservable.observeNext { (old, new) in
+        self.syncDisposer = appStateObservable.observeNext { (old, new) in
             if (!old.syncState.syncWorking && new.syncState.syncWorking) {
                 debugPrint("Sync one: \(new.syncState)")
                 syncOneTransmission(data, host: new.host)
@@ -80,7 +86,7 @@ public class Transmission: NSManagedObject {
         }
 
         // Recognize that there is work to do and flag that it should happen
-        appStateObservable.observeNext { (old, new) in
+        self.recordWorkDisposer = appStateObservable.observeNext { (old, new) in
             if (!new.syncState.recordWorking
                 && new.syncState.recordLoraToObject.count>0) {
                 updateAppState({ (old) -> AppState in
@@ -92,7 +98,7 @@ public class Transmission: NSManagedObject {
         }
         
         // Recognize that the work flag went up and do the work.
-        appStateObservable.observeNext { (old, new) in
+        self.recordDisposer = appStateObservable.observeNext { (old, new) in
             if (!old.syncState.recordWorking && new.syncState.recordWorking) {
                 debugPrint("Record one: \(new.syncState)")
                 recordOneLoraSeqNo(data, update: new.syncState.recordLoraToObject)

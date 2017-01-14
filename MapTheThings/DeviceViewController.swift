@@ -41,17 +41,17 @@ func stringFromTimeInterval(interval:NSTimeInterval) -> String {
 }
 
 class DeviceViewController: AppStateUIViewController {
-    @IBOutlet var devAddr: UITextField!
-    @IBOutlet var nwkSKey: UITextField!
-    @IBOutlet var appSKey: UITextField!
-    @IBOutlet var connected: UITextField!
-    @IBOutlet var lastLocation: UITextField!
-    @IBOutlet var lastTimestamp: UITextField!
-    @IBOutlet var lastAccuracy: UITextField!
-    @IBOutlet var lastPacket: UITextField!
-    @IBOutlet var batteryLevel: UITextField!
-    @IBOutlet var spreadingFactor: UISegmentedControl!
-    @IBOutlet var debugView: UITextView!
+    @IBOutlet weak var devAddr: UITextField!
+    @IBOutlet weak var nwkSKey: UITextField!
+    @IBOutlet weak var appSKey: UITextField!
+    @IBOutlet weak var connected: UITextField!
+    @IBOutlet weak var lastLocation: UITextField!
+    @IBOutlet weak var lastTimestamp: UITextField!
+    @IBOutlet weak var lastAccuracy: UITextField!
+    @IBOutlet weak var lastPacket: UITextField!
+    @IBOutlet weak var batteryLevel: UITextField!
+    @IBOutlet weak var spreadingFactor: UISegmentedControl!
+    @IBOutlet weak var debugView: UITextView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
