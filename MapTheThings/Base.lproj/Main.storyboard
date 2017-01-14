@@ -67,7 +67,7 @@
         <!--Devices-->
         <scene sceneID="cAX-CH-skc">
             <objects>
-                <tableViewController title="Devices" providesPresentationContextTransitionStyle="YES" modalPresentationStyle="currentContext" id="az9-wV-rLp" customClass="DevicesViewController" customModule="MapTheThings" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController title="Devices" modalTransitionStyle="flipHorizontal" modalPresentationStyle="currentContext" id="az9-wV-rLp" customClass="DevicesViewController" customModule="MapTheThings" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="t27-Ai-DsB">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -77,7 +77,7 @@
                                 <rect key="frame" x="0.0" y="28" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="1Ih-lG-Z5d" id="Mje-cf-bRI">
-                                    <rect key="frame" x="0.0" y="0.0" width="342" height="43"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="342" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="fj0-8R-oBk">
@@ -106,7 +106,7 @@
                                 <connections>
                                     <outlet property="connectedImage" destination="fj0-8R-oBk" id="64r-Ll-d8x"/>
                                     <outlet property="deviceName" destination="M3k-Rt-EuO" id="D5g-oo-SYK"/>
-                                    <segue destination="6iH-lR-cgP" kind="show" action="showDetailViewController:sender:" id="NKh-FO-3wz"/>
+                                    <segue destination="8rJ-Kc-sve" kind="show" id="1uU-d3-hLa"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>
@@ -414,11 +414,6 @@
                     </view>
                     <navigationItem key="navigationItem" title="Device" id="0aE-YP-WhL">
                         <barButtonItem key="backBarButtonItem" title="Back" id="3qq-U3-vQw"/>
-                        <barButtonItem key="rightBarButtonItem" style="done" systemItem="done" id="HvK-Ni-tFt">
-                            <connections>
-                                <action selector="cancel:" destination="8rJ-Kc-sve" id="NUc-Kp-YHF"/>
-                            </connections>
-                        </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="appSKey" destination="nBU-FU-0xf" id="JSd-V4-bLz"/>
@@ -437,7 +432,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4Nw-L8-lE0" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2879.1999999999998" y="187.55622188905548"/>
+            <point key="canvasLocation" x="2097" y="496"/>
         </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="yl2-sM-qoP">
@@ -462,7 +457,7 @@
         <scene sceneID="Asn-HM-77j">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="RRM-Rl-y7F" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Devices" id="OvO-mQ-bkF"/>
+                    <tabBarItem key="tabBarItem" title="Devices" image="second" id="OvO-mQ-bkF"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="14X-0a-ifR">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -476,25 +471,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fbX-DU-egb" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="208.80000000000001" y="496.10194902548727"/>
-        </scene>
-        <!--Device-->
-        <scene sceneID="0ee-Hg-s9A">
-            <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="6iH-lR-cgP" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Device" image="second" id="cPa-gy-q4n"/>
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="Qks-se-8KN">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="8rJ-Kc-sve" kind="relationship" relationship="rootViewController" id="dXh-Ux-CQ6"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="5Ya-9f-6WX" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1940" y="187.55622188905548"/>
         </scene>
     </scenes>
     <resources>
