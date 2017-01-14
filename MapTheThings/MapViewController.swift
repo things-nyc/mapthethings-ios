@@ -38,9 +38,9 @@ extension MKMapView {
 }
 
 class MapViewController: AppStateUIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
-    @IBOutlet var timestamp: UILabel!
-    @IBOutlet var toggle: UIButton!
-    @IBOutlet var mapView: MKMapView!
+    @IBOutlet weak var timestamp: UILabel!
+    @IBOutlet weak var toggle: UIButton!
+    @IBOutlet weak var mapView: MKMapView!
     var lastSamples: Set<SampleAnnotation>?
     var mapDragRecognizer: UIPanGestureRecognizer!
     

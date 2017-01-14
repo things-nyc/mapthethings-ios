@@ -11,6 +11,23 @@ import CoreBluetooth
 import ReactiveCocoa
 
 /*
+ Every bluetooth peripheral has a UUID.
+ 
+ The Bluetooth singleton object maintains a dictionary of nodes indexed by UUID. The values
+ are instances of LoraNode, which (currently) may be either a BluetoothNode or a FakeBluetoothNode.
+ 
+ When Bluetooth starts, it uses either a list of known peripherals or starts a scan of peripherals.
+ 
+ When a peripheral is discovered, it gets added to the Bluetooth.nodes dictionary and a Device object
+ representing its state is added to AppState.bluetooth dictionary (also indexed by same UUID).
+ 
+ At this point, we have not established a bluetooth connection to any device.
+ 
+ When AppState.connectToDevice is assigned a NSUUID, an observer on Bluetooth object initiates
+ a connect operation on the peripheral identified by state.activeDeviceID.
+ */
+
+/*
 "Device Name" type="org.bluetooth.characteristic.gap.device_name" uuid="2A00"
  "Name": utf8s
  
@@ -41,6 +58,7 @@ let loraAppSKeyCharacteristic =     CBUUID(string: "00002AD4-0000-1000-8000-0080
 let loraSpreadingFactorCharacteristic =
                                     CBUUID(string: "00002AD5-0000-1000-8000-00805F9B34FB")
 let transmitResultCharacteristic =  CBUUID(string: "00002ADA-0000-1000-8000-00805F9B34FB")
+//let deviceNameCharacteristic = CBUUID(string: "00002A00-0000-1000-8000-00805F9B34FB")
 
 let loraNodeCharacteristics : [CBUUID]? = [
     loraCommandCharacteristic,
@@ -161,13 +179,26 @@ func setAppStateDeviceAttribute(id: NSUUID, name: String?, characteristic: CBCha
 
 public protocol LoraNode {
     var  identifier : NSUUID { get }
+    func requestConnection(central: CBCentralManager)
+    func onConnect()
+    func requestDisconnect(central: CBCentralManager)
+    func onDisconnect()
     func sendPacket(data : NSData) -> Bool
     func sendPacketWithAck(data : NSData) -> UInt8? // ble sequence number, or null on failure or unavailable
     func setSpreadingFactor(sf: UInt8) -> Bool
 }
 
-func observeSpreadingFactor(device: LoraNode) {
-    appStateObservable.observeNext {update in
+func markConnectStatus(id: NSUUID, connected: Bool) {
+    updateAppState { (old) -> AppState in
+//        assert(dev.identifier.isEqual(peripheral.identifier), "Device id should be same as peripheral id")
+        var state = old
+        state.bluetooth[id]?.connected = connected
+        return state
+    }
+}
+
+func observeSpreadingFactor(device: LoraNode) -> Disposable? {
+    return appStateObservable.observeNext { update in
         let oldDev = update.old.bluetooth[device.identifier]
         if let dev = update.new.bluetooth[device.identifier],
             let sf = dev.spreadingFactor
@@ -193,6 +224,28 @@ public class FakeBluetoothNode : NSObject, LoraNode {
         return self.uuid
     }
 
+    public func requestConnection(central: CBCentralManager) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2 * NSEC_PER_SEC)),
+                       dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), {
+            self.onConnect()
+        });
+    }
+    
+    public func onConnect() {
+        markConnectStatus(self.identifier, connected: true)
+    }
+
+    public func requestDisconnect(central: CBCentralManager) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2 * NSEC_PER_SEC)),
+                       dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), {
+            self.onDisconnect()
+        });
+    }
+    
+    public func onDisconnect() {
+        markConnectStatus(self.identifier, connected: false)
+    }
+    
     public func setSpreadingFactor(sf: UInt8) -> Bool {
         debugPrint("Set spreading factor: \(sf)")
         return true
@@ -227,7 +280,7 @@ public class FakeBluetoothNode : NSObject, LoraNode {
 
 public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
     let peripheral : CBPeripheral
-    var characteristics : Dictionary<String, CBCharacteristic> = Dictionary()
+    var characteristics : [String: CBCharacteristic] = [:]
     var ble_seq: UInt8 = 1
     var sfDisposer: Disposable?
     
@@ -236,13 +289,30 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
         super.init()
         
         self.peripheral.delegate = self
-        self.peripheral.discoverServices(nodeServices)
-        
         self.sfDisposer = observeSpreadingFactor(self)
     }
     
     public var identifier : NSUUID {
         return self.peripheral.identifier
+    }
+    
+    public func requestConnection(central: CBCentralManager) {
+        central.connectPeripheral(self.peripheral, options: nil)
+    }
+
+    public func onConnect() {
+        self.peripheral.discoverServices(nodeServices)
+        markConnectStatus(self.identifier, connected: true)
+    }
+
+    public func requestDisconnect(central: CBCentralManager) {
+        central.cancelPeripheralConnection(self.peripheral)
+    }
+    
+    public func onDisconnect() {
+        self.characteristics = [:]
+        self.ble_seq = 1
+        markConnectStatus(self.identifier, connected: false)
     }
     
     public func sendPacket(data : NSData) -> Bool {
@@ -366,41 +436,57 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
 
 public class Bluetooth : NSObject, CBCentralManagerDelegate {
     let queue = dispatch_queue_create("Bluetooth", DISPATCH_QUEUE_SERIAL)
-    var central : CBCentralManager? = nil
-    var nodes : Dictionary<NSUUID, LoraNode> = Dictionary()
-    var connections : Array<CBPeripheral> = Array()
-    var connecting : CBPeripheral? = nil
+    var central : CBCentralManager!
+    var nodes : [NSUUID: LoraNode] = [:]
+//    var connections : [CBPeripheral] = []
+//    var connecting : CBPeripheral? = nil
+    var connectDisposer: Disposable?
+    var disconnectDisposer: Disposable?
     
     public init(savedIdentifiers: [NSUUID]) {
         super.init()
-        
         self.central = CBCentralManager.init(delegate: self, queue: self.queue,
-                                            options: [CBCentralManagerOptionRestoreIdentifierKey: "MapTheThingsManager"])
+                                             options: [CBCentralManagerOptionRestoreIdentifierKey: "MapTheThingsManager"])
         
         dispatch_after(
             dispatch_time(DISPATCH_TIME_NOW, (Int64)(5 * NSEC_PER_SEC)),
             dispatch_get_main_queue(), {
                 let knownPeripherals =
-                    self.central!.retrievePeripheralsWithIdentifiers(savedIdentifiers)
+                    self.central.retrievePeripheralsWithIdentifiers(savedIdentifiers)
                 if !knownPeripherals.isEmpty {
                     knownPeripherals.forEach({ (p) in
-                        self.central!.connectPeripheral(p, options: nil)
+//                        self.central!.connectPeripheral(p, options: nil)
+                        self.centralManager(self.central, didDiscoverPeripheral: p, advertisementData: [:], RSSI: 0)
                     })
                 }
                 else {
                     self.rescan()
                 }
             })
+        self.connectDisposer = appStateObservable.observeNext({ update in
+            if let activeID = update.new.viewDetailDeviceID,
+                node = self.nodes[activeID]
+                where stateValChanged(update, access: {$0.connectToDevice}) {
+                node.requestConnection(self.central)
+            }
+        })
+        self.disconnectDisposer = appStateObservable.observeNext({ update in
+            if let activeID = update.new.viewDetailDeviceID,
+                node = self.nodes[activeID]
+                where stateValChanged(update, access: {$0.disconnectDevice}) {
+                node.requestDisconnect(self.central)
+            }
+        })
     }
     
     public func addFakeNode() -> FakeBluetoothNode {
         let fake = FakeBluetoothNode()
-        connectNode(fake)
+        discoveredNode(fake, name: fake.identifier.UUIDString)
         return fake
     }
     
     public func rescan() {
-        self.central!.scanForPeripheralsWithServices(nodeServices, options: nil)
+        self.central.scanForPeripheralsWithServices(nodeServices, options: nil)
     }
     
     var nodeIdentifiers : [NSUUID] {
@@ -415,46 +501,37 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
     @objc public func centralManager(central: CBCentralManager, willRestoreState dict: [String : AnyObject]) {
         debugPrint("centralManager willRestoreState")
     }
-    private func attemptConnection() {
-        if (self.connections.count>0) {
-            let peripheral = self.connections.removeAtIndex(0)
-            self.connecting = peripheral
-            self.central!.connectPeripheral(peripheral, options: nil)
-        }
-    }
     @objc public func centralManager(central: CBCentralManager, didDiscoverPeripheral peripheral: CBPeripheral, advertisementData: [String : AnyObject], RSSI: NSNumber) {
         debugPrint("centralManager didDiscoverPeripheral", peripheral.name, advertisementData, RSSI)
-        self.connections.append(peripheral)
-        if (self.connecting==nil) {
-            attemptConnection()
+        if nodes[peripheral.identifier]==nil {
+            let node = BluetoothNode(peripheral: peripheral)
+            discoveredNode(node, name: peripheral.name)
         }
-//        [
-//        CBConnectPeripheralOptionNotifyOnConnectionKey: YES,
-//        CBConnectPeripheralOptionNotifyOnDisconnectionKey: YES,
-//        CBConnectPeripheralOptionNotifyOnNotificationKey: YES
-//        ]
+        else {
+            debugPrint("Repeated call to didDiscoverPeripheral ignored.")
+        }
     }
 
     @objc public func centralManager(central: CBCentralManager, didConnectPeripheral peripheral: CBPeripheral) {
         debugPrint("centralManager didConnectPeripheral", peripheral.name)
         
-        let node = BluetoothNode(peripheral: peripheral)
-        
-        connectNode(node)
+        if let node = nodes[peripheral.identifier] {
+            node.onConnect()
+        }
     }
     
-    public func connectNode(node: LoraNode) {
+    public func discoveredNode(node: LoraNode, name: String?) {
         self.nodes[node.identifier] = node
-        self.connecting = nil
 
         updateAppState { (old) -> AppState in
             var state = old
-            var dev = Device(uuid: node.identifier)
+            let devName = name==nil ? "<UnknownDevice>" : name!
+            var dev = Device(uuid: node.identifier, name: devName)
             if let known = state.bluetooth[node.identifier] {
                 dev = known
                 assert(dev.identifier.isEqual(node.identifier), "Device id should be same as peripheral id")
             }
-            dev.connected = true // Indicate that the peripheral is connected
+            dev.connected = false // Just discovered, not yet connected
             state.bluetooth[node.identifier] = dev
             return state
         }
@@ -462,24 +539,13 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
     
     @objc public func centralManager(central: CBCentralManager, didFailToConnectPeripheral peripheral: CBPeripheral, error: NSError?) {
         debugPrint("centralManager didFailToConnectPeripheral", peripheral.name, error)
-        attemptConnection()
     }
     
     @objc public func centralManager(central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
         // Ensure that when bluetooth device is disconnected, the device.connected = false
         debugPrint("centralManager didDisconnectPeripheral", peripheral.name, error)
-        attemptConnection()
-        updateAppState { (old) -> AppState in
-            if var dev = old.bluetooth[peripheral.identifier] {
-                assert(dev.identifier.isEqual(peripheral.identifier), "Device id should be same as peripheral id")
-                dev.connected = false // Indicate that the peripheral is disconnected
-                var state = old
-                state.bluetooth[peripheral.identifier] = dev
-                return state
-            }
-            else {
-                return old
-            }
+        if let node = self.nodes[peripheral.identifier] {
+            node.onDisconnect()
         }
     }
 }
