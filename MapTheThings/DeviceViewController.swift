@@ -104,13 +104,6 @@ class DeviceViewController: AppStateUIViewController {
         }
     }
     
-    @IBAction func rescanBluetooth(sender: UIButton) {
-        Answers.logCustomEventWithName("RescanBT", customAttributes: nil)
-        debugPrint("rescanBluetooth")
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        appDelegate.bluetooth!.rescan()
-    }
-    
     @IBAction func toggleConnection(sender: UIButton) {
         Answers.logCustomEventWithName("ConnectBT", customAttributes: nil)
         updateAppState {
