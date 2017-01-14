@@ -10,6 +10,7 @@ import Foundation
 import CoreLocation
 import Haneke
 import PromiseKit
+//import ReactiveCocoa
 
 func == <T:Equatable> (tuple1:(T,T),tuple2:(T,T)) -> Bool
 {
@@ -25,8 +26,10 @@ func == (a: CLLocationCoordinate2D, b: CLLocationCoordinate2D) -> Bool
 class SampleLoader {
     var lastBounds: Edges?
     let jsonCache = Cache<JSON>(name: "SampleLoader")
+//    var boundsDisposer: Disposable?
     
     init() {
+//        self.boundsDisposer =
         appStateObservable.observeNext({state in
             self.checkBoundsChanged(state.new.map.bounds, host: state.new.host)
         })

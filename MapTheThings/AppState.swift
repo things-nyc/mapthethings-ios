@@ -69,10 +69,12 @@ public struct SamplingState {
 }
 
 public struct Device {
-    public init(uuid: NSUUID) {
-        identifier = uuid
+    public init(uuid: NSUUID, name: String) {
+        self.identifier = uuid
+        self.name = name
     }
     let identifier: NSUUID
+    var name: String
     var devAddr: NSData?
     var nwkSKey: NSData?
     var appSKey: NSData?
@@ -102,10 +104,14 @@ public struct AppState {
     var host: String
     var error: [String]
     var bluetooth: Dictionary<NSUUID, Device>
+    var viewDetailDeviceID: NSUUID? = nil
     var map: MapState
     var sampling: SamplingState
-    var sendPacket: NSUUID? = nil
     var syncState: SyncState
+
+    var connectToDevice: NSUUID? = nil
+    var disconnectDevice: NSUUID? = nil
+    var sendPacket: NSUUID? = nil
 }
 
 private func defaultAppState() -> AppState {
@@ -127,10 +133,14 @@ private func defaultAppState() -> AppState {
         host: host,
         error: [],
         bluetooth: Dictionary(),
+        viewDetailDeviceID: nil,
         map: mapState,
         sampling: samplingState,
-        sendPacket: nil,
-        syncState: SyncState(syncWorking: false, syncPendingCount: 0, lastPost: nil, recordWorking: false, recordLoraToObject: []))
+        syncState: SyncState(syncWorking: false, syncPendingCount: 0, lastPost: nil, recordWorking: false, recordLoraToObject: []),
+        connectToDevice: nil,
+        disconnectDevice: nil,
+        sendPacket: nil
+    )
 }
 
 let defaultState = defaultAppState()

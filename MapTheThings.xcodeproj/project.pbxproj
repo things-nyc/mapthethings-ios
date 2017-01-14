@@ -31,10 +31,6 @@
 		0144500A1E1BF2EF00CDB5AF /* secondary_first_sub_category.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FF31E1BF2EF00CDB5AF /* secondary_first_sub_category.txt */; };
 		0144500B1E1BF2EF00CDB5AF /* secondary_second_sub_category.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FF41E1BF2EF00CDB5AF /* secondary_second_sub_category.txt */; };
 		0144500C1E1BF2EF00CDB5AF /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 01444FF51E1BF2EF00CDB5AF /* README.md */; };
-		0144500D1E1BF2EF00CDB5AF /* report.xml in Resources */ = {isa = PBXBuildFile; fileRef = 01444FF61E1BF2EF00CDB5AF /* report.xml */; };
-		0144500E1E1BF2EF00CDB5AF /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FF81E1BF2EF00CDB5AF /* README.txt */; };
-		0144500F1E1BF2EF00CDB5AF /* report.html in Resources */ = {isa = PBXBuildFile; fileRef = 01444FFA1E1BF2EF00CDB5AF /* report.html */; };
-		014450101E1BF2EF00CDB5AF /* report.junit in Resources */ = {isa = PBXBuildFile; fileRef = 01444FFB1E1BF2EF00CDB5AF /* report.junit */; };
 		015A6B7E1D29FD13001B5E44 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 015A6B7D1D29FD13001B5E44 /* AppState.swift */; };
 		015A6B801D2A0BC8001B5E44 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 015A6B7F1D2A0BC8001B5E44 /* MapKit.framework */; };
 		015A6B8A1D2A12AA001B5E44 /* AppStateUIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 015A6B891D2A12AA001B5E44 /* AppStateUIViewController.swift */; };
@@ -55,6 +51,7 @@
 		01D14A171D3C1E3D007FBD61 /* Tracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01D14A161D3C1E3D007FBD61 /* Tracking.swift */; };
 		01EC32F31DAB27B000CF9E8F /* DataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 01EC32F11DAB27B000CF9E8F /* DataModel.xcdatamodeld */; };
 		01F5F2091DA69BFC0097B6F0 /* .travis.yml in Resources */ = {isa = PBXBuildFile; fileRef = 01F5F2081DA69BFC0097B6F0 /* .travis.yml */; };
+		01F7ED831E283DD3006EC3FE /* DevicesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01F7ED821E283DD3006EC3FE /* DevicesViewController.swift */; };
 		1714AF3328D553B36089D5C4 /* Pods_MapTheThings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D117795337AE262DBA1B3CEC /* Pods_MapTheThings.framework */; };
 		41582B4DE73743951E62C555 /* Pods_MapTheThingsTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A8377A08A01EA8AE4A8C7C0 /* Pods_MapTheThingsTests.framework */; };
 		F240A312F98D86917B014192 /* Pods_MapTheThingsUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4564707B0A38A409C4F3FA5 /* Pods_MapTheThingsUITests.framework */; };
@@ -101,10 +98,6 @@
 		01444FF31E1BF2EF00CDB5AF /* secondary_first_sub_category.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = secondary_first_sub_category.txt; sourceTree = "<group>"; };
 		01444FF41E1BF2EF00CDB5AF /* secondary_second_sub_category.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = secondary_second_sub_category.txt; sourceTree = "<group>"; };
 		01444FF51E1BF2EF00CDB5AF /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		01444FF61E1BF2EF00CDB5AF /* report.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = report.xml; sourceTree = "<group>"; };
-		01444FF81E1BF2EF00CDB5AF /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
-		01444FFA1E1BF2EF00CDB5AF /* report.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = report.html; sourceTree = "<group>"; };
-		01444FFB1E1BF2EF00CDB5AF /* report.junit */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = report.junit; sourceTree = "<group>"; };
 		015A6B7D1D29FD13001B5E44 /* AppState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		015A6B7F1D2A0BC8001B5E44 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		015A6B811D2A0F8B001B5E44 /* BLEHelper.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BLEHelper.framework; path = "../../../Library/Developer/Xcode/DerivedData/MapTheThings-csldoafshwlhbscqdgzsdydcrxvi/Build/Products/Debug-iphonesimulator/BLEHelper/BLEHelper.framework"; sourceTree = "<group>"; };
@@ -136,6 +129,7 @@
 		01EC32F21DAB27B000CF9E8F /* DataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModel.xcdatamodel; sourceTree = "<group>"; };
 		01F5F2081DA69BFC0097B6F0 /* .travis.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .travis.yml; sourceTree = "<group>"; };
 		01F5F20A1DA69CC90097B6F0 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		01F7ED821E283DD3006EC3FE /* DevicesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DevicesViewController.swift; sourceTree = "<group>"; };
 		426939B63027F6706ED801A6 /* Pods-MapTheThingsUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapTheThingsUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MapTheThingsUITests/Pods-MapTheThingsUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		5A8377A08A01EA8AE4A8C7C0 /* Pods_MapTheThingsTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MapTheThingsTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		787D45900BE726E63051CBFB /* Pods-MapTheThingsTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapTheThingsTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-MapTheThingsTests/Pods-MapTheThingsTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -185,7 +179,6 @@
 				01444FE41E1BF2EF00CDB5AF /* Fastfile */,
 				01444FE51E1BF2EF00CDB5AF /* metadata */,
 				01444FF51E1BF2EF00CDB5AF /* README.md */,
-				01444FF61E1BF2EF00CDB5AF /* report.xml */,
 				01444FF71E1BF2EF00CDB5AF /* screenshots */,
 				01444FF91E1BF2EF00CDB5AF /* test_output */,
 			);
@@ -224,7 +217,6 @@
 		01444FF71E1BF2EF00CDB5AF /* screenshots */ = {
 			isa = PBXGroup;
 			children = (
-				01444FF81E1BF2EF00CDB5AF /* README.txt */,
 			);
 			path = screenshots;
 			sourceTree = "<group>";
@@ -232,8 +224,6 @@
 		01444FF91E1BF2EF00CDB5AF /* test_output */ = {
 			isa = PBXGroup;
 			children = (
-				01444FFA1E1BF2EF00CDB5AF /* report.html */,
-				01444FFB1E1BF2EF00CDB5AF /* report.junit */,
 			);
 			path = test_output;
 			sourceTree = "<group>";
@@ -273,6 +263,7 @@
 				015A6B891D2A12AA001B5E44 /* AppStateUIViewController.swift */,
 				01B542C81D36C3F400DE443B /* Bluetooth.swift */,
 				01444FE01E1A04EE00CDB5AF /* DataController.swift */,
+				01F7ED821E283DD3006EC3FE /* DevicesViewController.swift */,
 				0165DCED1D2552F900FFB1A1 /* DeviceViewController.swift */,
 				0165DCF71D2552F900FFB1A1 /* Info.plist */,
 				0165DCF41D2552F900FFB1A1 /* LaunchScreen.storyboard */,
@@ -352,7 +343,7 @@
 				0165DCE41D2552F900FFB1A1 /* Resources */,
 				01503EFA5990AB63800B736E /* [CP] Embed Pods Frameworks */,
 				5337C2E2ADCBCA337F95359E /* [CP] Copy Pods Resources */,
-				015A6B7C1D25A4CB001B5E44 /* ShellScript */,
+				015A6B7C1D25A4CB001B5E44 /* Copy Fabric config variables from private.env */,
 			);
 			buildRules = (
 			);
@@ -466,14 +457,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				014450051E1BF2EF00CDB5AF /* support_url.txt in Resources */,
-				0144500F1E1BF2EF00CDB5AF /* report.html in Resources */,
 				01444FFD1E1BF2EF00CDB5AF /* Fastfile in Resources */,
-				0144500E1E1BF2EF00CDB5AF /* README.txt in Resources */,
 				01444FFF1E1BF2EF00CDB5AF /* description.txt in Resources */,
 				0165DCF61D2552F900FFB1A1 /* LaunchScreen.storyboard in Resources */,
 				014450011E1BF2EF00CDB5AF /* marketing_url.txt in Resources */,
 				01444FFE1E1BF2EF00CDB5AF /* copyright.txt in Resources */,
-				014450101E1BF2EF00CDB5AF /* report.junit in Resources */,
 				014450031E1BF2EF00CDB5AF /* privacy_url.txt in Resources */,
 				01444FFC1E1BF2EF00CDB5AF /* Appfile in Resources */,
 				0144500B1E1BF2EF00CDB5AF /* secondary_second_sub_category.txt in Resources */,
@@ -486,7 +474,6 @@
 				014450071E1BF2EF00CDB5AF /* primary_first_sub_category.txt in Resources */,
 				014450001E1BF2EF00CDB5AF /* keywords.txt in Resources */,
 				0165DCF11D2552F900FFB1A1 /* Main.storyboard in Resources */,
-				0144500D1E1BF2EF00CDB5AF /* report.xml in Resources */,
 				014450081E1BF2EF00CDB5AF /* primary_second_sub_category.txt in Resources */,
 				014450091E1BF2EF00CDB5AF /* secondary_category.txt in Resources */,
 			);
@@ -524,13 +511,14 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MapTheThings/Pods-MapTheThings-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		015A6B7C1D25A4CB001B5E44 /* ShellScript */ = {
+		015A6B7C1D25A4CB001B5E44 /* Copy Fabric config variables from private.env */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
+			name = "Copy Fabric config variables from private.env";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -679,6 +667,7 @@
 				0144500C1E1BF2EF00CDB5AF /* README.md in Sources */,
 				015A6B7E1D29FD13001B5E44 /* AppState.swift in Sources */,
 				01444FE11E1A04EE00CDB5AF /* DataController.swift in Sources */,
+				01F7ED831E283DD3006EC3FE /* DevicesViewController.swift in Sources */,
 				01EC32F31DAB27B000CF9E8F /* DataModel.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -782,6 +771,7 @@
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 2.3;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -824,6 +814,7 @@
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 2.3;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};

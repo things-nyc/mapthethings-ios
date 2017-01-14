@@ -40,26 +40,49 @@ func stringFromTimeInterval(interval:NSTimeInterval) -> String {
     return String(format: "%0.2d:%0.2d:%0.2d",hours,minutes,seconds)
 }
 
-class DeviceViewController: AppStateUIViewController {
-    @IBOutlet var devAddr: UITextField!
-    @IBOutlet var nwkSKey: UITextField!
-    @IBOutlet var appSKey: UITextField!
-    @IBOutlet var connected: UITextField!
-    @IBOutlet var lastLocation: UITextField!
-    @IBOutlet var lastTimestamp: UITextField!
-    @IBOutlet var lastAccuracy: UITextField!
-    @IBOutlet var lastPacket: UITextField!
-    @IBOutlet var batteryLevel: UITextField!
-    @IBOutlet var spreadingFactor: UISegmentedControl!
-    @IBOutlet var debugView: UITextView!
+class ProvisioningViewController: UITableViewController {
+    @IBOutlet weak var devAddr: UILabel!
+    @IBOutlet weak var nwkSKey: UILabel!
+    @IBOutlet weak var appSKey: UILabel!
 
+    @IBOutlet weak var appKey: UILabel!
+    @IBOutlet weak var appEUI: UILabel!
+    @IBOutlet weak var devEUI: UILabel!
+}
+
+class StatusViewController: UITableViewController {
+    @IBOutlet weak var connected: UILabel!
+    @IBOutlet weak var lastLocation: UILabel!
+    @IBOutlet weak var lastTimestamp: UILabel!
+    @IBOutlet weak var lastAccuracy: UILabel!
+    @IBOutlet weak var lastPacket: UILabel!
+    @IBOutlet weak var batteryLevel: UILabel!
+}
+
+class DeviceViewController: AppStateUIViewController {
+    var provisioningView: ProvisioningViewController?
+    var statusView: StatusViewController?
+    
+    @IBOutlet weak var spreadingFactor: UISegmentedControl!
+    @IBOutlet weak var debugView: UITextView!
+    @IBOutlet weak var toggleConnection: UIButton!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         Answers.logContentViewWithName("DeviceView", contentType: "View", contentId: "DeviceView", customAttributes: nil)
     }
     
+    override func viewWillDisappear(animated: Bool) {
+        updateAppState {
+            var state = $0
+            state.viewDetailDeviceID = nil
+            return state
+        }
+    }
+    
     @IBAction func sendPacket(sender: UIButton) {
+        Answers.logCustomEventWithName("ManualSend", customAttributes: nil)
         debugPrint("sendPacket button pressed")
         updateAppState { (old) -> AppState in
             var state = old
@@ -69,6 +92,7 @@ class DeviceViewController: AppStateUIViewController {
     }
 
     @IBAction func sendTestPacket(sender: UIButton) {
+        Answers.logCustomEventWithName("TestPacket", customAttributes: nil)
         debugPrint("sendTestPacket button pressed")
         updateAppState { (old) -> AppState in
             var state = old
@@ -80,9 +104,20 @@ class DeviceViewController: AppStateUIViewController {
         }
     }
     
-    @IBAction func reconnectBluetooth(sender: UIButton) {
-        Answers.logCustomEventWithName("ReconnectBT", customAttributes: nil)
-        debugPrint("reconnectBluetooth")
+    @IBAction func toggleConnection(sender: UIButton) {
+        Answers.logCustomEventWithName("ConnectBT", customAttributes: nil)
+        updateAppState {
+            var state = $0
+            if let devID = state.viewDetailDeviceID, dev = state.bluetooth[devID] {
+                if dev.connected {
+                    state.disconnectDevice = NSUUID()
+                }
+                else {
+                    state.connectToDevice = NSUUID()
+                }
+            }
+            return state
+        }
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         appDelegate.bluetooth!.rescan()
     }
@@ -106,29 +141,31 @@ class DeviceViewController: AppStateUIViewController {
     
     override func renderAppState(oldState: AppState, state: AppState) {
         // Update UI according to app state
-        if let dev = state.bluetooth.first?.1 {
+        if let devID = state.viewDetailDeviceID, dev = state.bluetooth[devID] {
             if let devAddr = dev.devAddr {
-                self.devAddr.text = devAddr.hexadecimalString()
+                self.provisioningView!.devAddr.text = devAddr.hexadecimalString()
             }
             if let newSKey = dev.nwkSKey {
-                self.nwkSKey.text = newSKey.hexadecimalString()
+                self.provisioningView!.nwkSKey.text = newSKey.hexadecimalString()
             }
             if let appSKey = dev.appSKey {
-                self.appSKey.text = appSKey.hexadecimalString()
+                self.provisioningView!.appSKey.text = appSKey.hexadecimalString()
             }
             if let lastLocation = dev.lastLocation {
-                self.lastLocation.text = String(format: "%0.5f, %0.5f", lastLocation.coordinate.latitude, lastLocation.coordinate.longitude)
-                self.lastTimestamp.text = stringFromTimeInterval(-lastLocation.timestamp.timeIntervalSinceNow) + " ago"
-                self.lastAccuracy.text = "\(lastLocation.horizontalAccuracy)"
+                self.statusView!.lastLocation.text = String(format: "%0.5f, %0.5f", lastLocation.coordinate.latitude, lastLocation.coordinate.longitude)
+                self.statusView!.lastTimestamp.text = stringFromTimeInterval(-lastLocation.timestamp.timeIntervalSinceNow) + " ago"
+                self.statusView!.lastAccuracy.text = "\(lastLocation.horizontalAccuracy)"
             }
             if let lastPacket = dev.lastPacket {
-                self.lastPacket.text = lastPacket.hexadecimalString()
+                self.statusView!.lastPacket.text = lastPacket.hexadecimalString()
             }
-            self.batteryLevel.text = dev.battery.description
-            self.connected.text = dev.connected.description
+            self.statusView!.batteryLevel.text = dev.battery.description
+            self.statusView!.connected.text = dev.connected.description
             if let sf = dev.spreadingFactor {
                 self.spreadingFactor.selectedSegmentIndex = Int(sf) - 7
             }
+            self.toggleConnection.setTitle(dev.connected ? "Disconnect" : "Connect",
+                                           forState:UIControlState.Normal)
             
             var text = "Debug View\n"
             if let currentLocation = state.map.currentLocation {
@@ -159,6 +196,13 @@ class DeviceViewController: AppStateUIViewController {
         // Dispose of any resources that can be recreated.
     }
 
-
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if (segue.identifier=="provisioningView") {
+            self.provisioningView = segue.destinationViewController as? ProvisioningViewController
+        }
+        else if (segue.identifier=="statusView") {
+            self.statusView = segue.destinationViewController as? StatusViewController
+        }
+    }
 }
 

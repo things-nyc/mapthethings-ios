@@ -10,11 +10,13 @@ import UIKit
 import ReactiveCocoa
 
 class AppStateUIViewController: UIViewController {
+    var stateDisposer: Disposable?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // Listen for app state changes...
-        appStateObservable.observeOn(QueueScheduler.mainQueueScheduler).observeNext({state in
+        self.stateDisposer = appStateObservable.observeOn(QueueScheduler.mainQueueScheduler).observeNext({state in
             //print(state)
             self.renderAppState(state.old, state: state.new)
         })

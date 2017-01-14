@@ -13,7 +13,9 @@ class AppStateTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        updateAppState { state in
+            return defaultState
+        }
     }
     
     override func tearDown() {
@@ -24,16 +26,19 @@ class AppStateTests: XCTestCase {
     func testObservingSyncChange() {
         let expectation = expectationWithDescription("Should observe count set")
         
-        appStateObservable.observeNext { (old, new) in
-            if (old.syncState.countToSync != 5 && new.syncState.countToSync==5) {
-                XCTAssertEqual(5, new.syncState.countToSync)
+        let disposer = appStateObservable.observeNext { (old, new) in
+            if (old.syncState.syncPendingCount != 5 && new.syncState.syncPendingCount==5) {
+                XCTAssertEqual(5, new.syncState.syncPendingCount)
                 expectation.fulfill()
             }
+        }
+        defer {
+            disposer?.dispose()
         }
         
         updateAppState { old in
             var state = old
-            state.syncState.countToSync = 5
+            state.syncState.syncPendingCount = 5
             return state
         }
         
@@ -47,16 +52,19 @@ class AppStateTests: XCTestCase {
     func testObservingSyncChangeRepeated() {
         let expectation = expectationWithDescription("Should observe count set")
         
-        appStateObservable.observeNext { (old, new) in
-            if (old.syncState.countToSync != 5 && new.syncState.countToSync==5) {
-                XCTAssertEqual(5, new.syncState.countToSync)
+        let disposer = appStateObservable.observeNext { (old, new) in
+            if (old.syncState.syncPendingCount != 5 && new.syncState.syncPendingCount==5) {
+                XCTAssertEqual(5, new.syncState.syncPendingCount)
                 expectation.fulfill()
             }
+        }
+        defer {
+            disposer?.dispose()
         }
         
         updateAppState { old in
             var state = old
-            state.syncState.countToSync = 5
+            state.syncState.syncPendingCount = 5
             return state
         }
         
