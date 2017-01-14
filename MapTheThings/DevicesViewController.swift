@@ -8,6 +8,7 @@
 
 import UIKit
 import ReactiveCocoa
+import Crashlytics
 
 extension UIImage {
     class func circle(diameter: CGFloat, color: UIColor) -> UIImage? {
@@ -49,6 +50,7 @@ class DevicesViewController: UITableViewController {
         })
     }
     
+    @IBOutlet weak var refreshButton: UIBarButtonItem?
     var state: AppState? = nil
     var devices: [Device] = []
     let connectedImage = UIImage.circle(15, color: UIColor.greenColor())
@@ -63,6 +65,9 @@ class DevicesViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.refreshButton!.target = self
+        self.refreshButton!.action = #selector(DevicesViewController.rescanBluetooth)
 
         observeAppState()
         
@@ -73,6 +78,13 @@ class DevicesViewController: UITableViewController {
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
 
+    @IBAction func rescanBluetooth(sender: UIButton) {
+        Answers.logCustomEventWithName("RescanBT", customAttributes: nil)
+        debugPrint("rescanBluetooth")
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        appDelegate.bluetooth!.rescan()
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
