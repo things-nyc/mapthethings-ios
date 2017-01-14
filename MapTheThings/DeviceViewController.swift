@@ -63,6 +63,9 @@ class DeviceViewController: AppStateUIViewController {
     var provisioningView: ProvisioningViewController?
     var statusView: StatusViewController?
     
+    @IBOutlet weak var provisioningContainer: UIView!
+    @IBOutlet weak var toggleProvisioningButton: UIButton!
+    
     @IBOutlet weak var spreadingFactor: UISegmentedControl!
     @IBOutlet weak var debugView: UITextView!
     @IBOutlet weak var toggleConnection: UIButton!
@@ -90,7 +93,16 @@ class DeviceViewController: AppStateUIViewController {
             return state
         }
     }
-
+    
+    @IBAction func toggleProvisioningView(sender: UIButton) {
+        self.provisioningContainer.hidden = !self.provisioningContainer.hidden
+        var title = "Hide"
+        if self.provisioningContainer.hidden {
+            title = "Show"
+        }
+        self.toggleProvisioningButton.setTitle(title, forState: UIControlState.Normal)
+    }
+    
     @IBAction func sendTestPacket(sender: UIButton) {
         Answers.logCustomEventWithName("TestPacket", customAttributes: nil)
         debugPrint("sendTestPacket button pressed")
@@ -150,6 +162,15 @@ class DeviceViewController: AppStateUIViewController {
             }
             if let appSKey = dev.appSKey {
                 self.provisioningView!.appSKey.text = appSKey.hexadecimalString()
+            }
+            if let appKey = dev.appKey {
+                self.provisioningView!.appKey.text = appKey.hexadecimalString()
+            }
+            if let appEUI = dev.appEUI {
+                self.provisioningView!.appEUI.text = appEUI.hexadecimalString()
+            }
+            if let devEUI = dev.devEUI {
+                self.provisioningView!.devEUI.text = devEUI.hexadecimalString()
             }
             if let lastLocation = dev.lastLocation {
                 self.statusView!.lastLocation.text = String(format: "%0.5f, %0.5f", lastLocation.coordinate.latitude, lastLocation.coordinate.longitude)
