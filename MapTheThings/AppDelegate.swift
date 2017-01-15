@@ -7,18 +7,20 @@
 //
 
 import UIKit
+import CoreData
 import Fabric
 import Crashlytics
 
-@UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     var timer: NSTimer?
     var loader: SampleLoader?
-    var bluetooth: Bluetooth?
+    var bluetooth: Bluetooth!
     var location: Location?
     var tracker: Tracking?
+    var data: DataController?
+    var provisioning: Provisioning?
     
     func onTick() {
         updateAppState { (old) -> AppState in
@@ -37,11 +39,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.loader = SampleLoader()
         self.bluetooth = Bluetooth(savedIdentifiers: [])
         self.location = Location()
-        self.tracker = Tracking(bluetooth: self.bluetooth!)
+        self.data = DataController()
+        self.tracker = Tracking(bluetooth: self.bluetooth, dataController: self.data!)
+        self.provisioning = Provisioning()
+        
+        Transmission.loadTransmissions(self.data!)
 
-        if let fakeDevice = NSBundle.mainBundle().objectForInfoDictionaryKey("FakeDevice") as? Bool
-            where fakeDevice {
-            self.bluetooth?.addFakeNode()
+        if let fakeDevice = (NSBundle.mainBundle().objectForInfoDictionaryKey("FakeDevice") as? NSNumber)?.unsignedIntegerValue
+            where fakeDevice>0 {
+            for _ in 1...fakeDevice {
+                self.bluetooth.addFakeNode()
+            }
         }
        
         return true

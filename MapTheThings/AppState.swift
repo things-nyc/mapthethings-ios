@@ -6,18 +6,34 @@
 //  Copyright © 2016 The Things Network New York. All rights reserved.
 //
 
+import CoreData
 import CoreLocation
 import ReactiveCocoa
 import enum Result.NoError
+import Crashlytics
+
 
 typealias Edges = (ne: CLLocationCoordinate2D, sw: CLLocationCoordinate2D)
 
 public struct Sample {
+    var count: Int32
+    var attempts: Int32
     var location: CLLocationCoordinate2D
     var rssi: Float
     var snr: Float
     var timestamp: NSDate?
-    var seqno: Int32?
+}
+
+public struct TransSample {
+    var location: CLLocationCoordinate2D
+    var altitude: Double
+    var timestamp: NSDate?
+
+    var device: NSUUID? // LoraNode ID - device+ble_seq uniquely identify BLE transmit
+    var ble_seq: UInt8?
+    
+    var lora_seq: UInt32?
+    var objectID: NSManagedObjectID? // Where to write lora_seq when we get it back
 }
 
 public struct GridCell {
@@ -30,8 +46,9 @@ public struct MapState {
     var updated: NSDate
     var bounds: Edges
     var tracking: Bool
-    var samples: Array<Sample>
-    var cells: Array<GridCell>
+    var samples: [Sample]
+    var cells: [GridCell]
+    var transmissions: [TransSample]
 }
 
 public enum SamplingStrategy {
@@ -52,13 +69,18 @@ public struct SamplingState {
 }
 
 public struct Device {
-    public init(uuid: NSUUID) {
-        identifier = uuid
+    public init(uuid: NSUUID, name: String) {
+        self.identifier = uuid
+        self.name = name
     }
     let identifier: NSUUID
+    var name: String
     var devAddr: NSData?
     var nwkSKey: NSData?
     var appSKey: NSData?
+    var appKey: NSData?
+    var appEUI: NSData?
+    var devEUI: NSData?
     var connected: Bool = false
     var mode: SamplingMode = SamplingMode.Play
     var lastLocation: CLLocation?
@@ -66,29 +88,64 @@ public struct Device {
     var battery: UInt8 = 100
     var spreadingFactor: UInt8?
     var log: [String] = []
+    var hideProvisioning: Bool = false
+}
+
+public struct SyncState {
+    var syncWorking: Bool
+    var syncPendingCount: Int
+    var lastPost: NSDate?
+
+    var recordWorking: Bool
+    var recordLoraToObject: [(NSManagedObjectID, UInt32)]
 }
 
 public struct AppState {
     var now: NSDate
+    var host: String
+    var error: [String]
     var bluetooth: Dictionary<NSUUID, Device>
+    var viewDetailDeviceID: NSUUID? = nil
     var map: MapState
     var sampling: SamplingState
+    var syncState: SyncState
+
+    var connectToDevice: NSUUID? = nil
+    var disconnectDevice: NSUUID? = nil
     var sendPacket: NSUUID? = nil
+    var requestProvisioning: (NSUUID, NSUUID)? = nil // (click ID, device ID)
+    var assignProvisioning: (NSUUID, NSUUID)? = nil // (click ID, device ID)
 }
 
 private func defaultAppState() -> AppState {
-    let samples = Array<Sample>()
-    let cells = Array<GridCell>()
+    let samples = [Sample]()
+    let cells = [GridCell]()
+    let transmissions = [TransSample]()
     let nyNE = CLLocationCoordinate2D(latitude: 40.8476, longitude: -73.0543)
     let nySW = CLLocationCoordinate2D(latitude: 40.4976, longitude: -73.8631)
-    let mapState = MapState(currentLocation: nil, updated: NSDate(), bounds: (ne: nyNE, sw: nySW), tracking: true, samples: samples, cells: cells)
+    let mapState = MapState(currentLocation: nil, updated: NSDate(), bounds: (ne: nyNE, sw: nySW), tracking: true, samples: samples, cells: cells, transmissions: transmissions)
     let samplingState = SamplingState(strategy: SamplingStrategy.ConnectedNode, mode: SamplingMode.Stop, mostRecentSample: nil)
+
+    var host = "map.thethings.nyc"
+    if let testHost = NSBundle.mainBundle().objectForInfoDictionaryKey("TestHost") as? String {
+        host = testHost
+    }
+
     return AppState(
         now: NSDate(),
+        host: host,
+        error: [],
         bluetooth: Dictionary(),
+        viewDetailDeviceID: nil,
         map: mapState,
         sampling: samplingState,
-        sendPacket: nil)
+        syncState: SyncState(syncWorking: false, syncPendingCount: 0, lastPost: nil, recordWorking: false, recordLoraToObject: []),
+        connectToDevice: nil,
+        disconnectDevice: nil,
+        sendPacket: nil,
+        requestProvisioning: nil,
+        assignProvisioning: nil
+    )
 }
 
 let defaultState = defaultAppState()
@@ -108,7 +165,7 @@ public func updateAppState(fn: AppStateUpdateFn) {
     }
 }
 
-public func stateValChanged<T : Equatable>(state: (old: AppState, new: AppState), access: (AppState) -> (T?)) -> Bool {
+public func stateValChanged<T : Equatable>(state: (old: AppState, new: AppState), access: (AppState) -> T?) -> Bool {
     let new = access(state.new)
     let old = access(state.old)
     var changed = false
@@ -120,6 +177,51 @@ public func stateValChanged<T : Equatable>(state: (old: AppState, new: AppState)
             changed = true // New this state!
         }
     }
+    else if (old != nil) {
+        changed = true // Was set, now it isn't
+    }
     return changed
 }
+
+public func stateValChanged<T1 : Equatable, T2 : Equatable>(state: (old: AppState, new: AppState), access: (AppState) -> (T1, T2)?) -> Bool {
+    let new = access(state.new)
+    let old = access(state.old)
+    var changed = false
+    if let newValue = new {
+        if let oldValue = old {
+            changed = !(newValue==oldValue) // Different from last one?
+        }
+        else {
+            changed = true // New this state!
+        }
+    }
+    else if (old != nil) {
+        changed = true // Was set, now it isn't
+    }
+    return changed
+}
+
+public func setAppError(error: NSError, fn: String, domain: String) {
+    let msg = "Error in \(domain)/\(fn): \(error)"
+    debugPrint(msg)
+    Crashlytics.sharedInstance().recordError(error, withAdditionalUserInfo: ["domain": domain, "function": fn])
+    updateAppState { (old) -> AppState in
+        var state = old
+        state.error.append(msg)
+        return state
+    }
+}
+
+public func setAppError(error: ErrorType, fn: String, domain: String) {
+    let msg = "Error in \(domain)/\(fn): \(error)"
+    debugPrint(msg)
+    let nserr = NSError(domain: domain, code: 0, userInfo: [NSLocalizedDescriptionKey: "\(error)"])
+    Crashlytics.sharedInstance().recordError(nserr, withAdditionalUserInfo: ["domain": domain, "function": fn])
+    updateAppState { (old) -> AppState in
+        var state = old
+        state.error.append(msg)
+        return state
+    }
+}
+
 

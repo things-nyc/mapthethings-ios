@@ -8,17 +8,41 @@
 
 import MapKit
 
+public enum SampleAnnotationType {
+    case Summary
+    case DeadZone
+
+    case TransmissionUntracked
+    case TransmissionTracked
+    case TransmissionSuccess
+    case TransmissionError
+}
+
 public class SampleAnnotation : NSObject, MKAnnotation {
     public let title: String?
     public let subtitle: String?
     public let coordinate: CLLocationCoordinate2D
+    public let type: SampleAnnotationType
     
-    public init(coordinate: CLLocationCoordinate2D) {
+    public init(coordinate: CLLocationCoordinate2D, type: SampleAnnotationType) {
         self.title = nil
         self.subtitle = nil
         self.coordinate = coordinate
+        self.type = type
         
         super.init()
+    }
+    
+    public func pinTintColor() -> UIColor {
+        switch self.type {
+        case .Summary: return UIColor.blueColor()
+        case .DeadZone: return UIColor.grayColor()
+
+        case .TransmissionUntracked: return UIColor.yellowColor()
+        case .TransmissionTracked: return UIColor(red: 0.6, green: 1, blue: 0.6, alpha: 0.5)
+        case .TransmissionSuccess: return UIColor.greenColor()
+        case .TransmissionError: return UIColor.redColor()
+        }
     }
     
     public override var hashValue: Int {
@@ -30,6 +54,7 @@ public class SampleAnnotation : NSObject, MKAnnotation {
             if let subtitle = self.subtitle {
                 hash += subtitle.hashValue
             }
+            hash += self.type.hashValue
             hash = 1234567 ^ hash ^ Int(100000 * self.coordinate.longitude) ^ Int(100000 * self.coordinate.latitude)
 //            debugPrint(hash)
             return hash
@@ -49,7 +74,8 @@ func dEq(a: Double, b: Double) -> Bool {
 }
 public func ==(lhs: SampleAnnotation, rhs: SampleAnnotation) -> Bool {
     let eq = dEq(lhs.coordinate.latitude, b: rhs.coordinate.latitude) &&
-            dEq(lhs.coordinate.longitude, b: rhs.coordinate.longitude)
+            dEq(lhs.coordinate.longitude, b: rhs.coordinate.longitude) &&
+            lhs.type==rhs.type
     return eq
 }
 
@@ -70,6 +96,7 @@ extension MapViewController {
                 view.calloutOffset = CGPoint(x: -5, y: 5)
                 view.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
             }
+            view.pinTintColor = annotation.pinTintColor()
             return view
         }
         return nil
