@@ -33,7 +33,9 @@ There is a node in the same location as the iOS device running the app. The node
 There is a node in the same location as the iOS device running the app. The node transmits packets periodically. The app is subscribed to MQTT and when it receives a packet from the device, it posts the packet data and lat/lon to the API. This is how ttnmapper.org collects info.
 
 ## Developer Notes
-- Fake a Device - Set FakeDevice=true in Info.plist to fake a device when you don't have a hardware node. The app will act like it has a MapTheThings node to talk to.
+- Fake a Device - Set FakeDevice=1 in ```Info.plist``` to fake a device when you don't have a hardware node. The app will act like it has a MapTheThings node to talk to. Set it to a bigger number to debug behavior when there are more nodes around.
+- Test Host - Use a test host server by setting TestHost="localhost:3000" in ```Info.plist```.
+- Enable Fabric by defining FABRIC_API_KEY=xyz and FABRIC_BUILD_SECRET=abc in ```private.env```.
 
 ## People
 - Frank - Focused on working example of Active Collection. Bluetooth communication. Sync GPS samples with server.

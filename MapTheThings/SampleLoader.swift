@@ -10,6 +10,7 @@ import Foundation
 import CoreLocation
 import Haneke
 import PromiseKit
+//import ReactiveCocoa
 
 func == <T:Equatable> (tuple1:(T,T),tuple2:(T,T)) -> Bool
 {
@@ -25,24 +26,26 @@ func == (a: CLLocationCoordinate2D, b: CLLocationCoordinate2D) -> Bool
 class SampleLoader {
     var lastBounds: Edges?
     let jsonCache = Cache<JSON>(name: "SampleLoader")
+//    var boundsDisposer: Disposable?
     
     init() {
+//        self.boundsDisposer =
         appStateObservable.observeNext({state in
-            self.checkBoundsChanged(state.new.map.bounds)
+            self.checkBoundsChanged(state.new.map.bounds, host: state.new.host)
         })
     }
     
-    private func checkBoundsChanged(bounds: Edges) {
+    private func checkBoundsChanged(bounds: Edges, host: String) {
         if let last = self.lastBounds where (last.ne == bounds.ne && last.sw == bounds.sw) {
             return
         }
         lastBounds = bounds
-        load(bounds)
+        load(bounds, host: host)
     }
     
-    private func load(bounds: Edges) {
+    private func load(bounds: Edges, host: String) {
         let fmt =  { (x: Double) -> (String) in return String(format: "%0.6f", x) }
-        let apiurl = "http://map.thethings.nyc/api/v0/grids" +
+        let apiurl = "http://\(host)/api/v0/grids" +
             "/\(fmt(bounds.ne.latitude))/\(fmt(bounds.sw.longitude))" +
             "/\(fmt(bounds.sw.latitude))/\(fmt(bounds.ne.longitude))"
         debugPrint("Fetching grids for \(apiurl)")
@@ -80,7 +83,15 @@ class SampleLoader {
                     let snrStats = cell["lsnr"] as! [String : AnyObject]
                     let rssi = (rssiStats["avg"] as! NSNumber).floatValue
                     let snr = (snrStats["avg"] as! NSNumber).floatValue
-                    let s = Sample(location: CLLocationCoordinate2D(latitude: clat, longitude: clon), rssi: rssi, snr: snr, timestamp: nil, seqno: nil)
+
+                    let count = (cell["count"] as! NSNumber).intValue
+                    let attempts = (cell["attempt-cnt"] as! NSNumber).intValue
+                    
+                    // timestamp = cell["timestamp"]
+                    let s = Sample(count: count, attempts: attempts,
+                        location: CLLocationCoordinate2D(latitude: clat, longitude: clon),
+                        rssi: rssi, snr: snr,
+                        timestamp: nil)
                     return r + [s]
                 })
                 fulfill(samples)
@@ -136,7 +147,7 @@ class SampleLoader {
 //        let latitude = (latitudeRange[0] + latitudeRange[1]) / 2.0;
 //        let longitude = (longitudeRange[0] + longitudeRange[1]) / 2.0;
 
-        debugPrint("Hex \(hexhash) resolves to \(latitudeRange) vs \(longitudeRange)")
+//        debugPrint("Hex \(hexhash) resolves to \(latitudeRange) vs \(longitudeRange)")
         let nw = CLLocationCoordinate2D(latitude: latitudeRange[1], longitude: longitudeRange[0])
         let se = CLLocationCoordinate2D(latitude: latitudeRange[0], longitude: longitudeRange[1])
         return GridCell(nw: nw, se: se)

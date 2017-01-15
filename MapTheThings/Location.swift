@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import CoreLocation
 
-let MINIMUM_HORIZONTAL_ACCURACY_METERS = 100.0
+let MINIMUM_HORIZONTAL_ACCURACY_METERS = 30.0
 
 public class Location : NSObject, CLLocationManagerDelegate {
     let locationManager : CLLocationManager

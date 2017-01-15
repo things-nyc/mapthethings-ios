@@ -19,7 +19,9 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>201612072256</string>
+	<string>201701110217</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>Fabric</key>
 	<dict>
 		<key>APIKey</key>
@@ -54,7 +56,7 @@
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Get current location for sample</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We don't use Photos but I haven't figured out how to not require this.</string>
+	<string>We don&apos;t use Photos but I haven&apos;t figured out how to not require this.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>
@@ -85,7 +87,9 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>FakeDevice</key>
-	<false/>
+	<integer>0</integer>
+	<key>zTestHost</key>
+	<string>192.168.17.117:5000</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

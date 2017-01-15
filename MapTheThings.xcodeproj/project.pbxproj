@@ -3,11 +3,33 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 48;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		011AC5BA1E1E88CB002446FF /* AppStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 011AC5B91E1E88CB002446FF /* AppStateTests.swift */; };
+		011AC5C41E1E9DFB002446FF /* Result.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 015A6B831D2A0F8B001B5E44 /* Result.framework */; };
+		011AC5C61E1EA0B0002446FF /* TestingAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 011AC5C51E1EA0B0002446FF /* TestingAppDelegate.swift */; };
+		011AC5C81E1EA0D9002446FF /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 011AC5C71E1EA0D9002446FF /* main.swift */; };
 		01351C861DB5490D006A82B7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 01351C851DB5490D006A82B7 /* Assets.xcassets */; };
+		01444FDF1E1A000C00CDB5AF /* Transmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01444FDE1E1A000C00CDB5AF /* Transmission.swift */; };
+		01444FE11E1A04EE00CDB5AF /* DataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01444FE01E1A04EE00CDB5AF /* DataController.swift */; };
+		01444FFC1E1BF2EF00CDB5AF /* Appfile in Resources */ = {isa = PBXBuildFile; fileRef = 01444FE31E1BF2EF00CDB5AF /* Appfile */; };
+		01444FFD1E1BF2EF00CDB5AF /* Fastfile in Resources */ = {isa = PBXBuildFile; fileRef = 01444FE41E1BF2EF00CDB5AF /* Fastfile */; };
+		01444FFE1E1BF2EF00CDB5AF /* copyright.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FE61E1BF2EF00CDB5AF /* copyright.txt */; };
+		01444FFF1E1BF2EF00CDB5AF /* description.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FE81E1BF2EF00CDB5AF /* description.txt */; };
+		014450001E1BF2EF00CDB5AF /* keywords.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FE91E1BF2EF00CDB5AF /* keywords.txt */; };
+		014450011E1BF2EF00CDB5AF /* marketing_url.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FEA1E1BF2EF00CDB5AF /* marketing_url.txt */; };
+		014450021E1BF2EF00CDB5AF /* name.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FEB1E1BF2EF00CDB5AF /* name.txt */; };
+		014450031E1BF2EF00CDB5AF /* privacy_url.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FEC1E1BF2EF00CDB5AF /* privacy_url.txt */; };
+		014450041E1BF2EF00CDB5AF /* release_notes.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FED1E1BF2EF00CDB5AF /* release_notes.txt */; };
+		014450051E1BF2EF00CDB5AF /* support_url.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FEE1E1BF2EF00CDB5AF /* support_url.txt */; };
+		014450061E1BF2EF00CDB5AF /* primary_category.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FEF1E1BF2EF00CDB5AF /* primary_category.txt */; };
+		014450071E1BF2EF00CDB5AF /* primary_first_sub_category.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FF01E1BF2EF00CDB5AF /* primary_first_sub_category.txt */; };
+		014450081E1BF2EF00CDB5AF /* primary_second_sub_category.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FF11E1BF2EF00CDB5AF /* primary_second_sub_category.txt */; };
+		014450091E1BF2EF00CDB5AF /* secondary_category.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FF21E1BF2EF00CDB5AF /* secondary_category.txt */; };
+		0144500A1E1BF2EF00CDB5AF /* secondary_first_sub_category.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FF31E1BF2EF00CDB5AF /* secondary_first_sub_category.txt */; };
+		0144500B1E1BF2EF00CDB5AF /* secondary_second_sub_category.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FF41E1BF2EF00CDB5AF /* secondary_second_sub_category.txt */; };
 		015A6B7E1D29FD13001B5E44 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 015A6B7D1D29FD13001B5E44 /* AppState.swift */; };
 		015A6B801D2A0BC8001B5E44 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 015A6B7F1D2A0BC8001B5E44 /* MapKit.framework */; };
 		015A6B8A1D2A12AA001B5E44 /* AppStateUIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 015A6B891D2A12AA001B5E44 /* AppStateUIViewController.swift */; };
@@ -25,10 +47,14 @@
 		01B542C51D35F17A00DE443B /* MapAnnotations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B542C41D35F17A00DE443B /* MapAnnotations.swift */; };
 		01B542C71D35FCC300DE443B /* MapAnnotationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B542C61D35FCC200DE443B /* MapAnnotationsTests.swift */; };
 		01B542C91D36C3F500DE443B /* Bluetooth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B542C81D36C3F400DE443B /* Bluetooth.swift */; };
+		01C84F8B1E2AD33E00419472 /* Provisioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01C84F8A1E2AD33E00419472 /* Provisioning.swift */; };
 		01D14A171D3C1E3D007FBD61 /* Tracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01D14A161D3C1E3D007FBD61 /* Tracking.swift */; };
+		01EC32F31DAB27B000CF9E8F /* DataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 01EC32F11DAB27B000CF9E8F /* DataModel.xcdatamodeld */; };
 		01F5F2091DA69BFC0097B6F0 /* .travis.yml in Resources */ = {isa = PBXBuildFile; fileRef = 01F5F2081DA69BFC0097B6F0 /* .travis.yml */; };
+		01F7ED831E283DD3006EC3FE /* DevicesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01F7ED821E283DD3006EC3FE /* DevicesViewController.swift */; };
 		1714AF3328D553B36089D5C4 /* Pods_MapTheThings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D117795337AE262DBA1B3CEC /* Pods_MapTheThings.framework */; };
 		41582B4DE73743951E62C555 /* Pods_MapTheThingsTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A8377A08A01EA8AE4A8C7C0 /* Pods_MapTheThingsTests.framework */; };
+		B700E4C71E2BE18300761516 /* MessageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B700E4C61E2BE18300761516 /* MessageViewController.swift */; };
 		F240A312F98D86917B014192 /* Pods_MapTheThingsUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4564707B0A38A409C4F3FA5 /* Pods_MapTheThingsUITests.framework */; };
 /* End PBXBuildFile section */
 
@@ -50,7 +76,29 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		011AC5B91E1E88CB002446FF /* AppStateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
+		011AC5C51E1EA0B0002446FF /* TestingAppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestingAppDelegate.swift; sourceTree = "<group>"; };
+		011AC5C71E1EA0D9002446FF /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		01351C851DB5490D006A82B7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = MapTheThings/Assets.xcassets; sourceTree = "<group>"; };
+		01444FDE1E1A000C00CDB5AF /* Transmission.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transmission.swift; sourceTree = "<group>"; };
+		01444FE01E1A04EE00CDB5AF /* DataController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataController.swift; sourceTree = "<group>"; };
+		01444FE31E1BF2EF00CDB5AF /* Appfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Appfile; sourceTree = "<group>"; };
+		01444FE41E1BF2EF00CDB5AF /* Fastfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Fastfile; sourceTree = "<group>"; };
+		01444FE61E1BF2EF00CDB5AF /* copyright.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = copyright.txt; sourceTree = "<group>"; };
+		01444FE81E1BF2EF00CDB5AF /* description.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = description.txt; sourceTree = "<group>"; };
+		01444FE91E1BF2EF00CDB5AF /* keywords.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = keywords.txt; sourceTree = "<group>"; };
+		01444FEA1E1BF2EF00CDB5AF /* marketing_url.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = marketing_url.txt; sourceTree = "<group>"; };
+		01444FEB1E1BF2EF00CDB5AF /* name.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = name.txt; sourceTree = "<group>"; };
+		01444FEC1E1BF2EF00CDB5AF /* privacy_url.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = privacy_url.txt; sourceTree = "<group>"; };
+		01444FED1E1BF2EF00CDB5AF /* release_notes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = release_notes.txt; sourceTree = "<group>"; };
+		01444FEE1E1BF2EF00CDB5AF /* support_url.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = support_url.txt; sourceTree = "<group>"; };
+		01444FEF1E1BF2EF00CDB5AF /* primary_category.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = primary_category.txt; sourceTree = "<group>"; };
+		01444FF01E1BF2EF00CDB5AF /* primary_first_sub_category.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = primary_first_sub_category.txt; sourceTree = "<group>"; };
+		01444FF11E1BF2EF00CDB5AF /* primary_second_sub_category.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = primary_second_sub_category.txt; sourceTree = "<group>"; };
+		01444FF21E1BF2EF00CDB5AF /* secondary_category.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = secondary_category.txt; sourceTree = "<group>"; };
+		01444FF31E1BF2EF00CDB5AF /* secondary_first_sub_category.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = secondary_first_sub_category.txt; sourceTree = "<group>"; };
+		01444FF41E1BF2EF00CDB5AF /* secondary_second_sub_category.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = secondary_second_sub_category.txt; sourceTree = "<group>"; };
+		01444FF51E1BF2EF00CDB5AF /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		015A6B7D1D29FD13001B5E44 /* AppState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		015A6B7F1D2A0BC8001B5E44 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		015A6B811D2A0F8B001B5E44 /* BLEHelper.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BLEHelper.framework; path = "../../../Library/Developer/Xcode/DerivedData/MapTheThings-csldoafshwlhbscqdgzsdydcrxvi/Build/Products/Debug-iphonesimulator/BLEHelper/BLEHelper.framework"; sourceTree = "<group>"; };
@@ -78,15 +126,19 @@
 		01B542C41D35F17A00DE443B /* MapAnnotations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapAnnotations.swift; sourceTree = "<group>"; };
 		01B542C61D35FCC200DE443B /* MapAnnotationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapAnnotationsTests.swift; sourceTree = "<group>"; };
 		01B542C81D36C3F400DE443B /* Bluetooth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bluetooth.swift; sourceTree = "<group>"; };
+		01C84F8A1E2AD33E00419472 /* Provisioning.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Provisioning.swift; sourceTree = "<group>"; };
 		01D14A161D3C1E3D007FBD61 /* Tracking.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tracking.swift; sourceTree = "<group>"; };
+		01EC32F21DAB27B000CF9E8F /* DataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModel.xcdatamodel; sourceTree = "<group>"; };
 		01F5F2081DA69BFC0097B6F0 /* .travis.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .travis.yml; sourceTree = "<group>"; };
 		01F5F20A1DA69CC90097B6F0 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		01F7ED821E283DD3006EC3FE /* DevicesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DevicesViewController.swift; sourceTree = "<group>"; };
 		426939B63027F6706ED801A6 /* Pods-MapTheThingsUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapTheThingsUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MapTheThingsUITests/Pods-MapTheThingsUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		5A8377A08A01EA8AE4A8C7C0 /* Pods_MapTheThingsTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MapTheThingsTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		787D45900BE726E63051CBFB /* Pods-MapTheThingsTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapTheThingsTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-MapTheThingsTests/Pods-MapTheThingsTests.release.xcconfig"; sourceTree = "<group>"; };
 		7A5F7AA2372CE5EA3603F491 /* Pods-MapTheThingsUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapTheThingsUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-MapTheThingsUITests/Pods-MapTheThingsUITests.release.xcconfig"; sourceTree = "<group>"; };
 		A7FF93EE5357805E5BC5EA7A /* Pods-MapTheThings.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapTheThings.release.xcconfig"; path = "Pods/Target Support Files/Pods-MapTheThings/Pods-MapTheThings.release.xcconfig"; sourceTree = "<group>"; };
 		B4564707B0A38A409C4F3FA5 /* Pods_MapTheThingsUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MapTheThingsUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B700E4C61E2BE18300761516 /* MessageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageViewController.swift; sourceTree = "<group>"; };
 		CD64B5812031722A79AF578B /* Pods-MapTheThings.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapTheThings.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MapTheThings/Pods-MapTheThings.debug.xcconfig"; sourceTree = "<group>"; };
 		D117795337AE262DBA1B3CEC /* Pods_MapTheThings.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MapTheThings.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC95F3D7CB42F9BB055F6696 /* Pods-MapTheThingsTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapTheThingsTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MapTheThingsTests/Pods-MapTheThingsTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -107,6 +159,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				011AC5C41E1E9DFB002446FF /* Result.framework in Frameworks */,
 				41582B4DE73743951E62C555 /* Pods_MapTheThingsTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -122,10 +175,68 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		01444FE21E1BF2EF00CDB5AF /* fastlane */ = {
+			isa = PBXGroup;
+			children = (
+				01444FE31E1BF2EF00CDB5AF /* Appfile */,
+				01444FE41E1BF2EF00CDB5AF /* Fastfile */,
+				01444FE51E1BF2EF00CDB5AF /* metadata */,
+				01444FF51E1BF2EF00CDB5AF /* README.md */,
+				01444FF71E1BF2EF00CDB5AF /* screenshots */,
+				01444FF91E1BF2EF00CDB5AF /* test_output */,
+			);
+			path = fastlane;
+			sourceTree = "<group>";
+		};
+		01444FE51E1BF2EF00CDB5AF /* metadata */ = {
+			isa = PBXGroup;
+			children = (
+				01444FE61E1BF2EF00CDB5AF /* copyright.txt */,
+				01444FE71E1BF2EF00CDB5AF /* en-US */,
+				01444FEF1E1BF2EF00CDB5AF /* primary_category.txt */,
+				01444FF01E1BF2EF00CDB5AF /* primary_first_sub_category.txt */,
+				01444FF11E1BF2EF00CDB5AF /* primary_second_sub_category.txt */,
+				01444FF21E1BF2EF00CDB5AF /* secondary_category.txt */,
+				01444FF31E1BF2EF00CDB5AF /* secondary_first_sub_category.txt */,
+				01444FF41E1BF2EF00CDB5AF /* secondary_second_sub_category.txt */,
+			);
+			path = metadata;
+			sourceTree = "<group>";
+		};
+		01444FE71E1BF2EF00CDB5AF /* en-US */ = {
+			isa = PBXGroup;
+			children = (
+				01444FE81E1BF2EF00CDB5AF /* description.txt */,
+				01444FE91E1BF2EF00CDB5AF /* keywords.txt */,
+				01444FEA1E1BF2EF00CDB5AF /* marketing_url.txt */,
+				01444FEB1E1BF2EF00CDB5AF /* name.txt */,
+				01444FEC1E1BF2EF00CDB5AF /* privacy_url.txt */,
+				01444FED1E1BF2EF00CDB5AF /* release_notes.txt */,
+				01444FEE1E1BF2EF00CDB5AF /* support_url.txt */,
+			);
+			path = "en-US";
+			sourceTree = "<group>";
+		};
+		01444FF71E1BF2EF00CDB5AF /* screenshots */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = screenshots;
+			sourceTree = "<group>";
+		};
+		01444FF91E1BF2EF00CDB5AF /* test_output */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = test_output;
+			sourceTree = "<group>";
+		};
 		0165DCDD1D2552F900FFB1A1 = {
 			isa = PBXGroup;
 			children = (
+				01444FE21E1BF2EF00CDB5AF /* fastlane */,
 				01351C851DB5490D006A82B7 /* Assets.xcassets */,
+				01EC32F11DAB27B000CF9E8F /* DataModel.xcdatamodeld */,
 				01F5F2081DA69BFC0097B6F0 /* .travis.yml */,
 				01F5F20A1DA69CC90097B6F0 /* README.md */,
 				0165DCE81D2552F900FFB1A1 /* MapTheThings */,
@@ -150,19 +261,26 @@
 		0165DCE81D2552F900FFB1A1 /* MapTheThings */ = {
 			isa = PBXGroup;
 			children = (
+				0165DCE91D2552F900FFB1A1 /* AppDelegate.swift */,
 				015A6B7D1D29FD13001B5E44 /* AppState.swift */,
 				015A6B891D2A12AA001B5E44 /* AppStateUIViewController.swift */,
-				0165DCE91D2552F900FFB1A1 /* AppDelegate.swift */,
-				0165DCEB1D2552F900FFB1A1 /* MapViewController.swift */,
-				0165DCED1D2552F900FFB1A1 /* DeviceViewController.swift */,
-				0165DCEF1D2552F900FFB1A1 /* Main.storyboard */,
-				0165DCF41D2552F900FFB1A1 /* LaunchScreen.storyboard */,
-				0165DCF71D2552F900FFB1A1 /* Info.plist */,
-				017D67981D2DF187002FF061 /* SampleLoader.swift */,
-				01B542C41D35F17A00DE443B /* MapAnnotations.swift */,
 				01B542C81D36C3F400DE443B /* Bluetooth.swift */,
+				01444FE01E1A04EE00CDB5AF /* DataController.swift */,
+				01F7ED821E283DD3006EC3FE /* DevicesViewController.swift */,
+				0165DCED1D2552F900FFB1A1 /* DeviceViewController.swift */,
+				0165DCF71D2552F900FFB1A1 /* Info.plist */,
+				0165DCF41D2552F900FFB1A1 /* LaunchScreen.storyboard */,
 				01A12C5E1D3B28D90045BD42 /* Location.swift */,
+				0165DCEF1D2552F900FFB1A1 /* Main.storyboard */,
+				B700E4C61E2BE18300761516 /* MessageViewController.swift */,
+				011AC5C71E1EA0D9002446FF /* main.swift */,
+				01B542C41D35F17A00DE443B /* MapAnnotations.swift */,
+				0165DCEB1D2552F900FFB1A1 /* MapViewController.swift */,
+				01C84F8A1E2AD33E00419472 /* Provisioning.swift */,
+				017D67981D2DF187002FF061 /* SampleLoader.swift */,
+				011AC5C51E1EA0B0002446FF /* TestingAppDelegate.swift */,
 				01D14A161D3C1E3D007FBD61 /* Tracking.swift */,
+				01444FDE1E1A000C00CDB5AF /* Transmission.swift */,
 			);
 			path = MapTheThings;
 			sourceTree = "<group>";
@@ -170,9 +288,10 @@
 		0165DCFF1D2552F900FFB1A1 /* MapTheThingsTests */ = {
 			isa = PBXGroup;
 			children = (
-				0165DD001D2552F900FFB1A1 /* MapTheThingsTests.swift */,
+				011AC5B91E1E88CB002446FF /* AppStateTests.swift */,
 				0165DD021D2552F900FFB1A1 /* Info.plist */,
 				01B542C61D35FCC200DE443B /* MapAnnotationsTests.swift */,
+				0165DD001D2552F900FFB1A1 /* MapTheThingsTests.swift */,
 				016304CD1D465E58009488AC /* TrackingTests.swift */,
 			);
 			path = MapTheThingsTests;
@@ -229,7 +348,7 @@
 				0165DCE41D2552F900FFB1A1 /* Resources */,
 				01503EFA5990AB63800B736E /* [CP] Embed Pods Frameworks */,
 				5337C2E2ADCBCA337F95359E /* [CP] Copy Pods Resources */,
-				015A6B7C1D25A4CB001B5E44 /* ShellScript */,
+				015A6B7C1D25A4CB001B5E44 /* Copy Fabric config variables from private.env */,
 			);
 			buildRules = (
 			);
@@ -289,7 +408,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0810;
+				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = "The Things Network New York";
 				TargetAttributes = {
 					0165DCE51D2552F900FFB1A1 = {
@@ -320,7 +439,7 @@
 				};
 			};
 			buildConfigurationList = 0165DCE11D2552F900FFB1A1 /* Build configuration list for PBXProject "MapTheThings" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -344,10 +463,26 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				014450051E1BF2EF00CDB5AF /* support_url.txt in Resources */,
+				01444FFD1E1BF2EF00CDB5AF /* Fastfile in Resources */,
+				01444FFF1E1BF2EF00CDB5AF /* description.txt in Resources */,
 				0165DCF61D2552F900FFB1A1 /* LaunchScreen.storyboard in Resources */,
+				014450011E1BF2EF00CDB5AF /* marketing_url.txt in Resources */,
+				01444FFE1E1BF2EF00CDB5AF /* copyright.txt in Resources */,
+				014450031E1BF2EF00CDB5AF /* privacy_url.txt in Resources */,
+				01444FFC1E1BF2EF00CDB5AF /* Appfile in Resources */,
+				0144500B1E1BF2EF00CDB5AF /* secondary_second_sub_category.txt in Resources */,
+				014450061E1BF2EF00CDB5AF /* primary_category.txt in Resources */,
+				014450021E1BF2EF00CDB5AF /* name.txt in Resources */,
+				014450041E1BF2EF00CDB5AF /* release_notes.txt in Resources */,
+				0144500A1E1BF2EF00CDB5AF /* secondary_first_sub_category.txt in Resources */,
 				01F5F2091DA69BFC0097B6F0 /* .travis.yml in Resources */,
 				01351C861DB5490D006A82B7 /* Assets.xcassets in Resources */,
+				014450071E1BF2EF00CDB5AF /* primary_first_sub_category.txt in Resources */,
+				014450001E1BF2EF00CDB5AF /* keywords.txt in Resources */,
 				0165DCF11D2552F900FFB1A1 /* Main.storyboard in Resources */,
+				014450081E1BF2EF00CDB5AF /* primary_second_sub_category.txt in Resources */,
+				014450091E1BF2EF00CDB5AF /* secondary_category.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -383,18 +518,19 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MapTheThings/Pods-MapTheThings-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		015A6B7C1D25A4CB001B5E44 /* ShellScript */ = {
+		015A6B7C1D25A4CB001B5E44 /* Copy Fabric config variables from private.env */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
+			name = "Copy Fabric config variables from private.env";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Fabric/run\" fe94f5bf9e7fe1cec1ef97a4966456a3a7d0e94f 66132cceb6cf3da52d2d1f9d3f7f67218dd2f961ef59bfebca4c5a5072027550";
+			shellScript = "function prop {\n    grep \"${1}\" private.env | cut -d'=' -f2\n}\n\n\"${PODS_ROOT}/Fabric/run\" $(prop 'FABRIC_API_KEY') $(prop 'FABRIC_BUILD_SECRET')";
 		};
 		5337C2E2ADCBCA337F95359E /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -523,16 +659,24 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				011AC5C61E1EA0B0002446FF /* TestingAppDelegate.swift in Sources */,
 				01D14A171D3C1E3D007FBD61 /* Tracking.swift in Sources */,
 				01B542C91D36C3F500DE443B /* Bluetooth.swift in Sources */,
 				0165DCEE1D2552F900FFB1A1 /* DeviceViewController.swift in Sources */,
+				01444FDF1E1A000C00CDB5AF /* Transmission.swift in Sources */,
 				0165DCEA1D2552F900FFB1A1 /* AppDelegate.swift in Sources */,
 				01B542C51D35F17A00DE443B /* MapAnnotations.swift in Sources */,
 				01A12C5F1D3B28D90045BD42 /* Location.swift in Sources */,
 				017D67991D2DF187002FF061 /* SampleLoader.swift in Sources */,
 				015A6B8A1D2A12AA001B5E44 /* AppStateUIViewController.swift in Sources */,
+				B700E4C71E2BE18300761516 /* MessageViewController.swift in Sources */,
+				011AC5C81E1EA0D9002446FF /* main.swift in Sources */,
 				0165DCEC1D2552F900FFB1A1 /* MapViewController.swift in Sources */,
 				015A6B7E1D29FD13001B5E44 /* AppState.swift in Sources */,
+				01C84F8B1E2AD33E00419472 /* Provisioning.swift in Sources */,
+				01444FE11E1A04EE00CDB5AF /* DataController.swift in Sources */,
+				01F7ED831E283DD3006EC3FE /* DevicesViewController.swift in Sources */,
+				01EC32F31DAB27B000CF9E8F /* DataModel.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -543,6 +687,7 @@
 				0165DD011D2552F900FFB1A1 /* MapTheThingsTests.swift in Sources */,
 				016304CE1D465E58009488AC /* TrackingTests.swift in Sources */,
 				01B542C71D35FCC300DE443B /* MapAnnotationsTests.swift in Sources */,
+				011AC5BA1E1E88CB002446FF /* AppStateTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -634,6 +779,7 @@
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 2.3;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -676,6 +822,7 @@
 				OTHER_SWIFT_FLAGS = "-Xfrontend -debug-time-function-bodies";
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 2.3;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -685,7 +832,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CD64B5812031722A79AF578B /* Pods-MapTheThings.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 8WVD5SW854;
 				INFOPLIST_FILE = MapTheThings/Info.plist;
@@ -700,7 +847,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A7FF93EE5357805E5BC5EA7A /* Pods-MapTheThings.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 8WVD5SW854;
 				INFOPLIST_FILE = MapTheThings/Info.plist;
@@ -809,6 +956,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		01EC32F11DAB27B000CF9E8F /* DataModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				01EC32F21DAB27B000CF9E8F /* DataModel.xcdatamodel */,
+			);
+			currentVersion = 01EC32F21DAB27B000CF9E8F /* DataModel.xcdatamodel */;
+			name = DataModel.xcdatamodeld;
+			path = Data/DataModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 0165DCDE1D2552F900FFB1A1 /* Project object */;
 }
