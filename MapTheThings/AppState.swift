@@ -115,6 +115,7 @@ public struct AppState {
     var sendPacket: NSUUID? = nil
     var requestProvisioning: (NSUUID, NSUUID)? = nil // (click ID, device ID)
     var assignProvisioning: (NSUUID, NSUUID)? = nil // (click ID, device ID)
+    var requestSendPacket: (NSUUID, NSData)? = nil // (click ID, data to send)
 }
 
 private func defaultAppState() -> AppState {
@@ -144,7 +145,8 @@ private func defaultAppState() -> AppState {
         disconnectDevice: nil,
         sendPacket: nil,
         requestProvisioning: nil,
-        assignProvisioning: nil
+        assignProvisioning: nil,
+        requestSendPacket: nil
     )
 }
 
