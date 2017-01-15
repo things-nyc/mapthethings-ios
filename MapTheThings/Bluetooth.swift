@@ -199,6 +199,7 @@ public protocol LoraNode {
     func sendPacket(data : NSData) -> Bool
     func sendPacketWithAck(data : NSData) -> UInt8? // ble sequence number, or null on failure or unavailable
     func setSpreadingFactor(sf: UInt8) -> Bool
+    func assignOTAA(appKey: NSData, appEUI: NSData, devEUI: NSData)
 }
 
 func markConnectStatus(id: NSUUID, connected: Bool) {
@@ -262,6 +263,10 @@ public class FakeBluetoothNode : NSObject, LoraNode {
     public func setSpreadingFactor(sf: UInt8) -> Bool {
         debugPrint("Set spreading factor: \(sf)")
         return true
+    }
+    
+    public func assignOTAA(appKey: NSData, appEUI: NSData, devEUI: NSData) {
+        debugPrint("Assigning OTAA")
     }
 
     public func sendPacket(data : NSData) -> Bool {
@@ -359,6 +364,16 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
         }
     }
    
+    public func assignOTAA(appKey: NSData, appEUI: NSData, devEUI: NSData) {
+        if let charAppKey = self.characteristics[loraAppKeyCharacteristic.UUIDString],
+            charAppEUI = self.characteristics[loraAppEUICharacteristic.UUIDString],
+            charDevEUI = self.characteristics[loraDevEUICharacteristic.UUIDString] {
+            peripheral.writeValue(appKey, forCharacteristic: charAppKey, type: CBCharacteristicWriteType.WithResponse)
+            peripheral.writeValue(appEUI, forCharacteristic: charAppEUI, type: CBCharacteristicWriteType.WithResponse)
+            peripheral.writeValue(devEUI, forCharacteristic: charDevEUI, type: CBCharacteristicWriteType.WithResponse)
+        }
+    }
+
     public func setSpreadingFactor(sf : UInt8) -> Bool {
         if let characteristic = self.characteristics[loraSpreadingFactorCharacteristic.UUIDString] {
             debugPrint("Setting SF", sf)
@@ -454,10 +469,7 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
     let queue = dispatch_queue_create("Bluetooth", DISPATCH_QUEUE_SERIAL)
     var central : CBCentralManager!
     var nodes : [NSUUID: LoraNode] = [:]
-//    var connections : [CBPeripheral] = []
-//    var connecting : CBPeripheral? = nil
-    var connectDisposer: Disposable?
-    var disconnectDisposer: Disposable?
+    var disposeObserver: Disposable?
     
     public init(savedIdentifiers: [NSUUID]) {
         super.init()
@@ -479,18 +491,28 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
                     self.rescan()
                 }
             })
-        self.connectDisposer = appStateObservable.observeNext({ update in
+        self.disposeObserver = appStateObservable.observeNext({ update in
             if let activeID = update.new.viewDetailDeviceID,
-                node = self.nodes[activeID]
-                where stateValChanged(update, access: {$0.connectToDevice}) {
-                node.requestConnection(self.central)
+                node = self.nodes[activeID] {
+
+                if stateValChanged(update, access: {$0.connectToDevice}) {
+                    node.requestConnection(self.central)
+                }
+
+                if stateValChanged(update, access: {$0.disconnectDevice}) {
+                    node.requestDisconnect(self.central)
+                }
             }
-        })
-        self.disconnectDisposer = appStateObservable.observeNext({ update in
-            if let activeID = update.new.viewDetailDeviceID,
-                node = self.nodes[activeID]
-                where stateValChanged(update, access: {$0.disconnectDevice}) {
-                node.requestDisconnect(self.central)
+            
+            if stateValChanged(update, access: {$0.assignProvisioning}) {
+                if let (_, deviceID) = update.new.assignProvisioning,
+                    node = self.nodes[deviceID],
+                    device = update.new.bluetooth[deviceID],
+                    appKey = device.appKey,
+                    appEUI = device.appEUI,
+                    devEUI = device.devEUI {
+                    node.assignOTAA(appKey, appEUI: appEUI, devEUI: devEUI)
+                }
             }
         })
     }

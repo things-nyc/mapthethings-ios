@@ -63,7 +63,7 @@ class DeviceViewController: AppStateUIViewController {
     var provisioningView: ProvisioningViewController?
     var statusView: StatusViewController?
     
-    @IBOutlet weak var provisioningContainer: UIView!
+    @IBOutlet weak var provisioningContainer: UIStackView!
     @IBOutlet weak var toggleProvisioningButton: UIButton!
     
     @IBOutlet weak var spreadingFactor: UISegmentedControl!
@@ -104,6 +104,19 @@ class DeviceViewController: AppStateUIViewController {
             return state
         }
     }
+    
+    @IBAction func getOTAA(sender: UIButton) {
+        Answers.logCustomEventWithName("getOTAA", customAttributes: nil)
+        debugPrint("getOTAA button pressed")
+        updateAppState { (old) -> AppState in
+            var state = old
+            if let devID = old.viewDetailDeviceID {
+                state.requestProvisioning = (NSUUID(), devID)
+            }
+            return state
+        }
+    }
+
     
     @IBAction func sendTestPacket(sender: UIButton) {
         Answers.logCustomEventWithName("TestPacket", customAttributes: nil)

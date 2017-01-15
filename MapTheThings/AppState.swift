@@ -113,6 +113,8 @@ public struct AppState {
     var connectToDevice: NSUUID? = nil
     var disconnectDevice: NSUUID? = nil
     var sendPacket: NSUUID? = nil
+    var requestProvisioning: (NSUUID, NSUUID)? = nil // (click ID, device ID)
+    var assignProvisioning: (NSUUID, NSUUID)? = nil // (click ID, device ID)
 }
 
 private func defaultAppState() -> AppState {
@@ -140,7 +142,9 @@ private func defaultAppState() -> AppState {
         syncState: SyncState(syncWorking: false, syncPendingCount: 0, lastPost: nil, recordWorking: false, recordLoraToObject: []),
         connectToDevice: nil,
         disconnectDevice: nil,
-        sendPacket: nil
+        sendPacket: nil,
+        requestProvisioning: nil,
+        assignProvisioning: nil
     )
 }
 
@@ -161,7 +165,25 @@ public func updateAppState(fn: AppStateUpdateFn) {
     }
 }
 
-public func stateValChanged<T : Equatable>(state: (old: AppState, new: AppState), access: (AppState) -> (T?)) -> Bool {
+public func stateValChanged<T : Equatable>(state: (old: AppState, new: AppState), access: (AppState) -> T?) -> Bool {
+    let new = access(state.new)
+    let old = access(state.old)
+    var changed = false
+    if let newValue = new {
+        if let oldValue = old {
+            changed = !(newValue==oldValue) // Different from last one?
+        }
+        else {
+            changed = true // New this state!
+        }
+    }
+    else if (old != nil) {
+        changed = true // Was set, now it isn't
+    }
+    return changed
+}
+
+public func stateValChanged<T1 : Equatable, T2 : Equatable>(state: (old: AppState, new: AppState), access: (AppState) -> (T1, T2)?) -> Bool {
     let new = access(state.new)
     let old = access(state.old)
     var changed = false
