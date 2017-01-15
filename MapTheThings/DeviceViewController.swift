@@ -63,6 +63,9 @@ class DeviceViewController: AppStateUIViewController {
     var provisioningView: ProvisioningViewController?
     var statusView: StatusViewController?
     
+    @IBOutlet weak var provisioningContainer: UIStackView!
+    @IBOutlet weak var toggleProvisioningButton: UIButton!
+    
     @IBOutlet weak var spreadingFactor: UISegmentedControl!
     @IBOutlet weak var debugView: UITextView!
     @IBOutlet weak var toggleConnection: UIButton!
@@ -90,7 +93,31 @@ class DeviceViewController: AppStateUIViewController {
             return state
         }
     }
+    
+    @IBAction func toggleProvisioningView(sender: UIButton) {
+        updateAppState { (old) -> AppState in
+            var state = old
+            if let devID = state.viewDetailDeviceID, var dev = state.bluetooth[devID] {
+                dev.hideProvisioning = !dev.hideProvisioning
+                state.bluetooth[devID] = dev
+            }
+            return state
+        }
+    }
+    
+    @IBAction func getOTAA(sender: UIButton) {
+        Answers.logCustomEventWithName("getOTAA", customAttributes: nil)
+        debugPrint("getOTAA button pressed")
+        updateAppState { (old) -> AppState in
+            var state = old
+            if let devID = old.viewDetailDeviceID {
+                state.requestProvisioning = (NSUUID(), devID)
+            }
+            return state
+        }
+    }
 
+    
     @IBAction func sendTestPacket(sender: UIButton) {
         Answers.logCustomEventWithName("TestPacket", customAttributes: nil)
         debugPrint("sendTestPacket button pressed")
@@ -139,7 +166,7 @@ class DeviceViewController: AppStateUIViewController {
         }
     }
     
-    override func renderAppState(oldState: AppState, state: AppState) {
+    override func renderAppState(_: AppState, state: AppState) {
         // Update UI according to app state
         if let devID = state.viewDetailDeviceID, dev = state.bluetooth[devID] {
             if let devAddr = dev.devAddr {
@@ -150,6 +177,15 @@ class DeviceViewController: AppStateUIViewController {
             }
             if let appSKey = dev.appSKey {
                 self.provisioningView!.appSKey.text = appSKey.hexadecimalString()
+            }
+            if let appKey = dev.appKey {
+                self.provisioningView!.appKey.text = appKey.hexadecimalString()
+            }
+            if let appEUI = dev.appEUI {
+                self.provisioningView!.appEUI.text = appEUI.hexadecimalString()
+            }
+            if let devEUI = dev.devEUI {
+                self.provisioningView!.devEUI.text = devEUI.hexadecimalString()
             }
             if let lastLocation = dev.lastLocation {
                 self.statusView!.lastLocation.text = String(format: "%0.5f, %0.5f", lastLocation.coordinate.latitude, lastLocation.coordinate.longitude)
@@ -166,7 +202,10 @@ class DeviceViewController: AppStateUIViewController {
             }
             self.toggleConnection.setTitle(dev.connected ? "Disconnect" : "Connect",
                                            forState:UIControlState.Normal)
-            
+            self.provisioningContainer.hidden = dev.hideProvisioning
+            self.toggleProvisioningButton.setTitle(dev.hideProvisioning ? "Show" : "Hide",
+                                                   forState: UIControlState.Normal)
+
             var text = "Debug View\n"
             if let currentLocation = state.map.currentLocation {
                 let locAge = fabs(currentLocation.timestamp.timeIntervalSinceNow)

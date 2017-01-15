@@ -20,6 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var location: Location?
     var tracker: Tracking?
     var data: DataController?
+    var provisioning: Provisioning?
     
     func onTick() {
         updateAppState { (old) -> AppState in
@@ -40,6 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.location = Location()
         self.data = DataController()
         self.tracker = Tracking(bluetooth: self.bluetooth, dataController: self.data!)
+        self.provisioning = Provisioning()
         
         Transmission.loadTransmissions(self.data!)
 

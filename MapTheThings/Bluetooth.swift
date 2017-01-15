@@ -55,10 +55,14 @@ let loraWritePacketWithAckCharacteristic =
 let loraDevAddrCharacteristic =     CBUUID(string: "00002AD2-0000-1000-8000-00805F9B34FB")
 let loraNwkSKeyCharacteristic =     CBUUID(string: "00002AD3-0000-1000-8000-00805F9B34FB")
 let loraAppSKeyCharacteristic =     CBUUID(string: "00002AD4-0000-1000-8000-00805F9B34FB")
+
+let loraAppKeyCharacteristic =      CBUUID(string: "00002AD7-0000-1000-8000-00805F9B34FB")
+let loraAppEUICharacteristic =      CBUUID(string: "00002AD8-0000-1000-8000-00805F9B34FB")
+let loraDevEUICharacteristic =      CBUUID(string: "00002AD9-0000-1000-8000-00805F9B34FB")
+
 let loraSpreadingFactorCharacteristic =
                                     CBUUID(string: "00002AD5-0000-1000-8000-00805F9B34FB")
 let transmitResultCharacteristic =  CBUUID(string: "00002ADA-0000-1000-8000-00805F9B34FB")
-//let deviceNameCharacteristic = CBUUID(string: "00002A00-0000-1000-8000-00805F9B34FB")
 
 let loraNodeCharacteristics : [CBUUID]? = [
     loraCommandCharacteristic,
@@ -69,6 +73,9 @@ let loraNodeCharacteristics : [CBUUID]? = [
     loraAppSKeyCharacteristic,
     loraSpreadingFactorCharacteristic,
     transmitResultCharacteristic,
+    loraAppKeyCharacteristic,
+    loraAppEUICharacteristic,
+    loraDevEUICharacteristic,
 ]
 
 extension UInt16 {
@@ -137,6 +144,12 @@ func setAppStateDeviceAttribute(id: NSUUID, name: String?, characteristic: CBCha
                 dev.nwkSKey = value
             case loraAppSKeyCharacteristic:
                 dev.appSKey = value
+            case loraAppKeyCharacteristic:
+                dev.appKey = value
+            case loraAppEUICharacteristic:
+                dev.appEUI = value
+            case loraDevEUICharacteristic:
+                dev.devEUI = value
             case transmitResultCharacteristic:
                 //                      format         ble_seq          error           lora_seq
                 assert(value.length==(sizeof(UInt8)+sizeof(UInt8)+sizeof(UInt16)+sizeof(UInt32)))
@@ -186,6 +199,7 @@ public protocol LoraNode {
     func sendPacket(data : NSData) -> Bool
     func sendPacketWithAck(data : NSData) -> UInt8? // ble sequence number, or null on failure or unavailable
     func setSpreadingFactor(sf: UInt8) -> Bool
+    func assignOTAA(appKey: NSData, appEUI: NSData, devEUI: NSData)
 }
 
 func markConnectStatus(id: NSUUID, connected: Bool) {
@@ -249,6 +263,10 @@ public class FakeBluetoothNode : NSObject, LoraNode {
     public func setSpreadingFactor(sf: UInt8) -> Bool {
         debugPrint("Set spreading factor: \(sf)")
         return true
+    }
+    
+    public func assignOTAA(appKey: NSData, appEUI: NSData, devEUI: NSData) {
+        debugPrint("Assigning OTAA")
     }
 
     public func sendPacket(data : NSData) -> Bool {
@@ -346,6 +364,16 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
         }
     }
    
+    public func assignOTAA(appKey: NSData, appEUI: NSData, devEUI: NSData) {
+        if let charAppKey = self.characteristics[loraAppKeyCharacteristic.UUIDString],
+            charAppEUI = self.characteristics[loraAppEUICharacteristic.UUIDString],
+            charDevEUI = self.characteristics[loraDevEUICharacteristic.UUIDString] {
+            peripheral.writeValue(appKey, forCharacteristic: charAppKey, type: CBCharacteristicWriteType.WithResponse)
+            peripheral.writeValue(appEUI, forCharacteristic: charAppEUI, type: CBCharacteristicWriteType.WithResponse)
+            peripheral.writeValue(devEUI, forCharacteristic: charDevEUI, type: CBCharacteristicWriteType.WithResponse)
+        }
+    }
+
     public func setSpreadingFactor(sf : UInt8) -> Bool {
         if let characteristic = self.characteristics[loraSpreadingFactorCharacteristic.UUIDString] {
             debugPrint("Setting SF", sf)
@@ -395,6 +423,9 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
             case loraDevAddrCharacteristic,
                 loraAppSKeyCharacteristic,
                 loraNwkSKeyCharacteristic,
+                loraAppKeyCharacteristic,
+                loraAppEUICharacteristic,
+                loraDevEUICharacteristic,
                 loraSpreadingFactorCharacteristic:
                 peripheral.readValueForCharacteristic(characteristic)
             case batteryLevelCharacteristic,
@@ -438,10 +469,7 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
     let queue = dispatch_queue_create("Bluetooth", DISPATCH_QUEUE_SERIAL)
     var central : CBCentralManager!
     var nodes : [NSUUID: LoraNode] = [:]
-//    var connections : [CBPeripheral] = []
-//    var connecting : CBPeripheral? = nil
-    var connectDisposer: Disposable?
-    var disconnectDisposer: Disposable?
+    var disposeObserver: Disposable?
     
     public init(savedIdentifiers: [NSUUID]) {
         super.init()
@@ -463,18 +491,28 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
                     self.rescan()
                 }
             })
-        self.connectDisposer = appStateObservable.observeNext({ update in
+        self.disposeObserver = appStateObservable.observeNext({ update in
             if let activeID = update.new.viewDetailDeviceID,
-                node = self.nodes[activeID]
-                where stateValChanged(update, access: {$0.connectToDevice}) {
-                node.requestConnection(self.central)
+                node = self.nodes[activeID] {
+
+                if stateValChanged(update, access: {$0.connectToDevice}) {
+                    node.requestConnection(self.central)
+                }
+
+                if stateValChanged(update, access: {$0.disconnectDevice}) {
+                    node.requestDisconnect(self.central)
+                }
             }
-        })
-        self.disconnectDisposer = appStateObservable.observeNext({ update in
-            if let activeID = update.new.viewDetailDeviceID,
-                node = self.nodes[activeID]
-                where stateValChanged(update, access: {$0.disconnectDevice}) {
-                node.requestDisconnect(self.central)
+            
+            if stateValChanged(update, access: {$0.assignProvisioning}) {
+                if let (_, deviceID) = update.new.assignProvisioning,
+                    node = self.nodes[deviceID],
+                    device = update.new.bluetooth[deviceID],
+                    appKey = device.appKey,
+                    appEUI = device.appEUI,
+                    devEUI = device.devEUI {
+                    node.assignOTAA(appKey, appEUI: appEUI, devEUI: devEUI)
+                }
             }
         })
     }

@@ -20,6 +20,10 @@ class AppStateUIViewController: UIViewController {
             //print(state)
             self.renderAppState(state.old, state: state.new)
         })
+
+        // Set initial view
+        let (oldState, state) = appStateProperty.value
+        renderAppState(oldState, state: state)
     }
     
     func renderAppState(oldState: AppState, state: AppState) {
