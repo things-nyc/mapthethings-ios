@@ -54,6 +54,7 @@
 		01F7ED831E283DD3006EC3FE /* DevicesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01F7ED821E283DD3006EC3FE /* DevicesViewController.swift */; };
 		1714AF3328D553B36089D5C4 /* Pods_MapTheThings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D117795337AE262DBA1B3CEC /* Pods_MapTheThings.framework */; };
 		41582B4DE73743951E62C555 /* Pods_MapTheThingsTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A8377A08A01EA8AE4A8C7C0 /* Pods_MapTheThingsTests.framework */; };
+		B700E4C71E2BE18300761516 /* MessageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B700E4C61E2BE18300761516 /* MessageViewController.swift */; };
 		F240A312F98D86917B014192 /* Pods_MapTheThingsUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B4564707B0A38A409C4F3FA5 /* Pods_MapTheThingsUITests.framework */; };
 /* End PBXBuildFile section */
 
@@ -137,6 +138,7 @@
 		7A5F7AA2372CE5EA3603F491 /* Pods-MapTheThingsUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapTheThingsUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-MapTheThingsUITests/Pods-MapTheThingsUITests.release.xcconfig"; sourceTree = "<group>"; };
 		A7FF93EE5357805E5BC5EA7A /* Pods-MapTheThings.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapTheThings.release.xcconfig"; path = "Pods/Target Support Files/Pods-MapTheThings/Pods-MapTheThings.release.xcconfig"; sourceTree = "<group>"; };
 		B4564707B0A38A409C4F3FA5 /* Pods_MapTheThingsUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MapTheThingsUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B700E4C61E2BE18300761516 /* MessageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageViewController.swift; sourceTree = "<group>"; };
 		CD64B5812031722A79AF578B /* Pods-MapTheThings.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapTheThings.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MapTheThings/Pods-MapTheThings.debug.xcconfig"; sourceTree = "<group>"; };
 		D117795337AE262DBA1B3CEC /* Pods_MapTheThings.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MapTheThings.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC95F3D7CB42F9BB055F6696 /* Pods-MapTheThingsTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapTheThingsTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MapTheThingsTests/Pods-MapTheThingsTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -270,6 +272,7 @@
 				0165DCF41D2552F900FFB1A1 /* LaunchScreen.storyboard */,
 				01A12C5E1D3B28D90045BD42 /* Location.swift */,
 				0165DCEF1D2552F900FFB1A1 /* Main.storyboard */,
+				B700E4C61E2BE18300761516 /* MessageViewController.swift */,
 				011AC5C71E1EA0D9002446FF /* main.swift */,
 				01B542C41D35F17A00DE443B /* MapAnnotations.swift */,
 				0165DCEB1D2552F900FFB1A1 /* MapViewController.swift */,
@@ -666,6 +669,7 @@
 				01A12C5F1D3B28D90045BD42 /* Location.swift in Sources */,
 				017D67991D2DF187002FF061 /* SampleLoader.swift in Sources */,
 				015A6B8A1D2A12AA001B5E44 /* AppStateUIViewController.swift in Sources */,
+				B700E4C71E2BE18300761516 /* MessageViewController.swift in Sources */,
 				011AC5C81E1EA0D9002446FF /* main.swift in Sources */,
 				0165DCEC1D2552F900FFB1A1 /* MapViewController.swift in Sources */,
 				015A6B7E1D29FD13001B5E44 /* AppState.swift in Sources */,
