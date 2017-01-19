@@ -20,7 +20,7 @@ extension MKMapView {
             CGPoint(x: self.bounds.maxX, y: self.bounds.minY)
         ]
         let coords = corners.map { corner in
-            self.convertPoint(corner, toCoordinateFromView: self)
+            self.convert(corner, toCoordinateFrom: self)
         }
         let startBounds = (
             n: coords[0].latitude, s: coords[0].latitude,
@@ -54,14 +54,14 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate, UIGestureR
         mapView.addGestureRecognizer(mapDragRecognizer)
     }
     
-    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith
         otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         // Thanks http://stackoverflow.com/a/5089553/1207583
         return true
     }
     
-    func didDragMap(gestureRecognizer: UIGestureRecognizer) {
-        if (gestureRecognizer.state == .Began) {
+    func didDragMap(_ gestureRecognizer: UIGestureRecognizer) {
+        if (gestureRecognizer.state == .began) {
             updateAppState { (old) -> AppState in
                 var state = old
                 state.map.tracking = false
@@ -70,7 +70,7 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate, UIGestureR
         }
     }
     
-    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         let edges = mapView.edgePoints()
         updateAppState { (old) -> AppState in
             var state = old
@@ -79,7 +79,7 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate, UIGestureR
         }
     }
     
-    @IBAction func toggleTracking(event: UIEvent) {
+    @IBAction func toggleTracking(_ event: UIEvent) {
         updateAppState { (old) -> AppState in
             var state = old
             state.map.tracking = !state.map.tracking
@@ -87,7 +87,7 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate, UIGestureR
         }
     }
     
-    override func renderAppState(oldState: AppState, state: AppState) {
+    override func renderAppState(_ oldState: AppState, state: AppState) {
         
         if let location = state.map.currentLocation {
             // Show current location in lat/lon on top of view
@@ -98,42 +98,42 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate, UIGestureR
             
         }
         
-        self.toggle.setTitle("Toggle Tracking: " + (state.map.tracking ? "True" : "False"), forState: UIControlState.Normal)
+        self.toggle.setTitle("Toggle Tracking: " + (state.map.tracking ? "True" : "False"), for: UIControlState())
         if (state.map.tracking) {
-            mapView.setUserTrackingMode(MKUserTrackingMode.Follow, animated:true)
+            mapView.setUserTrackingMode(MKUserTrackingMode.follow, animated:true)
         }
         else {
-            mapView.setUserTrackingMode(MKUserTrackingMode.None, animated:true)
+            mapView.setUserTrackingMode(MKUserTrackingMode.none, animated:true)
         }
         
         // TODO
         // - In Sampling mode, show last sample info
         let samples = state.map.samples.map { (s) -> SampleAnnotation in
-            var typ = SampleAnnotationType.Summary
+            var typ = SampleAnnotationType.summary
             if (s.attempts>0 && s.count==0) {
-                typ = SampleAnnotationType.DeadZone
+                typ = SampleAnnotationType.deadZone
             }
             return SampleAnnotation(coordinate: s.location, type: typ)
         }
         let transmissions = state.map.transmissions.map { (s) -> SampleAnnotation in
             var type: SampleAnnotationType
             if s.ble_seq==nil {
-                type = SampleAnnotationType.TransmissionUntracked
+                type = SampleAnnotationType.transmissionUntracked
             }
             else if s.lora_seq==nil {
-                type = SampleAnnotationType.TransmissionTracked
+                type = SampleAnnotationType.transmissionTracked
             }
             else {
-                type = SampleAnnotationType.TransmissionSuccess
+                type = SampleAnnotationType.transmissionSuccess
             }
             return SampleAnnotation(coordinate: s.location, type: type)
         }
         let new = Set<SampleAnnotation>(samples).union(Set<SampleAnnotation>(transmissions))
         if let last = self.lastSamples {
             // Figure out what remains, what gets added, and what gets removed
-            let same = last.intersect(new)
-            let add = new.subtract(same)
-            let remove = last.subtract(same)
+            let same = last.intersection(new)
+            let add = new.subtracting(same)
+            let remove = last.subtracting(same)
             if !remove.isEmpty {
                 debugPrint("Removing", remove.count)
                 switch remove.count {

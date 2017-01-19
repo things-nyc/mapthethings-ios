@@ -8,7 +8,7 @@
 
 import CoreData
 import CoreLocation
-import ReactiveCocoa
+import ReactiveSwift
 import enum Result.NoError
 import Crashlytics
 
@@ -21,15 +21,15 @@ public struct Sample {
     var location: CLLocationCoordinate2D
     var rssi: Float
     var snr: Float
-    var timestamp: NSDate?
+    var timestamp: Date?
 }
 
 public struct TransSample {
     var location: CLLocationCoordinate2D
     var altitude: Double
-    var timestamp: NSDate?
+    var timestamp: Date?
 
-    var device: NSUUID? // LoraNode ID - device+ble_seq uniquely identify BLE transmit
+    var device: UUID? // LoraNode ID - device+ble_seq uniquely identify BLE transmit
     var ble_seq: UInt8?
     
     var lora_seq: UInt32?
@@ -43,7 +43,7 @@ public struct GridCell {
 
 public struct MapState {
     var currentLocation: CLLocation?
-    var updated: NSDate
+    var updated: Date
     var bounds: Edges
     var tracking: Bool
     var samples: [Sample]
@@ -52,14 +52,14 @@ public struct MapState {
 }
 
 public enum SamplingStrategy {
-    case ConnectedNode // Bluetooth connected node is directed by app to send TTN message
+    case connectedNode // Bluetooth connected node is directed by app to send TTN message
     //case Periodic // Node sends message periodically.
 }
 
 public enum SamplingMode {
-    case Play
-    case Pause
-    case Stop
+    case play
+    case pause
+    case stop
 }
 
 public struct SamplingState {
@@ -69,22 +69,22 @@ public struct SamplingState {
 }
 
 public struct Device {
-    public init(uuid: NSUUID, name: String) {
+    public init(uuid: UUID, name: String) {
         self.identifier = uuid
         self.name = name
     }
-    let identifier: NSUUID
+    let identifier: UUID
     var name: String
-    var devAddr: NSData?
-    var nwkSKey: NSData?
-    var appSKey: NSData?
-    var appKey: NSData?
-    var appEUI: NSData?
-    var devEUI: NSData?
+    var devAddr: Data?
+    var nwkSKey: Data?
+    var appSKey: Data?
+    var appKey: Data?
+    var appEUI: Data?
+    var devEUI: Data?
     var connected: Bool = false
-    var mode: SamplingMode = SamplingMode.Play
+    var mode: SamplingMode = SamplingMode.play
     var lastLocation: CLLocation?
-    var lastPacket: NSData?
+    var lastPacket: Data?
     var battery: UInt8 = 100
     var spreadingFactor: UInt8?
     var log: [String] = []
@@ -94,27 +94,27 @@ public struct Device {
 public struct SyncState {
     var syncWorking: Bool
     var syncPendingCount: Int
-    var lastPost: NSDate?
+    var lastPost: Date?
 
     var recordWorking: Bool
     var recordLoraToObject: [(NSManagedObjectID, UInt32)]
 }
 
 public struct AppState {
-    var now: NSDate
+    var now: Date
     var host: String
     var error: [String]
-    var bluetooth: Dictionary<NSUUID, Device>
-    var viewDetailDeviceID: NSUUID? = nil
+    var bluetooth: Dictionary<UUID, Device>
+    var viewDetailDeviceID: UUID? = nil
     var map: MapState
     var sampling: SamplingState
     var syncState: SyncState
 
-    var connectToDevice: NSUUID? = nil
-    var disconnectDevice: NSUUID? = nil
-    var sendPacket: NSUUID? = nil
-    var requestProvisioning: (NSUUID, NSUUID)? = nil // (click ID, device ID)
-    var assignProvisioning: (NSUUID, NSUUID)? = nil // (click ID, device ID)
+    var connectToDevice: UUID? = nil
+    var disconnectDevice: UUID? = nil
+    var sendPacket: UUID? = nil
+    var requestProvisioning: (UUID, UUID)? = nil // (click ID, device ID)
+    var assignProvisioning: (UUID, UUID)? = nil // (click ID, device ID)
 }
 
 private func defaultAppState() -> AppState {
@@ -123,16 +123,16 @@ private func defaultAppState() -> AppState {
     let transmissions = [TransSample]()
     let nyNE = CLLocationCoordinate2D(latitude: 40.8476, longitude: -73.0543)
     let nySW = CLLocationCoordinate2D(latitude: 40.4976, longitude: -73.8631)
-    let mapState = MapState(currentLocation: nil, updated: NSDate(), bounds: (ne: nyNE, sw: nySW), tracking: true, samples: samples, cells: cells, transmissions: transmissions)
-    let samplingState = SamplingState(strategy: SamplingStrategy.ConnectedNode, mode: SamplingMode.Stop, mostRecentSample: nil)
+    let mapState = MapState(currentLocation: nil, updated: Date(), bounds: (ne: nyNE, sw: nySW), tracking: true, samples: samples, cells: cells, transmissions: transmissions)
+    let samplingState = SamplingState(strategy: SamplingStrategy.connectedNode, mode: SamplingMode.stop, mostRecentSample: nil)
 
     var host = "map.thethings.nyc"
-    if let testHost = NSBundle.mainBundle().objectForInfoDictionaryKey("TestHost") as? String {
+    if let testHost = Bundle.main.object(forInfoDictionaryKey: "TestHost") as? String {
         host = testHost
     }
 
     return AppState(
-        now: NSDate(),
+        now: Date(),
         host: host,
         error: [],
         bluetooth: Dictionary(),
@@ -152,20 +152,21 @@ let defaultState = defaultAppState()
 public var appStateProperty = MutableProperty((old: defaultState, new: defaultState))
 public var appStateObservable = appStateProperty.signal
 
-let sq = dispatch_queue_create("AppState", DISPATCH_QUEUE_SERIAL)
+let sq = DispatchQueue(label: "AppState", attributes: [])
 
 // Update app state in serial queue to avoid threading conflicts
 public typealias AppStateUpdateFn = (AppState) -> AppState
-public func updateAppState(fn: AppStateUpdateFn) {
-    dispatch_async(sq) {
-        appStateProperty.modify({ (last: (old: AppState, new: AppState)) -> ((old: AppState, new: AppState)) in
-            let newState = fn(last.new)
+public func updateAppState(_ fn: @escaping AppStateUpdateFn) {
+    sq.async {
+        appStateProperty.modify({ (last) -> ((old: AppState, new: AppState)) in
+            // WARNING: Changing to 'let' causes tests to fail 20170119
+            var newState = fn(last.new)
             return (old: last.new, new: newState)
         })
     }
 }
 
-public func stateValChanged<T : Equatable>(state: (old: AppState, new: AppState), access: (AppState) -> T?) -> Bool {
+public func stateValChanged<T : Equatable>(_ state: (old: AppState, new: AppState), access: (AppState) -> T?) -> Bool {
     let new = access(state.new)
     let old = access(state.old)
     var changed = false
@@ -183,7 +184,7 @@ public func stateValChanged<T : Equatable>(state: (old: AppState, new: AppState)
     return changed
 }
 
-public func stateValChanged<T1 : Equatable, T2 : Equatable>(state: (old: AppState, new: AppState), access: (AppState) -> (T1, T2)?) -> Bool {
+public func stateValChanged<T1 : Equatable, T2 : Equatable>(_ state: (old: AppState, new: AppState), access: (AppState) -> (T1, T2)?) -> Bool {
     let new = access(state.new)
     let old = access(state.old)
     var changed = false
@@ -201,7 +202,7 @@ public func stateValChanged<T1 : Equatable, T2 : Equatable>(state: (old: AppStat
     return changed
 }
 
-public func setAppError(error: NSError, fn: String, domain: String) {
+public func setAppError(_ error: NSError, fn: String, domain: String) {
     let msg = "Error in \(domain)/\(fn): \(error)"
     debugPrint(msg)
     Crashlytics.sharedInstance().recordError(error, withAdditionalUserInfo: ["domain": domain, "function": fn])
@@ -212,7 +213,7 @@ public func setAppError(error: NSError, fn: String, domain: String) {
     }
 }
 
-public func setAppError(error: ErrorType, fn: String, domain: String) {
+public func setAppError(_ error: Error, fn: String, domain: String) {
     let msg = "Error in \(domain)/\(fn): \(error)"
     debugPrint(msg)
     let nserr = NSError(domain: domain, code: 0, userInfo: [NSLocalizedDescriptionKey: "\(error)"])

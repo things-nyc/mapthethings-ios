@@ -7,24 +7,24 @@
 //
 
 import UIKit
-import ReactiveCocoa
+import ReactiveSwift
 import Crashlytics
 
 extension UIImage {
-    class func circle(diameter: CGFloat, color: UIColor) -> UIImage? {
-        UIGraphicsBeginImageContextWithOptions(CGSizeMake(diameter, diameter), false, 0)
+    class func circle(_ diameter: CGFloat, color: UIColor) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: diameter, height: diameter), false, 0)
         if let ctx = UIGraphicsGetCurrentContext() {
             defer {
                 UIGraphicsEndImageContext()
             }
-            CGContextSaveGState(ctx)
+            ctx.saveGState()
             defer {
-                CGContextRestoreGState(ctx)
+                ctx.restoreGState()
             }
             
-            let rect = CGRectMake(0, 0, diameter, diameter)
-            CGContextSetFillColorWithColor(ctx, color.CGColor)
-            CGContextFillEllipseInRect(ctx, rect)
+            let rect = CGRect(x: 0, y: 0, width: diameter, height: diameter)
+            ctx.setFillColor(color.cgColor)
+            ctx.fillEllipse(in: rect)
             
             if let img = UIGraphicsGetImageFromCurrentImageContext() {
                 return img
@@ -44,7 +44,7 @@ class DevicesViewController: UITableViewController {
     func observeAppState() {
         // Copied from AppStateViewController because this inherits differently. Should mix in.
         // Listen for app state changes...
-        self.stateDisposer = appStateObservable.observeOn(QueueScheduler.mainQueueScheduler).observeNext({state in
+        self.stateDisposer = appStateObservable.observe(on: QueueScheduler.main).observeValues({state in
             //print(state)
             self.renderAppState(state.old, state: state.new)
         })
@@ -53,12 +53,12 @@ class DevicesViewController: UITableViewController {
     @IBOutlet weak var refreshButton: UIBarButtonItem?
     var state: AppState? = nil
     var devices: [Device] = []
-    let connectedImage = UIImage.circle(15, color: UIColor.greenColor())
+    let connectedImage = UIImage.circle(15, color: UIColor.green)
     
-    func renderAppState(oldState: AppState, state: AppState) {
+    func renderAppState(_ oldState: AppState, state: AppState) {
         self.state = state
-        self.devices = state.bluetooth.values.sort({ (a, b) -> Bool in
-            return a.identifier.UUIDString < b.identifier.UUIDString
+        self.devices = state.bluetooth.values.sorted(by: { (a, b) -> Bool in
+            return a.identifier.uuidString < b.identifier.uuidString
         })
         self.tableView.reloadData()
     }
@@ -80,10 +80,10 @@ class DevicesViewController: UITableViewController {
         renderAppState(oldState, state: state)
     }
 
-    @IBAction func rescanBluetooth(sender: UIButton) {
-        Answers.logCustomEventWithName("RescanBT", customAttributes: nil)
+    @IBAction func rescanBluetooth(_ sender: UIButton) {
+        Answers.logCustomEvent(withName: "RescanBT", customAttributes: nil)
         debugPrint("rescanBluetooth")
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.bluetooth!.rescan()
     }
     
@@ -94,22 +94,22 @@ class DevicesViewController: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
         return devices.count
     }
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("DeviceCell", forIndexPath: indexPath) as! DeviceCellView
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "DeviceCell", for: indexPath) as! DeviceCellView
         
         let device = self.devices[indexPath.row]
         cell.deviceName.text = device.name
         cell.connectedImage.image = device.connected ? connectedImage : nil
-        // cell.detailTextLabel?.text = device.identifier.UUIDString
+        // cell.detailTextLabel?.text = device.identifier.uuidString
         return cell
     }
 
@@ -151,7 +151,7 @@ class DevicesViewController: UITableViewController {
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
         

@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import ReactiveSwift
 @testable import MapTheThings
 
 class AppStateTests: XCTestCase {
@@ -24,9 +25,9 @@ class AppStateTests: XCTestCase {
     }
     
     func testObservingSyncChange() {
-        let expectation = expectationWithDescription("Should observe count set")
+        let expectation = self.expectation(description: "Should observe count set")
         
-        let disposer = appStateObservable.observeNext { (old, new) in
+        let disposer = appStateObservable.observeValues { (old, new) in
             if (old.syncState.syncPendingCount != 5 && new.syncState.syncPendingCount==5) {
                 XCTAssertEqual(5, new.syncState.syncPendingCount)
                 expectation.fulfill()
@@ -42,7 +43,7 @@ class AppStateTests: XCTestCase {
             return state
         }
         
-        waitForExpectationsWithTimeout(5.0) { (error) in
+        waitForExpectations(timeout: 5.0) { (error) in
             if let err = error {
                 XCTFail("Failed with error \(err)")
             }
@@ -50,9 +51,9 @@ class AppStateTests: XCTestCase {
     }
     
     func testObservingSyncChangeRepeated() {
-        let expectation = expectationWithDescription("Should observe count set")
+        let expectation = self.expectation(description: "Should observe count set")
         
-        let disposer = appStateObservable.observeNext { (old, new) in
+        let disposer = appStateObservable.observeValues { (old, new) in
             if (old.syncState.syncPendingCount != 5 && new.syncState.syncPendingCount==5) {
                 XCTAssertEqual(5, new.syncState.syncPendingCount)
                 expectation.fulfill()
@@ -68,7 +69,7 @@ class AppStateTests: XCTestCase {
             return state
         }
         
-        waitForExpectationsWithTimeout(5.0) { (error) in
+        waitForExpectations(timeout: 5.0) { (error) in
             if let err = error {
                 XCTFail("Failed with error \(err)")
             }
@@ -77,7 +78,7 @@ class AppStateTests: XCTestCase {
     
     func testPerformanceExample() {
         // This is an example of a performance test case.
-        self.measureBlock {
+        self.measure {
             // Put the code you want to measure the time of here.
         }
     }

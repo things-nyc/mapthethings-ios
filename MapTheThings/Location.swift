@@ -12,7 +12,7 @@ import CoreLocation
 
 let MINIMUM_HORIZONTAL_ACCURACY_METERS = 25.0
 
-public class Location : NSObject, CLLocationManagerDelegate {
+open class Location : NSObject, CLLocationManagerDelegate {
     let locationManager : CLLocationManager
     
     public override init() {
@@ -22,7 +22,7 @@ public class Location : NSObject, CLLocationManagerDelegate {
         
         if CLLocationManager.locationServicesEnabled() {
             let status = CLLocationManager.authorizationStatus()
-            if (status==CLAuthorizationStatus.AuthorizedWhenInUse || status == CLAuthorizationStatus.Denied) {
+            if (status==CLAuthorizationStatus.authorizedWhenInUse || status == CLAuthorizationStatus.denied) {
 //                let title = (status == CLAuthorizationStatus.Denied) ? "Location services are off" : "Background location is not enabled";
 //                let message = "To use background location you must turn on 'Always' in the Location Services Settings";
 //                
@@ -44,7 +44,7 @@ public class Location : NSObject, CLLocationManagerDelegate {
                 locationManager.requestAlwaysAuthorization()
             }
                 // The user has not enabled any location services. Request background authorization.
-            else if (status == CLAuthorizationStatus.NotDetermined) {
+            else if (status == CLAuthorizationStatus.notDetermined) {
                 locationManager.requestAlwaysAuthorization()
             }
 
@@ -59,7 +59,7 @@ public class Location : NSObject, CLLocationManagerDelegate {
         }
     }
     
-    public func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    open func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         // Ignore updates that aren't at least accurate to 25 meters
         if let location = locations.last {
             if (location.horizontalAccuracy<MINIMUM_HORIZONTAL_ACCURACY_METERS) {
@@ -73,11 +73,11 @@ public class Location : NSObject, CLLocationManagerDelegate {
         }
     }
     
-    public func locationManagerDidPauseLocationUpdates(manager: CLLocationManager) {
+    open func locationManagerDidPauseLocationUpdates(_ manager: CLLocationManager) {
         debugPrint("locationManagerDidPauseLocationUpdates")
     }
-    public func locationManager(manager: CLLocationManager,
-                           didFailWithError error: NSError) {
+    open func locationManager(_ manager: CLLocationManager,
+                           didFailWithError error: Error) {
         debugPrint("didFailWithError", error)
     }
 }

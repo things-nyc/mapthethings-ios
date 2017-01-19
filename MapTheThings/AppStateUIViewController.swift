@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ReactiveCocoa
+import ReactiveSwift
 
 class AppStateUIViewController: UIViewController {
     var stateDisposer: Disposable?
@@ -16,9 +16,10 @@ class AppStateUIViewController: UIViewController {
         super.viewDidLoad()
         
         // Listen for app state changes...
-        self.stateDisposer = appStateObservable.observeOn(QueueScheduler.mainQueueScheduler).observeNext({state in
+        self.stateDisposer = appStateObservable.observe(on: QueueScheduler.main)
+            .observeValues({ state in
             //print(state)
-            self.renderAppState(state.old, state: state.new)
+            return self.renderAppState(state.old, state: state.new)
         })
 
         // Set initial view
@@ -26,7 +27,7 @@ class AppStateUIViewController: UIViewController {
         renderAppState(oldState, state: state)
     }
     
-    func renderAppState(oldState: AppState, state: AppState) {
+    func renderAppState(_ oldState: AppState, state: AppState) -> Void {
         preconditionFailure("This method must be overridden")
     }
 }

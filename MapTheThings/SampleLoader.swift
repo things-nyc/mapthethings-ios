@@ -10,7 +10,7 @@ import Foundation
 import CoreLocation
 import Haneke
 import PromiseKit
-//import ReactiveCocoa
+//import ReactiveSwift
 
 func == <T:Equatable> (tuple1:(T,T),tuple2:(T,T)) -> Bool
 {
@@ -30,52 +30,54 @@ class SampleLoader {
     
     init() {
 //        self.boundsDisposer =
-        appStateObservable.observeNext({state in
+        appStateObservable.observeValues({state in
             self.checkBoundsChanged(state.new.map.bounds, host: state.new.host)
         })
     }
     
-    private func checkBoundsChanged(bounds: Edges, host: String) {
-        if let last = self.lastBounds where (last.ne == bounds.ne && last.sw == bounds.sw) {
+    fileprivate func checkBoundsChanged(_ bounds: Edges, host: String) {
+        if let last = self.lastBounds, (last.ne == bounds.ne && last.sw == bounds.sw) {
             return
         }
         lastBounds = bounds
         load(bounds, host: host)
     }
     
-    private func load(bounds: Edges, host: String) {
+    fileprivate func load(_ bounds: Edges, host: String) {
         let fmt =  { (x: Double) -> (String) in return String(format: "%0.6f", x) }
         let apiurl = "http://\(host)/api/v0/grids" +
             "/\(fmt(bounds.ne.latitude))/\(fmt(bounds.sw.longitude))" +
             "/\(fmt(bounds.sw.latitude))/\(fmt(bounds.ne.longitude))"
         debugPrint("Fetching grids for \(apiurl)")
-        let requestURL: NSURL = NSURL(string: apiurl)!
+        let requestURL: URL = URL(string: apiurl)!
         jsonCache.fetch(URL: requestURL).onSuccess { json in
             //debugPrint("JSON", json)
-            let gridUrls = json.array
-            let sampleLists = gridUrls.map({ (gridUrl: Any) -> (Promise<Array<Sample>>) in
-                let gridUrlString = gridUrl as! String
-                let requestURL: NSURL = NSURL(string: gridUrlString)!
-                return self.loadGrid(requestURL)
-            })
-            when(sampleLists).then { (lists) -> (Void) in
-                let allSamples = lists.reduce([Sample](), combine: { all, list in
-                    return all + list
+            if let gridUrls = json.array {
+                let sampleLists = gridUrls.map({ (gridUrl: Any) -> (Promise<Array<Sample>>) in
+                    let gridUrlString = gridUrl as! String
+                    let requestURL: NSURL = NSURL(string: gridUrlString)!
+                    return self.loadGrid(requestURL)
                 })
-                self.gotSamples(allSamples)
-            }
+                
+                _ = when(fulfilled: sampleLists).then { (lists) -> (Void) in
+                    let allSamples = lists.reduce([Sample](), { all, list in
+                        return all + list
+                    })
+                    self.gotSamples(allSamples)
+                }
 
-            self.gotCells(gridUrls)
+                self.gotCells(gridUrls)
+            }
         }
     }
     
-    private func loadGrid(gridUrl: NSURL) -> Promise<Array<Sample>> {
+    fileprivate func loadGrid(_ gridUrl: NSURL) -> Promise<Array<Sample>> {
         //debugPrint("loadGrid(\(gridUrl))")
         return Promise { fulfill, reject in
-            jsonCache.fetch(URL: gridUrl).onSuccess { json in
+            jsonCache.fetch(URL: gridUrl as URL).onSuccess { json in
                 //debugPrint("JSON Grid", json)
                 let cells = json.dictionary["cells"]! as! [String : AnyObject]
-                let samples = cells.reduce([], combine: { (r: Array<Sample>, c: (String, AnyObject)) -> Array<Sample> in
+                let samples = cells.reduce([], { (r: Array<Sample>, c: (String, AnyObject)) -> Array<Sample> in
                     let cell = c.1
                     let clat = (cell["clat"] as! NSNumber).doubleValue
                     let clon = (cell["clon"] as! NSNumber).doubleValue
@@ -88,7 +90,7 @@ class SampleLoader {
                     let attempts = (cell["attempt-cnt"] as! NSNumber).intValue
                     
                     // timestamp = cell["timestamp"]
-                    let s = Sample(count: count, attempts: attempts,
+                    let s = Sample(count: Int32(count), attempts: Int32(attempts),
                         location: CLLocationCoordinate2D(latitude: clat, longitude: clon),
                         rssi: rssi, snr: snr,
                         timestamp: nil)
@@ -96,7 +98,7 @@ class SampleLoader {
                 })
                 fulfill(samples)
             }.onFailure({ (error) in
-                if (error?.code == -402) {
+                if error?._code == -402 {
                     fulfill([Sample]())
                 }
                 else {
@@ -106,12 +108,12 @@ class SampleLoader {
         }
     }
     
-    private func hashToGridCell(hash: String) -> GridCell {
-        let hexhash = hash.substringFromIndex(hash.startIndex.advancedBy(1))
+    fileprivate func hashToGridCell(_ hash: String) -> GridCell {
+        let hexhash = hash.substring(from: hash.characters.index(hash.startIndex, offsetBy: 1))
 
         // Based on https://github.com/kungfoo/geohash-java/blob/master/src/main/java/ch/hsr/geohash/GeoHash.java#L95
         
-        func divideRangeDecode(range: [Double], b: Bool) -> [Double] {
+        func divideRangeDecode(_ range: [Double], b: Bool) -> [Double] {
             let mid = (range[0] + range[1]) / 2.0;
             if (b) {
 //                hash.addOnBitToEnd();
@@ -128,11 +130,11 @@ class SampleLoader {
         // TODO: have to prefix binary string with 0 bits as determined by hash prefix character
         let (latitudeRange, longitudeRange) = hexhash.characters.reduce(
             (startLatitudeRange, startLongitudeRange),
-            combine: { (latLon, hexChar) -> ([Double], [Double]) in
+            { (latLon, hexChar) -> ([Double], [Double]) in
             let cd = Int("\(hexChar)", radix: 16)!
             var latitudeRange = latLon.0
             var longitudeRange = latLon.1
-            for j in (0...3).reverse() {
+            for j in (0...3).reversed() {
                 let mask = 1 << j
                 if (isEvenBit) {
                     longitudeRange = divideRangeDecode(longitudeRange, b: (cd & mask) != 0)
@@ -153,17 +155,17 @@ class SampleLoader {
         return GridCell(nw: nw, se: se)
     }
     
-    private func gotCells(urls: [AnyObject]) {
+    fileprivate func gotCells(_ urls: [AnyObject]) {
         let cells = urls.map({ (gridUrl: Any) -> GridCell in
             let gridUrlString = gridUrl as! String
             // https://s3.amazonaws.com/nyc.thethings.map.grids/ED2791W-v0
             let regex = try! NSRegularExpression(pattern: "/([^/]+)-v\\d$", options: [])
-            let matches = regex.matchesInString(gridUrlString,
+            let matches = regex.matches(in: gridUrlString,
                 options: [], range: NSMakeRange(0, gridUrlString.characters.count))
-            let range = matches.first!.rangeAtIndex(1) // Group
-            let r = gridUrlString.startIndex.advancedBy(range.location) ..<
-                gridUrlString.startIndex.advancedBy(range.location+range.length)
-            let hash = String(gridUrlString.substringWithRange(r).characters.reverse())
+            let range = matches.first!.rangeAt(1) // Group
+            let r = gridUrlString.characters.index(gridUrlString.startIndex, offsetBy: range.location) ..<
+                gridUrlString.characters.index(gridUrlString.startIndex, offsetBy: range.location+range.length)
+            let hash = String(gridUrlString.substring(with: r).characters.reversed())
             return self.hashToGridCell(hash)
         })
         updateAppState { (old) -> AppState in
@@ -173,7 +175,7 @@ class SampleLoader {
         }
     }
     
-    private func gotSamples(samples: Array<Sample>) {
+    fileprivate func gotSamples(_ samples: Array<Sample>) {
         updateAppState { (old) -> AppState in
             var state = old
             state.map.samples = samples

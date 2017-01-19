@@ -9,20 +9,20 @@
 import MapKit
 
 public enum SampleAnnotationType {
-    case Summary
-    case DeadZone
+    case summary
+    case deadZone
 
-    case TransmissionUntracked
-    case TransmissionTracked
-    case TransmissionSuccess
-    case TransmissionError
+    case transmissionUntracked
+    case transmissionTracked
+    case transmissionSuccess
+    case transmissionError
 }
 
-public class SampleAnnotation : NSObject, MKAnnotation {
-    public let title: String?
-    public let subtitle: String?
-    public let coordinate: CLLocationCoordinate2D
-    public let type: SampleAnnotationType
+open class SampleAnnotation : NSObject, MKAnnotation {
+    open let title: String?
+    open let subtitle: String?
+    open let coordinate: CLLocationCoordinate2D
+    open let type: SampleAnnotationType
     
     public init(coordinate: CLLocationCoordinate2D, type: SampleAnnotationType) {
         self.title = nil
@@ -33,19 +33,19 @@ public class SampleAnnotation : NSObject, MKAnnotation {
         super.init()
     }
     
-    public func pinTintColor() -> UIColor {
+    open func pinTintColor() -> UIColor {
         switch self.type {
-        case .Summary: return UIColor.blueColor()
-        case .DeadZone: return UIColor.grayColor()
+        case .summary: return UIColor.blue
+        case .deadZone: return UIColor.gray
 
-        case .TransmissionUntracked: return UIColor.yellowColor()
-        case .TransmissionTracked: return UIColor(red: 0.6, green: 1, blue: 0.6, alpha: 0.5)
-        case .TransmissionSuccess: return UIColor.greenColor()
-        case .TransmissionError: return UIColor.redColor()
+        case .transmissionUntracked: return UIColor.yellow
+        case .transmissionTracked: return UIColor(red: 0.6, green: 1, blue: 0.6, alpha: 0.5)
+        case .transmissionSuccess: return UIColor.green
+        case .transmissionError: return UIColor.red
         }
     }
     
-    public override var hashValue: Int {
+    open override var hashValue: Int {
         get {
             var hash: Int = 0
             if let title = self.title {
@@ -61,7 +61,7 @@ public class SampleAnnotation : NSObject, MKAnnotation {
         }
     }
     // Thanks to http://stackoverflow.com/questions/33319959/nsobject-subclass-in-swift-hash-vs-hashvalue-isequal-vs
-    override public func isEqual(object: AnyObject?) -> Bool {
+    override open func isEqual(_ object: Any?) -> Bool {
         if let other = object as? SampleAnnotation {
             return self==other
         } else {
@@ -69,7 +69,7 @@ public class SampleAnnotation : NSObject, MKAnnotation {
         }
     }
 }
-func dEq(a: Double, b: Double) -> Bool {
+func dEq(_ a: Double, b: Double) -> Bool {
     return fabs(a - b) < DBL_EPSILON
 }
 public func ==(lhs: SampleAnnotation, rhs: SampleAnnotation) -> Bool {
@@ -81,11 +81,11 @@ public func ==(lhs: SampleAnnotation, rhs: SampleAnnotation) -> Bool {
 
 
 extension MapViewController {
-    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         if let annotation = annotation as? SampleAnnotation {
             let identifier = "pin"
             var view: MKPinAnnotationView
-            if let dequeuedView = mapView.dequeueReusableAnnotationViewWithIdentifier(identifier)
+            if let dequeuedView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
                 as? MKPinAnnotationView { // 2
                 dequeuedView.annotation = annotation
                 view = dequeuedView
@@ -94,7 +94,7 @@ extension MapViewController {
                 view = MKPinAnnotationView(annotation: annotation, reuseIdentifier: identifier)
                 view.canShowCallout = true
                 view.calloutOffset = CGPoint(x: -5, y: 5)
-                view.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
+                view.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
             }
             view.pinTintColor = annotation.pinTintColor()
             return view
