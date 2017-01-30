@@ -62,9 +62,9 @@ open class Transmission: NSManagedObject {
         // explicitly support the pattern when I get a chance.
         
         // Recognize that there is work to do and flag that it should happen
-        self.syncWorkDisposer = appStateObservable.observeValues { (old, new) in
-            if (!new.syncState.syncWorking
-                && new.syncState.syncPendingCount>0) {
+        self.syncWorkDisposer = appStateObservable.observeValues { signal in
+            if (!signal.new.syncState.syncWorking
+                && signal.new.syncState.syncPendingCount>0) {
                 // Don't just start async work here. There's a chance with 
                 // multiple enqueued updates to AppState that this method will be called 
                 // many times in the same state of needing to start work. We wouldn't want to 
@@ -78,17 +78,17 @@ open class Transmission: NSManagedObject {
         }
         
         // Recognize that the work flag went up and do the work.
-        self.syncDisposer = appStateObservable.observeValues { (old, new) in
-            if (!old.syncState.syncWorking && new.syncState.syncWorking) {
-                debugPrint("Sync one: \(new.syncState)")
-                syncOneTransmission(data, host: new.host)
+        self.syncDisposer = appStateObservable.observeValues { signal in
+            if (!signal.old.syncState.syncWorking && signal.new.syncState.syncWorking) {
+                debugPrint("Sync one: \(signal.new.syncState)")
+                syncOneTransmission(data, host: signal.new.host)
             }
         }
 
         // Recognize that there is work to do and flag that it should happen
-        self.recordWorkDisposer = appStateObservable.observeValues { (old, new) in
-            if (!new.syncState.recordWorking
-                && new.syncState.recordLoraToObject.count>0) {
+        self.recordWorkDisposer = appStateObservable.observeValues { signal in
+            if (!signal.new.syncState.recordWorking
+                && signal.new.syncState.recordLoraToObject.count>0) {
                 updateAppState({ (old) -> AppState in
                     var state = old
                     state.syncState.recordWorking = true
@@ -98,10 +98,10 @@ open class Transmission: NSManagedObject {
         }
         
         // Recognize that the work flag went up and do the work.
-        self.recordDisposer = appStateObservable.observeValues { (old, new) in
-            if (!old.syncState.recordWorking && new.syncState.recordWorking) {
-                debugPrint("Record one: \(new.syncState)")
-                recordOneLoraSeqNo(data, update: new.syncState.recordLoraToObject)
+        self.recordDisposer = appStateObservable.observeValues { signal in
+            if (!signal.old.syncState.recordWorking && signal.new.syncState.recordWorking) {
+                debugPrint("Record one: \(signal.new.syncState)")
+                recordOneLoraSeqNo(data, update: signal.new.syncState.recordLoraToObject)
             }
         }
 

@@ -149,7 +149,8 @@ private func defaultAppState() -> AppState {
 }
 
 let defaultState = defaultAppState()
-public var appStateProperty = MutableProperty((old: defaultState, new: defaultState))
+public typealias AppStateSignal = (old: AppState, new: AppState)
+public var appStateProperty = MutableProperty<AppStateSignal>((old: defaultState, new: defaultState))
 public var appStateObservable = appStateProperty.signal
 
 let sq = DispatchQueue(label: "AppState", attributes: [])
@@ -158,15 +159,14 @@ let sq = DispatchQueue(label: "AppState", attributes: [])
 public typealias AppStateUpdateFn = (AppState) -> AppState
 public func updateAppState(_ fn: @escaping AppStateUpdateFn) {
     sq.async {
-        appStateProperty.modify({ (last) -> ((old: AppState, new: AppState)) in
-            // WARNING: Changing to 'let' causes tests to fail 20170119
-            var newState = fn(last.new)
-            return (old: last.new, new: newState)
+        appStateProperty.modify({ (mutable) -> Void in
+            mutable.old = mutable.new
+            mutable.new = fn(mutable.new)
         })
     }
 }
 
-public func stateValChanged<T : Equatable>(_ state: (old: AppState, new: AppState), access: (AppState) -> T?) -> Bool {
+public func stateValChanged<T : Equatable>(_ state: AppStateSignal, access: (AppState) -> T?) -> Bool {
     let new = access(state.new)
     let old = access(state.old)
     var changed = false
@@ -184,7 +184,7 @@ public func stateValChanged<T : Equatable>(_ state: (old: AppState, new: AppStat
     return changed
 }
 
-public func stateValChanged<T1 : Equatable, T2 : Equatable>(_ state: (old: AppState, new: AppState), access: (AppState) -> (T1, T2)?) -> Bool {
+public func stateValChanged<T1 : Equatable, T2 : Equatable>(_ state: AppStateSignal, access: (AppState) -> (T1, T2)?) -> Bool {
     let new = access(state.new)
     let old = access(state.old)
     var changed = false

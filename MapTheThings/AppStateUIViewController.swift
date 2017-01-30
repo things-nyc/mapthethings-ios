@@ -23,8 +23,8 @@ class AppStateUIViewController: UIViewController {
         })
 
         // Set initial view
-        let (oldState, state) = appStateProperty.value
-        renderAppState(oldState, state: state)
+        let initial = appStateProperty.value
+        renderAppState(initial.old, state: initial.new)
     }
     
     func renderAppState(_ oldState: AppState, state: AppState) -> Void {
