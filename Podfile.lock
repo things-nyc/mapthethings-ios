@@ -5,6 +5,7 @@ PODS:
     - Fabric (~> 1.6.3)
   - Fabric (1.6.11)
   - HanekeSwift (0.10.1)
+  - OAuthSwift (1.1.0)
   - OMGHTTPURLRQ (3.2.2):
     - OMGHTTPURLRQ/RQ (= 3.2.2)
   - OMGHTTPURLRQ/FormURLEncode (3.2.2)
@@ -35,6 +36,7 @@ DEPENDENCIES:
   - Crashlytics (= 3.8.3)
   - Fabric
   - HanekeSwift
+  - OAuthSwift
   - PromiseKit (~> 3.2)
   - ReactiveCocoa
   - Underscore.m
@@ -44,13 +46,14 @@ SPEC CHECKSUMS:
   BLEHelper: ec81a9bd828723d84c35670993bb0eb5157c9bf8
   Crashlytics: 2b6dbe138a42395577cfa73dfa1aa7248cadf39e
   Fabric: 5911403591946b8228ab1c51d98f1d7137e863c6
-  HanekeSwift: 08e47d3d0f2899ec58e5d257beba0de619aca9e8
+  HanekeSwift: '08e47d3d0f2899ec58e5d257beba0de619aca9e8'
+  OAuthSwift: 7ec2c62274f6bdc30b1ba3b799c39a6fdcaea0e5
   OMGHTTPURLRQ: edb14c7d28add69226b79d826f930805927a0ffa
   PromiseKit: d3393df0dfd7ed208cec0267dce13c66d9c09d0a
   ReactiveCocoa: 72263e7ac0770c274617ccd345e01049d0ca38ae
   Result: 18e1a7597fbcca5923c565b40a25a98afafdee02
   Underscore.m: dc9ca06fe2c9a79d01ce20c3d2c1e8f91f2d92dc
 
-PODFILE CHECKSUM: 5dec9c4db3bb9b369919da915849cd9a070282ab
+PODFILE CHECKSUM: 24791c541ce7552665acbb60f7ce689cff7ccf8c
 
 COCOAPODS: 1.1.1

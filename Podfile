@@ -9,6 +9,7 @@ target 'MapTheThings' do
   pod 'ReactiveCocoa'
   pod 'HanekeSwift'
   pod 'Alamofire', '~> 3'
+  pod 'OAuthSwift'
   #pod 'PromiseKit/Alamofire', '~> 4.0'
   pod 'PromiseKit', '~> 3.2'
   #pod 'Reachability'

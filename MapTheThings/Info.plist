@@ -18,10 +18,19 @@
 	<string>1.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>mapthethings</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>201701110217</string>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 	<key>Fabric</key>
 	<dict>
 		<key>APIKey</key>
@@ -36,6 +45,10 @@
 			</dict>
 		</array>
 	</dict>
+	<key>FakeDevice</key>
+	<integer>0</integer>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -86,10 +99,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>FakeDevice</key>
-	<integer>0</integer>
-	<key>zTestHost</key>
-	<string>192.168.17.117:5000</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -97,5 +106,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>zTestHost</key>
+	<string>192.168.17.117:5000</string>
 </dict>
 </plist>
