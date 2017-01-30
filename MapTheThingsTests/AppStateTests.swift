@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import ReactiveSwift
 @testable import MapTheThings
 
 class AppStateTests: XCTestCase {
@@ -23,12 +24,38 @@ class AppStateTests: XCTestCase {
         super.tearDown()
     }
     
-    func testObservingSyncChange() {
-        let expectation = expectationWithDescription("Should observe count set")
+    func testModifyingAppStateStruct() {
+        let state = defaultState
         
-        let disposer = appStateObservable.observeNext { (old, new) in
-            if (old.syncState.syncPendingCount != 5 && new.syncState.syncPendingCount==5) {
-                XCTAssertEqual(5, new.syncState.syncPendingCount)
+        var mutable1 = state
+        let now = Date()
+        mutable1.now = now
+        let copy = mutable1
+        XCTAssertEqual(now, mutable1.now)
+        XCTAssertEqual(now, copy.now)
+        
+        var mutable2 = state
+        XCTAssertEqual(0, mutable2.syncState.syncPendingCount)
+        mutable2.syncState.syncPendingCount = 2
+        XCTAssertEqual(2, mutable2.syncState.syncPendingCount)
+        let copy2 = mutable2
+        XCTAssertEqual(2, copy2.syncState.syncPendingCount)
+        
+        let mutator = { (state: AppState) -> AppState in
+            var mutable3 = state
+            mutable3.syncState.syncPendingCount = 2
+            return mutable3
+        }
+        let copy3 = mutator(state)
+        XCTAssertEqual(2, copy3.syncState.syncPendingCount)
+    }
+    
+    func testObservingSyncChange() {
+        let expectation = self.expectation(description: "Should observe count set")
+        
+        let disposer = appStateObservable.observeValues { signal in
+            if (signal.old.syncState.syncPendingCount != 5 && signal.new.syncState.syncPendingCount==5) {
+                XCTAssertEqual(5, signal.new.syncState.syncPendingCount)
                 expectation.fulfill()
             }
         }
@@ -42,7 +69,7 @@ class AppStateTests: XCTestCase {
             return state
         }
         
-        waitForExpectationsWithTimeout(5.0) { (error) in
+        waitForExpectations(timeout: 10.0) { (error) in
             if let err = error {
                 XCTFail("Failed with error \(err)")
             }
@@ -50,11 +77,11 @@ class AppStateTests: XCTestCase {
     }
     
     func testObservingSyncChangeRepeated() {
-        let expectation = expectationWithDescription("Should observe count set")
+        let expectation = self.expectation(description: "Should observe count set")
         
-        let disposer = appStateObservable.observeNext { (old, new) in
-            if (old.syncState.syncPendingCount != 5 && new.syncState.syncPendingCount==5) {
-                XCTAssertEqual(5, new.syncState.syncPendingCount)
+        let disposer = appStateObservable.observeValues { signal in
+            if (signal.old.syncState.syncPendingCount != 5 && signal.new.syncState.syncPendingCount==5) {
+                XCTAssertEqual(5, signal.new.syncState.syncPendingCount)
                 expectation.fulfill()
             }
         }
@@ -68,7 +95,7 @@ class AppStateTests: XCTestCase {
             return state
         }
         
-        waitForExpectationsWithTimeout(5.0) { (error) in
+        waitForExpectations(timeout: 5.0) { (error) in
             if let err = error {
                 XCTFail("Failed with error \(err)")
             }
@@ -77,7 +104,7 @@ class AppStateTests: XCTestCase {
     
     func testPerformanceExample() {
         // This is an example of a performance test case.
-        self.measureBlock {
+        self.measure {
             // Put the code you want to measure the time of here.
         }
     }

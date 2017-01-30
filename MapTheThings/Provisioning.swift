@@ -11,9 +11,9 @@ import Foundation
 import MapKit
 import Alamofire
 import PromiseKit
-import ReactiveCocoa
+import ReactiveSwift
 
-extension NSData {
+extension Data {
 // Thanks: http://stackoverflow.com/a/26502285/1207583
     /// Create `NSData` from hexadecimal string representation
     ///
@@ -21,46 +21,46 @@ extension NSData {
     ///
     /// - returns: Data represented by this hexadecimal string.
     
-    static func dataWithHexString(s: String) -> NSData? {
+    static func dataWithHexString(_ s: String) -> Data? {
         let data = NSMutableData(capacity: s.characters.count / 2)
         
-        let regex = try! NSRegularExpression(pattern: "[0-9a-f]{1,2}", options: .CaseInsensitive)
-        regex.enumerateMatchesInString(s, options: [], range: NSMakeRange(0, s.characters.count)) { match, flags, stop in
-            let byteString = (s as NSString).substringWithRange(match!.range)
+        let regex = try! NSRegularExpression(pattern: "[0-9a-f]{1,2}", options: .caseInsensitive)
+        regex.enumerateMatches(in: s, options: [], range: NSMakeRange(0, s.characters.count)) { match, flags, stop in
+            let byteString = (s as NSString).substring(with: match!.range)
             var num = UInt8(byteString, radix: 16)
-            data?.appendBytes(&num, length: 1)
+            data?.append(&num, length: 1)
         }
         
-        return data
+        return data as Data?
     }
 }
 
-public class Provisioning {
+open class Provisioning {
     var provisionDisposer: Disposable?
 
     init() {
-        self.provisionDisposer = appStateObservable.observeNext { update in
-            if let (_, deviceID) = update.new.requestProvisioning
-                where stateValChanged(update, access: { $0.requestProvisioning}) {
+        self.provisionDisposer = appStateObservable.observeValues { update in
+            if let (_, deviceID) = update.new.requestProvisioning,
+                stateValChanged(update, access: { $0.requestProvisioning}) {
                 self.getOTAA(deviceID, host: update.new.host)
             }
         }
     }
 
-    private func getOTAA(deviceID: NSUUID, host: String) {
-        let parameters: [String: AnyObject] = ["devName": "My Name"]
+    fileprivate func getOTAA(_ deviceID: UUID, host: String) {
+        let parameters: [String: AnyObject] = ["devName": "My Name" as AnyObject]
         debugPrint("Params: \(parameters)")
         let url = "http://\(host)/api/v0/provision-device"
         debugPrint("URL: \(url)")
         let rsp = Promise<NSDictionary> { fulfill, reject in
-            return request(.POST, url,
+            return request(url, method: .post,
                     parameters: parameters,
-                    encoding: ParameterEncoding.JSON)
-                .responseJSON(queue: nil, options: .AllowFragments, completionHandler: { response in
+                    encoding: JSONEncoding())
+                .responseJSON(queue: nil, options: .allowFragments, completionHandler: { response in
                     switch response.result {
-                    case .Success(let value):
+                    case .success(let value):
                         fulfill(value as! NSDictionary)
-                    case .Failure(let error):
+                    case .failure(let error):
                         reject(error)
                     }
                 })
@@ -68,12 +68,12 @@ public class Provisioning {
         rsp.then { jsonResponse -> Void in
             debugPrint(jsonResponse)
             if let appKey = jsonResponse["app_key"] as? String,
-                let appKeyData = NSData.dataWithHexString(appKey),
+                let appKeyData = Data.dataWithHexString(appKey),
                 let appEUI = jsonResponse["app_eui"] as? String,
-                let appEUIData = NSData.dataWithHexString(appEUI),
+                let appEUIData = Data.dataWithHexString(appEUI),
                 let devEUI = jsonResponse["dev_eui"] as? String,
-                let devEUIData = NSData.dataWithHexString(devEUI)
-                where appKeyData.length==16 && appEUIData.length==8 && devEUIData.length==8 {
+                let devEUIData = Data.dataWithHexString(devEUI),
+                appKeyData.count==16 && appEUIData.count==8 && devEUIData.count==8 {
                 updateAppState {
                     var state = $0
                     if var dev = state.bluetooth[deviceID] {
@@ -81,7 +81,7 @@ public class Provisioning {
                         dev.appEUI = appEUIData
                         dev.devEUI = devEUIData
                         state.bluetooth[deviceID] = dev
-                        state.assignProvisioning = (NSUUID(), deviceID)
+                        state.assignProvisioning = (UUID(), deviceID)
                     }
                     return state
                 }
@@ -94,7 +94,7 @@ public class Provisioning {
                 let userInfo = [NSLocalizedFailureReasonErrorKey: msg]
                 throw NSError(domain: "web", code: 0, userInfo: userInfo)
             }
-        }.error { (error) in
+        }.catch { (error) in
             debugPrint("\(error)")
             setAppError(error, fn: "getOTAA", domain: "web")
         }

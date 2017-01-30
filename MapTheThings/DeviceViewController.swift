@@ -10,23 +10,20 @@ import UIKit
 import CoreLocation
 import Crashlytics
 
-extension NSData {
+extension Data {
     
     func hexadecimalString() -> String? {
-        let buffer = UnsafePointer<UInt8>(self.bytes)
-        if buffer == nil {
-            return nil
-        }
+        let buffer = (self as NSData).bytes.bindMemory(to: UInt8.self, capacity: self.count)
         
         var hexadecimalString = ""
-        for i in 0..<self.length {
-            hexadecimalString += String(format: "%02x", buffer.advancedBy(i).memory)
+        for i in 0..<self.count {
+            hexadecimalString += String(format: "%02x", buffer.advanced(by: i).pointee)
         }
-        return hexadecimalString.uppercaseString
+        return hexadecimalString.uppercased()
     }
 }
 
-func stringFromTimeInterval(interval:NSTimeInterval) -> String {
+func stringFromTimeInterval(_ interval:TimeInterval) -> String {
     
     let ti = NSInteger(interval)
     
@@ -73,10 +70,10 @@ class DeviceViewController: AppStateUIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        Answers.logContentViewWithName("DeviceView", contentType: "View", contentId: "DeviceView", customAttributes: nil)
+        Answers.logContentView(withName: "DeviceView", contentType: "View", contentId: "DeviceView", customAttributes: nil)
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         updateAppState {
             var state = $0
             state.viewDetailDeviceID = nil
@@ -84,17 +81,17 @@ class DeviceViewController: AppStateUIViewController {
         }
     }
     
-    @IBAction func sendPacket(sender: UIButton) {
-        Answers.logCustomEventWithName("ManualSend", customAttributes: nil)
+    @IBAction func sendPacket(_ sender: UIButton) {
+        Answers.logCustomEvent(withName: "ManualSend", customAttributes: nil)
         debugPrint("sendPacket button pressed")
         updateAppState { (old) -> AppState in
             var state = old
-            state.sendPacket = NSUUID() // Each press of command
+            state.sendPacket = UUID() // Each press of command
             return state
         }
     }
     
-    @IBAction func toggleProvisioningView(sender: UIButton) {
+    @IBAction func toggleProvisioningView(_ sender: UIButton) {
         updateAppState { (old) -> AppState in
             var state = old
             if let devID = state.viewDetailDeviceID, var dev = state.bluetooth[devID] {
@@ -105,53 +102,53 @@ class DeviceViewController: AppStateUIViewController {
         }
     }
     
-    @IBAction func getOTAA(sender: UIButton) {
-        Answers.logCustomEventWithName("getOTAA", customAttributes: nil)
+    @IBAction func getOTAA(_ sender: UIButton) {
+        Answers.logCustomEvent(withName: "getOTAA", customAttributes: nil)
         debugPrint("getOTAA button pressed")
         updateAppState { (old) -> AppState in
             var state = old
             if let devID = old.viewDetailDeviceID {
-                state.requestProvisioning = (NSUUID(), devID)
+                state.requestProvisioning = (UUID(), devID)
             }
             return state
         }
     }
 
     
-    @IBAction func sendTestPacket(sender: UIButton) {
-        Answers.logCustomEventWithName("TestPacket", customAttributes: nil)
+    @IBAction func sendTestPacket(_ sender: UIButton) {
+        Answers.logCustomEvent(withName: "TestPacket", customAttributes: nil)
         debugPrint("sendTestPacket button pressed")
         updateAppState { (old) -> AppState in
             var state = old
             if state.map.currentLocation==nil {
                 state.map.currentLocation = CLLocation(latitude: 10, longitude: 10)
             }
-            state.sendPacket = NSUUID() // Each press of command
+            state.sendPacket = UUID() // Each press of command
             return state
         }
     }
     
-    @IBAction func toggleConnection(sender: UIButton) {
-        Answers.logCustomEventWithName("ConnectBT", customAttributes: nil)
+    @IBAction func toggleConnection(_ sender: UIButton) {
+        Answers.logCustomEvent(withName: "ConnectBT", customAttributes: nil)
         updateAppState {
             var state = $0
-            if let devID = state.viewDetailDeviceID, dev = state.bluetooth[devID] {
+            if let devID = state.viewDetailDeviceID, let dev = state.bluetooth[devID] {
                 if dev.connected {
-                    state.disconnectDevice = NSUUID()
+                    state.disconnectDevice = UUID()
                 }
                 else {
-                    state.connectToDevice = NSUUID()
+                    state.connectToDevice = UUID()
                 }
             }
             return state
         }
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.bluetooth!.rescan()
     }
     
-    @IBAction func spreadingFactorChange(sender: UISegmentedControl) {
+    @IBAction func spreadingFactorChange(_ sender: UISegmentedControl) {
         let sf = UInt8(sender.selectedSegmentIndex) + 7
-        Answers.logCustomEventWithName("SetSF", customAttributes: ["SF": NSNumber(unsignedChar: sf)])
+        Answers.logCustomEvent(withName: "SetSF", customAttributes: ["SF": NSNumber(value: sf as UInt8)])
         debugPrint("setSF: \(sf)")
         updateAppState { (old) -> AppState in
             if var dev = old.bluetooth.first?.1 {
@@ -168,7 +165,7 @@ class DeviceViewController: AppStateUIViewController {
     
     override func renderAppState(_: AppState, state: AppState) {
         // Update UI according to app state
-        if let devID = state.viewDetailDeviceID, dev = state.bluetooth[devID] {
+        if let devID = state.viewDetailDeviceID, let dev = state.bluetooth[devID] {
             if let devAddr = dev.devAddr {
                 self.provisioningView!.devAddr.text = devAddr.hexadecimalString()
             }
@@ -201,10 +198,10 @@ class DeviceViewController: AppStateUIViewController {
                 self.spreadingFactor.selectedSegmentIndex = Int(sf) - 7
             }
             self.toggleConnection.setTitle(dev.connected ? "Disconnect" : "Connect",
-                                           forState:UIControlState.Normal)
-            self.provisioningContainer.hidden = dev.hideProvisioning
+                                           for:UIControlState())
+            self.provisioningContainer.isHidden = dev.hideProvisioning
             self.toggleProvisioningButton.setTitle(dev.hideProvisioning ? "Show" : "Hide",
-                                                   forState: UIControlState.Normal)
+                                                   for: UIControlState())
 
             var text = "Debug View\n"
             if let currentLocation = state.map.currentLocation {
@@ -214,9 +211,9 @@ class DeviceViewController: AppStateUIViewController {
                 text += "Location is current: \(isCurrentLocation)\n"
                 
                 if let lastLocation = dev.lastLocation {
-                    let d = lastLocation.distanceFromLocation(currentLocation) // in meters
+                    let d = lastLocation.distance(from: currentLocation) // in meters
                     text += String(format: "Distance (sent vs latest): %0.1f meters\n", d)
-                    let t = lastLocation.timestamp.timeIntervalSinceDate(currentLocation.timestamp)
+                    let t = lastLocation.timestamp.timeIntervalSince(currentLocation.timestamp)
                     text += "Time (sent vs latest): \(stringFromTimeInterval(fabs(t)))\n"
                 }
 
@@ -235,12 +232,12 @@ class DeviceViewController: AppStateUIViewController {
         // Dispose of any resources that can be recreated.
     }
 
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if (segue.identifier=="provisioningView") {
-            self.provisioningView = segue.destinationViewController as? ProvisioningViewController
+            self.provisioningView = segue.destination as? ProvisioningViewController
         }
         else if (segue.identifier=="statusView") {
-            self.statusView = segue.destinationViewController as? StatusViewController
+            self.statusView = segue.destination as? StatusViewController
         }
     }
 }
