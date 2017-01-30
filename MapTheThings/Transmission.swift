@@ -11,60 +11,60 @@ import Foundation
 import MapKit
 import Alamofire
 import PromiseKit
-import ReactiveCocoa
+import ReactiveSwift
 
-public class Transmission: NSManagedObject {
-    @NSManaged var created: NSDate
+open class Transmission: NSManagedObject {
+    @NSManaged var created: Date
 
     @NSManaged var latitude: Double
     @NSManaged var longitude: Double
     @NSManaged var altitude: Double
-    @NSManaged var packet: NSData?
+    @NSManaged var packet: Data?
 
     // When node reports transmission, store seq_no
     @NSManaged var dev_eui: String
     @NSManaged var seq_no: NSNumber?
 
     // Date transmission was stored at server
-    @NSManaged var synced: NSDate?
+    @NSManaged var synced: Date?
     
     static var syncWorkDisposer: Disposable?
     static var syncDisposer: Disposable?
     static var recordWorkDisposer: Disposable?
     static var recordDisposer: Disposable?
     
-    override public func awakeFromInsert() {
+    override open func awakeFromInsert() {
         super.awakeFromInsert()
-        created = NSDate()
+        created = Date()
     }
     
-    public static func create(
-        dataController: DataController,
+    open static func create(
+        _ dataController: DataController,
         latitude: Double, longitude: Double, altitude: Double,
-        packet: NSData, device: NSUUID
+        packet: Data, device: UUID
         ) throws -> Transmission {
         return try dataController.performAndWaitInContext() { moc in
-            let tx = NSEntityDescription.insertNewObjectForEntityForName("Transmission", inManagedObjectContext: moc) as! Transmission
+            let tx = NSEntityDescription.insertNewObject(forEntityName: "Transmission", into: moc) as! Transmission
             tx.latitude = latitude
             tx.longitude = longitude
             tx.altitude = altitude
             tx.packet = packet
-            tx.dev_eui = device.UUIDString
+            tx.dev_eui = device.uuidString
             tx.seq_no = nil
             try moc.save()
             return tx
         }
     }
     
-    public static func loadTransmissions(data: DataController) {
+    open static func loadTransmissions(_ data: DataController) {
         // NOTE: The following code represents a pattern regarding idempotency of work
         // that is emerging in the AppState logic. I expect I'll add some code to 
         // explicitly support the pattern when I get a chance.
         
         // Recognize that there is work to do and flag that it should happen
-        self.syncWorkDisposer = appStateObservable.observeNext { (old, new) in
-            if (!new.syncState.syncWorking
-                && new.syncState.syncPendingCount>0) {
+        self.syncWorkDisposer = appStateObservable.observeValues { signal in
+            if (!signal.new.syncState.syncWorking
+                && signal.new.syncState.syncPendingCount>0) {
                 // Don't just start async work here. There's a chance with 
                 // multiple enqueued updates to AppState that this method will be called 
                 // many times in the same state of needing to start work. We wouldn't want to 
@@ -78,17 +78,17 @@ public class Transmission: NSManagedObject {
         }
         
         // Recognize that the work flag went up and do the work.
-        self.syncDisposer = appStateObservable.observeNext { (old, new) in
-            if (!old.syncState.syncWorking && new.syncState.syncWorking) {
-                debugPrint("Sync one: \(new.syncState)")
-                syncOneTransmission(data, host: new.host)
+        self.syncDisposer = appStateObservable.observeValues { signal in
+            if (!signal.old.syncState.syncWorking && signal.new.syncState.syncWorking) {
+                debugPrint("Sync one: \(signal.new.syncState)")
+                syncOneTransmission(data, host: signal.new.host)
             }
         }
 
         // Recognize that there is work to do and flag that it should happen
-        self.recordWorkDisposer = appStateObservable.observeNext { (old, new) in
-            if (!new.syncState.recordWorking
-                && new.syncState.recordLoraToObject.count>0) {
+        self.recordWorkDisposer = appStateObservable.observeValues { signal in
+            if (!signal.new.syncState.recordWorking
+                && signal.new.syncState.recordLoraToObject.count>0) {
                 updateAppState({ (old) -> AppState in
                     var state = old
                     state.syncState.recordWorking = true
@@ -98,25 +98,25 @@ public class Transmission: NSManagedObject {
         }
         
         // Recognize that the work flag went up and do the work.
-        self.recordDisposer = appStateObservable.observeNext { (old, new) in
-            if (!old.syncState.recordWorking && new.syncState.recordWorking) {
-                debugPrint("Record one: \(new.syncState)")
-                recordOneLoraSeqNo(data, update: new.syncState.recordLoraToObject)
+        self.recordDisposer = appStateObservable.observeValues { signal in
+            if (!signal.old.syncState.recordWorking && signal.new.syncState.recordWorking) {
+                debugPrint("Record one: \(signal.new.syncState)")
+                recordOneLoraSeqNo(data, update: signal.new.syncState.recordLoraToObject)
             }
         }
 
         data.performInContext() { moc in
             do {
-                let fetch = NSFetchRequest(entityName: "Transmission")
-                let calendar = NSCalendar.autoupdatingCurrentCalendar()
-                let now = NSDate()
-                if let earlier = calendar.dateByAddingUnit(.Hour, value: -8, toDate: now, options: []) {
-                    fetch.predicate = NSPredicate(format: "created > %@", earlier)
-                    let transmissions = try moc.executeFetchRequest(fetch) as! [Transmission]
+                let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Transmission")
+                let calendar = Calendar.autoupdatingCurrent
+                let now = Date()
+                if let earlier = (calendar as NSCalendar).date(byAdding: .hour, value: -8, to: now, options: []) {
+                    fetch.predicate = NSPredicate(format: "created > %@", earlier as CVarArg)
+                    let transmissions = try moc.fetch(fetch) as! [Transmission]
                     let samples = transmissions.map { (tx) in
                         return TransSample(location: CLLocationCoordinate2D(latitude: tx.latitude, longitude: tx.longitude), altitude: tx.altitude, timestamp: tx.created,
                             device: nil, ble_seq: nil, // Not live transmission, so nil OK
-                            lora_seq: tx.seq_no?.unsignedIntValue, objectID: nil)
+                            lora_seq: tx.seq_no?.uint32Value, objectID: nil)
                     }
                     
                     updateAppState({ (old) -> AppState in
@@ -127,14 +127,14 @@ public class Transmission: NSManagedObject {
                 }
  
                 fetch.predicate = NSPredicate(format: "synced = nil and seq_no != nil")
-                let syncReady = try moc.countForFetchRequest(fetch)
+                let syncReady = try moc.count(for: fetch)
                 updateAppState { old in
                     var state = old
                     state.syncState.syncPendingCount = syncReady
                     return state
                 }
                 fetch.predicate = NSPredicate(format: "synced = nil")
-                let unsynced = try moc.countForFetchRequest(fetch)
+                let unsynced = try moc.count(for: fetch)
                 debugPrint("Transmissions without node confirmation: \(unsynced)")
             }
             catch let error as NSError {
@@ -147,15 +147,15 @@ public class Transmission: NSManagedObject {
         }
     }
     
-    static func recordOneLoraSeqNo(data: DataController, update: [(NSManagedObjectID, UInt32)]) {
+    static func recordOneLoraSeqNo(_ data: DataController, update: [(NSManagedObjectID, UInt32)]) {
         if (update.isEmpty) {
             return
         }
         data.performInContext() { moc in
             let (objID, loraSeq) = update.first!
             do {
-                let tx = try moc.existingObjectWithID(objID) as! Transmission
-                tx.seq_no = NSNumber(unsignedInt: loraSeq)
+                let tx = try moc.existingObject(with: objID) as! Transmission
+                tx.seq_no = NSNumber(value: loraSeq)
                 try moc.save()
             }
             catch let error as NSError {
@@ -176,21 +176,21 @@ public class Transmission: NSManagedObject {
         }
     }
     
-    static func formatterForJSONDate() -> NSDateFormatter {
-        let formatter = NSDateFormatter()
+    static func formatterForJSONDate() -> DateFormatter {
+        let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-        formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
-        formatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter
     }
 
-    public static func syncOneTransmission(data: DataController, host: String) {
+    open static func syncOneTransmission(_ data: DataController, host: String) {
         data.performInContext() { moc in
             do {
-                let fetch = NSFetchRequest(entityName: "Transmission")
+                let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Transmission")
                 fetch.predicate = NSPredicate(format: "synced = nil and seq_no != nil")
                 fetch.fetchLimit = 1
-                let transmissions = try moc.executeFetchRequest(fetch) as! [Transmission]
+                let transmissions = try moc.fetch(fetch) as! [Transmission]
                 if (transmissions.count>=1) {
                     postTransmission(transmissions[0], data: data, host: host)
                 }
@@ -205,7 +205,7 @@ public class Transmission: NSManagedObject {
         }
     }
 
-    public static func postTransmission(tx: Transmission, data: DataController, host: String) {
+    open static func postTransmission(_ tx: Transmission, data: DataController, host: String) {
         let formatter = formatterForJSONDate()
         let params = Promise<[String:AnyObject]>{ fulfill, reject in
             data.performInContext() { _ in
@@ -214,11 +214,11 @@ public class Transmission: NSManagedObject {
                     "lat": tx.latitude,
                     "lon": tx.longitude,
                     "alt": tx.altitude,
-                    "timestamp": formatter.stringFromDate(tx.created),
+                    "timestamp": formatter.string(from: tx.created),
                     "dev_eui": tx.dev_eui,
                     "msg_seq": tx.seq_no!,
-                ]
-                fulfill(parameters)
+                ] as [String : Any]
+                fulfill(parameters as [String : AnyObject])
             }
         }
         params.then { parameters -> Promise<NSDictionary> in
@@ -226,14 +226,14 @@ public class Transmission: NSManagedObject {
             let url = "http://\(host)/api/v0/transmissions"
             debugPrint("URL: \(url)")
             let rsp = Promise<NSDictionary> { fulfill, reject in
-                request(.POST, url,
+                request(url, method: .post,
                     parameters: parameters,
-                    encoding: ParameterEncoding.JSON)
-                .responseJSON(queue: nil, options: .AllowFragments, completionHandler: { response in
+                    encoding: JSONEncoding())
+                .responseJSON(queue: nil, options: .allowFragments, completionHandler: { response in
                     switch response.result {
-                    case .Success(let value):
+                    case .success(let value):
                         fulfill(value as! NSDictionary)
-                    case .Failure(let error):
+                    case .failure(let error):
                         reject(error)
                     }
                 })
@@ -243,7 +243,7 @@ public class Transmission: NSManagedObject {
             debugPrint(jsonResponse)
             // Write sync time to tx
             try data.performAndWaitInContext() { moc in
-                let now = NSDate()
+                let now = Date()
                 tx.synced = now
                 try moc.save()
                 updateAppState({ (old) -> AppState in
@@ -256,12 +256,12 @@ public class Transmission: NSManagedObject {
                     return state
                 })
             }
-        }.error { (error) in
+        }.catch { (error) in
             debugPrint("\(error)")
             setAppError(error, fn: "postTransmission", domain: "web")
             updateAppState({ (old) -> AppState in
                 var state = old
-                state.syncState.lastPost = NSDate()
+                state.syncState.lastPost = Date()
                 state.syncState.syncWorking = false
                 return state
             })

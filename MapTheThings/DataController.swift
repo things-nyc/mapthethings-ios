@@ -9,56 +9,61 @@
 import UIKit
 import CoreData
 
-public class DataController: NSObject {
+open class DataController: NSObject {
     
     let managedObjectContext: NSManagedObjectContext
     
     override init() {
         // This resource is the same name as your xcdatamodeld contained in your project.
-        guard let modelURL = NSBundle.mainBundle().URLForResource("DataModel", withExtension:"momd")
+        guard let modelURL = Bundle.main.url(forResource: "DataModel", withExtension:"momd")
         else {
             fatalError("Error loading model from bundle")
         }
         
         // The managed object model for the application. It is a fatal error for the application not to be able to find and load its model.
-        guard let mom = NSManagedObjectModel(contentsOfURL: modelURL)
+        guard let mom = NSManagedObjectModel(contentsOf: modelURL)
         else {
             fatalError("Error initializing mom from: \(modelURL)")
         }
         let psc = NSPersistentStoreCoordinator(managedObjectModel: mom)
-        managedObjectContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
+        managedObjectContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
         managedObjectContext.persistentStoreCoordinator = psc
-        managedObjectContext.performBlock {
-            let urls = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)
+        managedObjectContext.perform {
+            let urls = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
             let docURL = urls[urls.endIndex-1]
             /* The directory the application uses to store the Core Data store file.
              This code uses a file named "DataModel.sqlite" in the application's documents directory.
              */
-            let storeURL = docURL.URLByAppendingPathComponent("DataModel.sqlite")
+            let storeURL = docURL.appendingPathComponent("DataModel.sqlite")
             do {
-                try psc.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: storeURL, options: nil)
+                try psc.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: storeURL, options: nil)
             } catch {
                 fatalError("Error migrating store: \(error)")
             }
         }
     }
     
-    public func performInContext(block: (moc: NSManagedObjectContext) -> Void) {
-        managedObjectContext.performBlock { 
-            block(moc: self.managedObjectContext)
+    open func performInContext(_ block: @escaping (_ moc: NSManagedObjectContext) -> Void) {
+        managedObjectContext.perform { 
+            block(self.managedObjectContext)
         }
+    }
+    
+    func currentQueueName() -> String? {
+        let name = __dispatch_queue_get_label(nil)
+        return String(cString: name, encoding: .utf8)
     }
 
     /* Performs get block on NSManagedObjectContext queue and returns result on synchronously.
      If get block throws an exception, this function rethrows the same exception to the caller. */
-    public func performAndWaitInContext<T : Any>(get: (moc: NSManagedObjectContext) throws -> T) throws -> T {
+    open func performAndWaitInContext<T : Any>(_ get: @escaping (_ moc: NSManagedObjectContext) throws -> T) throws -> T {
         var result: T?
-        var throwError: ErrorType?
-        print("performBlockAndWait: \(String(UTF8String: dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL))!)")
-        managedObjectContext.performBlockAndWait {
-            print("performBlockAndWait: \(String(UTF8String: dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL))!)")
+        var throwError: Error?
+        print("performBlockAndWait outer: \(self.currentQueueName())")
+        managedObjectContext.performAndWait {
+            print("performBlockAndWait inner: \(self.currentQueueName())")
             do {
-                result = try get(moc: self.managedObjectContext)
+                result = try get(self.managedObjectContext)
             }
             catch let error {
                 throwError = error

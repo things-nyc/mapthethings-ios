@@ -27,6 +27,8 @@ global coverage map for The Things Network (TTN).
   - Hit the Send button. Message will be transmitted via a connected node.
 
 ## Developer Notes
+- We use [Cocoapods](https://cocoapods.org/). You'll need to install it and run ```pod install``` to bring in all the dependencies.
+- We are now using the latest version of Swift.
 - Fake a Device - Set FakeDevice=1 in ```Info.plist``` to fake a device when you don't have a hardware node. The app will act like it has a MapTheThings node to talk to. Set it to a bigger number to debug behavior when there are more nodes around.
 - Test Host - Use a test host server by setting TestHost="localhost:3000" in ```Info.plist```.
 - Enable Fabric by defining FABRIC_API_KEY=xyz and FABRIC_BUILD_SECRET=abc in ```private.env```.

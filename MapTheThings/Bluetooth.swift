@@ -8,7 +8,7 @@
 
 import Foundation
 import CoreBluetooth
-import ReactiveCocoa
+import ReactiveSwift
 
 /*
  Every bluetooth peripheral has a UUID.
@@ -79,42 +79,44 @@ let loraNodeCharacteristics : [CBUUID]? = [
 ]
 
 extension UInt16 {
-    var data: NSData {
-        var int = self
-        return NSData(bytes: &int, length: sizeof(UInt16))
+    var data: Data {
+        var int: UInt16 = self
+        let buffer = UnsafeBufferPointer(start: &int, count: 1)
+        return Data(buffer: buffer)
     }
 }
 
 extension UInt8 {
-    var data: NSData {
-        var int = self
-        return NSData(bytes: &int, length: sizeof(UInt8))
+    var data: Data {
+        var int: UInt8 = self
+        let buffer = UnsafeBufferPointer(start: &int, count: 1)
+        return Data(buffer: buffer)
     }
 }
 
 extension CBCharacteristic {
-    var nsUUID : NSUUID {
-        var s = self.UUID.UUIDString
-        if s.lengthOfBytesUsingEncoding(NSUTF8StringEncoding)==4 {
+    var nsUUID : UUID {
+        var s = self.uuid.uuidString
+        if s.lengthOfBytes(using: String.Encoding.utf8)==4 {
             s = "0000\(s)-0000-1000-8000-00805F9B34FB"
         }
-        return NSUUID(UUIDString: s)!
+        return UUID(uuidString: s)!
     }
 }
 
-func readInteger<T : IntegerType>(data : NSData, start : Int) -> T {
+func readInteger<T : Integer>(_ data : Data, start : Int) -> T {
     var d : T = 0
-    data.getBytes(&d, range: NSRange(location: start, length: sizeof(T)))
+    (data as NSData).getBytes(&d, range: NSRange(location: start, length: MemoryLayout<T>.size))
     return d
 }
 
-func storeLoraSeq(old_state: AppState, device: NSUUID, ble_seq: UInt8, lora_seq: UInt32) -> AppState {
+func storeLoraSeq(_ old_state: AppState, device: UUID, ble_seq: UInt8, lora_seq: UInt32) -> AppState {
     debugPrint("storeLoraSeq \(lora_seq) for ble: \(ble_seq)")
     var state = old_state
     // Find transmission with this device+ble_seq
-    for (index, tx) in state.map.transmissions.enumerate() {
-        if let tx_ble_seq = tx.ble_seq, tx_dev = tx.device
-            where ble_seq==tx_ble_seq && device==tx_dev && tx.lora_seq==nil {
+    for (index, tx) in state.map.transmissions.enumerated() {
+        if let tx_ble_seq = tx.ble_seq,
+            let tx_dev = tx.device, (ble_seq==tx_ble_seq && device==tx_dev as UUID && tx.lora_seq==nil) {
             // There could be the same device+ble with lora_seq already set
             // - because BLE seq numbers repeat - hence lora_seq nil check.
             // TODO: Not good enough - could have failed to receive lora seq.
@@ -131,13 +133,13 @@ func storeLoraSeq(old_state: AppState, device: NSUUID, ble_seq: UInt8, lora_seq:
     return state
 }
 
-func setAppStateDeviceAttribute(id: NSUUID, name: String?, characteristic: CBCharacteristic, value: NSData, error: NSError?) {
-    let s = String(data: value, encoding: NSUTF8StringEncoding)
-    debugPrint("peripheral didUpdateValueForCharacteristic", name, characteristic, s, error)
+func setAppStateDeviceAttribute(_ id: UUID, name: String?, characteristic: CBCharacteristic, value: Data, error: NSError?) {
+    let s = String(data: value, encoding: String.Encoding.utf8)
+    debugPrint("peripheral didUpdateValueForCharacteristic", name ?? "-", characteristic, s?.description ?? "-", error?.description ?? "-")
     updateAppState { (old) -> AppState in
         if var dev = old.bluetooth[id] {
             var state = old
-            switch characteristic.UUID {
+            switch characteristic.uuid {
             case loraDevAddrCharacteristic:
                 dev.devAddr = value
             case loraNwkSKeyCharacteristic:
@@ -152,13 +154,13 @@ func setAppStateDeviceAttribute(id: NSUUID, name: String?, characteristic: CBCha
                 dev.devEUI = value
             case transmitResultCharacteristic:
                 //                      format         ble_seq          error           lora_seq
-                assert(value.length==(sizeof(UInt8)+sizeof(UInt8)+sizeof(UInt16)+sizeof(UInt32)))
+                assert(value.count==(MemoryLayout<UInt8>.size+MemoryLayout<UInt8>.size+MemoryLayout<UInt16>.size+MemoryLayout<UInt32>.size))
                 debugPrint("TX result: \(value)")
                 let result_format:UInt8 = readInteger(value, start: 0)
                 if result_format==1 {
-                    let ble_seq:UInt8 = readInteger(value, start: sizeof(UInt8))
-                    let error:UInt16 = readInteger(value, start: 2*sizeof(UInt8))
-                    let lora_seq:UInt32 = readInteger(value, start: 2*sizeof(UInt8)+sizeof(UInt16))
+                    let ble_seq:UInt8 = readInteger(value, start: MemoryLayout<UInt8>.size)
+                    let error:UInt16 = readInteger(value, start: 2*MemoryLayout<UInt8>.size)
+                    let lora_seq:UInt32 = readInteger(value, start: 2*MemoryLayout<UInt8>.size+MemoryLayout<UInt16>.size)
                     if error==0 {
                         state = storeLoraSeq(state, device: id, ble_seq: ble_seq, lora_seq: lora_seq)
                     }
@@ -172,7 +174,7 @@ func setAppStateDeviceAttribute(id: NSUUID, name: String?, characteristic: CBCha
             case batteryLevelCharacteristic:
                 dev.battery = readInteger(value, start: 0)
             case logStringCharacteristic:
-                let msg = String(data: value, encoding: NSUTF8StringEncoding)!
+                let msg = String(data: value, encoding: String.Encoding.utf8)!
                 dev.log.append(msg)
             case loraSpreadingFactorCharacteristic:
                 let sf:UInt8 = readInteger(value, start: 0)
@@ -191,18 +193,18 @@ func setAppStateDeviceAttribute(id: NSUUID, name: String?, characteristic: CBCha
 }
 
 public protocol LoraNode {
-    var  identifier : NSUUID { get }
-    func requestConnection(central: CBCentralManager)
+    var  identifier : UUID { get }
+    func requestConnection(_ central: CBCentralManager)
     func onConnect()
-    func requestDisconnect(central: CBCentralManager)
+    func requestDisconnect(_ central: CBCentralManager)
     func onDisconnect()
-    func sendPacket(data : NSData) -> Bool
-    func sendPacketWithAck(data : NSData) -> UInt8? // ble sequence number, or null on failure or unavailable
-    func setSpreadingFactor(sf: UInt8) -> Bool
-    func assignOTAA(appKey: NSData, appEUI: NSData, devEUI: NSData)
+    func sendPacket(_ data : Data) -> Bool
+    func sendPacketWithAck(_ data : Data) -> UInt8? // ble sequence number, or null on failure or unavailable
+    func setSpreadingFactor(_ sf: UInt8) -> Bool
+    func assignOTAA(_ appKey: Data, appEUI: Data, devEUI: Data)
 }
 
-func markConnectStatus(id: NSUUID, connected: Bool) {
+func markConnectStatus(_ id: UUID, connected: Bool) {
     updateAppState { (old) -> AppState in
 //        assert(dev.identifier.isEqual(peripheral.identifier), "Device id should be same as peripheral id")
         var state = old
@@ -211,82 +213,79 @@ func markConnectStatus(id: NSUUID, connected: Bool) {
     }
 }
 
-func observeSpreadingFactor(device: LoraNode) -> Disposable? {
-    return appStateObservable.observeNext { update in
+func observeSpreadingFactor(_ device: LoraNode) -> Disposable? {
+    return appStateObservable.observeValues { update in
         let oldDev = update.old.bluetooth[device.identifier]
         if let dev = update.new.bluetooth[device.identifier],
-            let sf = dev.spreadingFactor
-            where oldDev==nil || oldDev!.spreadingFactor==nil || sf != oldDev!.spreadingFactor! {
-            device.setSpreadingFactor(sf)
+            let sf = dev.spreadingFactor,
+            oldDev==nil || oldDev!.spreadingFactor==nil || sf != oldDev!.spreadingFactor! {
+            _ = device.setSpreadingFactor(sf)
         }
     }
 }
 
-public class FakeBluetoothNode : NSObject, LoraNode {
-    let uuid: NSUUID
+open class FakeBluetoothNode : NSObject, LoraNode {
+    let uuid: UUID
     var lora_seq: UInt32 = 100;
     var ble_seq: UInt8 = 1 // Rolling sequence number that lets us link ack messages to sends
     var sfDisposer: Disposable?
     
     override public init() {
-        self.uuid = NSUUID()
+        self.uuid = UUID()
         super.init()
         self.sfDisposer = observeSpreadingFactor(self)
     }
     
-    public var identifier : NSUUID {
+    open var identifier : UUID {
         return self.uuid
     }
 
-    public func requestConnection(central: CBCentralManager) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2 * NSEC_PER_SEC)),
-                       dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), {
+    open func requestConnection(_ central: CBCentralManager) {
+        DispatchQueue.global(qos: DispatchQoS.QoSClass.background).asyncAfter(deadline: DispatchTime.now() + Double(Int64(2 * NSEC_PER_SEC)) / Double(NSEC_PER_SEC), execute: {
             self.onConnect()
         });
     }
     
-    public func onConnect() {
+    open func onConnect() {
         markConnectStatus(self.identifier, connected: true)
     }
 
-    public func requestDisconnect(central: CBCentralManager) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2 * NSEC_PER_SEC)),
-                       dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), {
+    open func requestDisconnect(_ central: CBCentralManager) {
+        DispatchQueue.global(qos: DispatchQoS.QoSClass.background).asyncAfter(deadline: DispatchTime.now() + Double(Int64(2 * NSEC_PER_SEC)) / Double(NSEC_PER_SEC), execute: {
             self.onDisconnect()
         });
     }
     
-    public func onDisconnect() {
+    open func onDisconnect() {
         markConnectStatus(self.identifier, connected: false)
     }
     
-    public func setSpreadingFactor(sf: UInt8) -> Bool {
+    open func setSpreadingFactor(_ sf: UInt8) -> Bool {
         debugPrint("Set spreading factor: \(sf)")
         return true
     }
     
-    public func assignOTAA(appKey: NSData, appEUI: NSData, devEUI: NSData) {
+    open func assignOTAA(_ appKey: Data, appEUI: Data, devEUI: Data) {
         debugPrint("Assigning OTAA")
     }
 
-    public func sendPacket(data : NSData) -> Bool {
+    open func sendPacket(_ data : Data) -> Bool {
         debugPrint("Sending fake packet: \(data)")
         return true
     }
-    public func sendPacketWithAck(data: NSData) -> UInt8? {
+    open func sendPacketWithAck(_ data: Data) -> UInt8? {
         let ble_seq = self.ble_seq
         self.ble_seq += 1
         
         let lora_seq = self.lora_seq
         self.lora_seq += 1
         
-        let tracked = NSMutableData(data: ble_seq.data)
-        tracked.appendData(data)
+        var tracked = NSData(data: ble_seq.data) as Data
+        tracked.append(data)
 
-        sendPacket(tracked)
+        _ = sendPacket(tracked)
         
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(10 * NSEC_PER_SEC)),
-                       dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), {
+        DispatchQueue.global(qos: DispatchQoS.QoSClass.background).asyncAfter(deadline: DispatchTime.now() + Double(Int64(10 * NSEC_PER_SEC)) / Double(NSEC_PER_SEC), execute: {
                         debugPrint("Writing response sequence no \(self.ble_seq)")
                         updateAppState { (old) -> AppState in
                             return storeLoraSeq(old, device: self.uuid, ble_seq: ble_seq, lora_seq: lora_seq)
@@ -296,7 +295,7 @@ public class FakeBluetoothNode : NSObject, LoraNode {
     }
 }
 
-public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
+open class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
     let peripheral : CBPeripheral
     var characteristics : [String: CBCharacteristic] = [:]
     var ble_seq: UInt8 = 1
@@ -310,33 +309,33 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
         self.sfDisposer = observeSpreadingFactor(self)
     }
     
-    public var identifier : NSUUID {
+    open var identifier : UUID {
         return self.peripheral.identifier
     }
     
-    public func requestConnection(central: CBCentralManager) {
-        central.connectPeripheral(self.peripheral, options: nil)
+    open func requestConnection(_ central: CBCentralManager) {
+        central.connect(self.peripheral, options: nil)
     }
 
-    public func onConnect() {
+    open func onConnect() {
         self.peripheral.discoverServices(nodeServices)
         markConnectStatus(self.identifier, connected: true)
     }
 
-    public func requestDisconnect(central: CBCentralManager) {
+    open func requestDisconnect(_ central: CBCentralManager) {
         central.cancelPeripheralConnection(self.peripheral)
     }
     
-    public func onDisconnect() {
+    open func onDisconnect() {
         self.characteristics = [:]
         self.ble_seq = 1
         markConnectStatus(self.identifier, connected: false)
     }
     
-    public func sendPacket(data : NSData) -> Bool {
-        if let characteristic = self.characteristics[loraWritePacketCharacteristic.UUIDString] {
+    open func sendPacket(_ data : Data) -> Bool {
+        if let characteristic = self.characteristics[loraWritePacketCharacteristic.uuidString] {
             debugPrint("Sending packet", data)
-            peripheral.writeValue(data, forCharacteristic: characteristic, type: CBCharacteristicWriteType.WithResponse)
+            peripheral.writeValue(data, for: characteristic, type: CBCharacteristicWriteType.withResponse)
             return true
         }
         else {
@@ -344,18 +343,18 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
             return false
         }
     }
-    public func sendPacketWithAck(data: NSData) -> UInt8? {
-        if let characteristic = self.characteristics[loraWritePacketWithAckCharacteristic.UUIDString] {
+    open func sendPacketWithAck(_ data: Data) -> UInt8? {
+        if let characteristic = self.characteristics[loraWritePacketWithAckCharacteristic.uuidString] {
             debugPrint("Sending packet with ack", data)
             let ble_seq = self.ble_seq
             self.ble_seq += 1
             
             // Prepend ble_seq to actual data. ble_seq will be included in tx result report.
-            let tracked = NSMutableData(data: ble_seq.data)
-            tracked.appendData(data)
+            var tracked = NSData(data: ble_seq.data) as Data
+            tracked.append(data)
             
-            peripheral.writeValue(tracked, forCharacteristic: characteristic,
-                                  type: CBCharacteristicWriteType.WithResponse)
+            peripheral.writeValue(tracked, for: characteristic,
+                                  type: CBCharacteristicWriteType.withResponse)
             return ble_seq
         }
         else {
@@ -364,20 +363,20 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
         }
     }
    
-    public func assignOTAA(appKey: NSData, appEUI: NSData, devEUI: NSData) {
-        if let charAppKey = self.characteristics[loraAppKeyCharacteristic.UUIDString],
-            charAppEUI = self.characteristics[loraAppEUICharacteristic.UUIDString],
-            charDevEUI = self.characteristics[loraDevEUICharacteristic.UUIDString] {
-            peripheral.writeValue(appKey, forCharacteristic: charAppKey, type: CBCharacteristicWriteType.WithResponse)
-            peripheral.writeValue(appEUI, forCharacteristic: charAppEUI, type: CBCharacteristicWriteType.WithResponse)
-            peripheral.writeValue(devEUI, forCharacteristic: charDevEUI, type: CBCharacteristicWriteType.WithResponse)
+    open func assignOTAA(_ appKey: Data, appEUI: Data, devEUI: Data) {
+        if let charAppKey = self.characteristics[loraAppKeyCharacteristic.uuidString],
+            let charAppEUI = self.characteristics[loraAppEUICharacteristic.uuidString],
+            let charDevEUI = self.characteristics[loraDevEUICharacteristic.uuidString] {
+            peripheral.writeValue(appKey, for: charAppKey, type: CBCharacteristicWriteType.withResponse)
+            peripheral.writeValue(appEUI, for: charAppEUI, type: CBCharacteristicWriteType.withResponse)
+            peripheral.writeValue(devEUI, for: charDevEUI, type: CBCharacteristicWriteType.withResponse)
         }
     }
 
-    public func setSpreadingFactor(sf : UInt8) -> Bool {
-        if let characteristic = self.characteristics[loraSpreadingFactorCharacteristic.UUIDString] {
+    open func setSpreadingFactor(_ sf : UInt8) -> Bool {
+        if let characteristic = self.characteristics[loraSpreadingFactorCharacteristic.uuidString] {
             debugPrint("Setting SF", sf)
-            peripheral.writeValue(sf.data, forCharacteristic: characteristic, type: CBCharacteristicWriteType.WithResponse)
+            peripheral.writeValue(sf.data, for: characteristic, type: CBCharacteristicWriteType.withResponse)
             return true
         }
         else {
@@ -386,40 +385,40 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
         }
     }
     
-    @objc public func peripheralDidUpdateName(peripheral: CBPeripheral) {
-        debugPrint("peripheralDidUpdateName", peripheral.name)
+    @objc open func peripheralDidUpdateName(_ peripheral: CBPeripheral) {
+        debugPrint("peripheralDidUpdateName", peripheral.name ?? "-")
     }
-    @objc public func peripheral(peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
-        debugPrint("peripheral didModifyServices", peripheral.name, invalidatedServices)
+    @objc open func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
+        debugPrint("peripheral didModifyServices", peripheral.name ?? "-", invalidatedServices)
     }
-    @objc public func peripheralDidUpdateRSSI(peripheral: CBPeripheral, error: NSError?) {
-        debugPrint("peripheralDidUpdateRSSI", peripheral.name, error)
+    @objc open func peripheralDidUpdateRSSI(_ peripheral: CBPeripheral, error: Error?) {
+        debugPrint("peripheralDidUpdateRSSI", peripheral.name ?? "-", error ?? "-")
     }
-    @objc public func peripheral(peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: NSError?) {
-        debugPrint("peripheral didReadRSSI", peripheral.name, RSSI, error)
+    @objc open func peripheral(_ peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?) {
+        debugPrint("peripheral didReadRSSI", peripheral.name ?? "-", RSSI, error ?? "-")
     }
-    @objc public func peripheral(peripheral: CBPeripheral, didDiscoverServices error: NSError?) {
-        debugPrint("peripheral didDiscoverServices", peripheral.name, peripheral.services, error)
+    @objc open func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        debugPrint("peripheral didDiscoverServices", peripheral.name ?? "-", peripheral.services ?? "-", error ?? "-")
         peripheral.services?.forEach({ (service) in
-            switch service.UUID {
+            switch service.uuid {
             case loraService:
-                peripheral.discoverCharacteristics(loraNodeCharacteristics, forService: service)
+                peripheral.discoverCharacteristics(loraNodeCharacteristics, for: service)
             case logService:
-                peripheral.discoverCharacteristics([logStringCharacteristic], forService: service)
+                peripheral.discoverCharacteristics([logStringCharacteristic], for: service)
             default:
-                peripheral.discoverCharacteristics(nil, forService: service)
+                peripheral.discoverCharacteristics(nil, for: service)
             }
         })
     }
-    @objc public func peripheral(peripheral: CBPeripheral, didDiscoverIncludedServicesForService service: CBService, error: NSError?) {
-        debugPrint("peripheral didDiscoverIncludedServicesForService", peripheral.name, service, error)
+    @objc open func peripheral(_ peripheral: CBPeripheral, didDiscoverIncludedServicesFor service: CBService, error: Error?) {
+        debugPrint("peripheral didDiscoverIncludedServicesForService", peripheral.name ?? "-", service, error ?? "-")
     }
-    @objc public func peripheral(peripheral: CBPeripheral, didDiscoverCharacteristicsForService service: CBService, error: NSError?) {
-        debugPrint("peripheral didDiscoverCharacteristicsForService", peripheral.name, service, service.characteristics, error)
+    @objc open func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        debugPrint("peripheral didDiscoverCharacteristicsForService", peripheral.name ?? "-", service, service.characteristics ?? "-", error ?? "-")
         service.characteristics!.forEach { (characteristic) in
-            debugPrint("Set characteristic: ", characteristic.nsUUID.UUIDString)
-            self.characteristics[characteristic.nsUUID.UUIDString] = characteristic
-            switch characteristic.UUID {
+            debugPrint("Set characteristic: ", characteristic.nsUUID.uuidString)
+            self.characteristics[characteristic.nsUUID.uuidString] = characteristic
+            switch characteristic.uuid {
             case loraDevAddrCharacteristic,
                 loraAppSKeyCharacteristic,
                 loraNwkSKeyCharacteristic,
@@ -427,73 +426,72 @@ public class BluetoothNode : NSObject, LoraNode, CBPeripheralDelegate {
                 loraAppEUICharacteristic,
                 loraDevEUICharacteristic,
                 loraSpreadingFactorCharacteristic:
-                peripheral.readValueForCharacteristic(characteristic)
+                peripheral.readValue(for: characteristic)
             case batteryLevelCharacteristic,
                 transmitResultCharacteristic,
                 logStringCharacteristic:
                 debugPrint("Subscribing to characteristic", characteristic)
-                peripheral.setNotifyValue(true, forCharacteristic: characteristic)
+                peripheral.setNotifyValue(true, for: characteristic)
 //          case loraCommandCharacteristic:
 //                let command : UInt16 = 500
 //                debugPrint("Writing to characteristic", characteristic, command)
 //                peripheral.writeValue(command.data, forCharacteristic: characteristic,
 //                  type:CBCharacteristicWriteType.WithResponse)
             default:
-                peripheral.readValueForCharacteristic(characteristic)
+                peripheral.readValue(for: characteristic)
             }
         }
     }
-    @objc public func peripheral(peripheral: CBPeripheral, didUpdateValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
+    @objc open func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         if let value = characteristic.value {
-            setAppStateDeviceAttribute(peripheral.identifier, name: peripheral.name, characteristic: characteristic, value: value, error: error)
+            setAppStateDeviceAttribute(peripheral.identifier, name: peripheral.name, characteristic: characteristic, value: value, error: error as NSError?)
         }
     }
-    @objc public func peripheral(peripheral: CBPeripheral, didWriteValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
-        debugPrint("peripheral didWriteValueForCharacteristic", peripheral.name, characteristic, error)
+    @objc open func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+        debugPrint("peripheral didWriteValueForCharacteristic", peripheral.name ?? "-", characteristic, error ?? "-")
     }
-    @objc public func peripheral(peripheral: CBPeripheral, didUpdateNotificationStateForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
-        debugPrint("peripheral didUpdateNotificationStateForCharacteristic", peripheral.name, characteristic, error)
+    @objc open func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
+        debugPrint("peripheral didUpdateNotificationStateForCharacteristic", peripheral.name ?? "-", characteristic, error ?? "-")
     }
-    @objc public func peripheral(peripheral: CBPeripheral, didDiscoverDescriptorsForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
-        debugPrint("peripheral didDiscoverDescriptorsForCharacteristic", peripheral.name, characteristic, error)
+    @objc open func peripheral(_ peripheral: CBPeripheral, didDiscoverDescriptorsFor characteristic: CBCharacteristic, error: Error?) {
+        debugPrint("peripheral didDiscoverDescriptorsForCharacteristic", peripheral.name ?? "-", characteristic, error ?? "-")
     }
-    @objc public func peripheral(peripheral: CBPeripheral, didUpdateValueForDescriptor descriptor: CBDescriptor, error: NSError?) {
-        debugPrint("peripheral didUpdateValueForDescriptor", peripheral.name, descriptor, error)
+    @objc open func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor descriptor: CBDescriptor, error: Error?) {
+        debugPrint("peripheral didUpdateValueForDescriptor", peripheral.name ?? "-", descriptor, error ?? "-")
     }
-    @objc public func peripheral(peripheral: CBPeripheral, didWriteValueForDescriptor descriptor: CBDescriptor, error: NSError?) {
-        debugPrint("peripheral didWriteValueForDescriptor", peripheral.name, descriptor, error)
+    @objc open func peripheral(_ peripheral: CBPeripheral, didWriteValueFor descriptor: CBDescriptor, error: Error?) {
+        debugPrint("peripheral didWriteValueForDescriptor", peripheral.name ?? "-", descriptor, error ?? "-")
     }
 }
 
-public class Bluetooth : NSObject, CBCentralManagerDelegate {
-    let queue = dispatch_queue_create("Bluetooth", DISPATCH_QUEUE_SERIAL)
+open class Bluetooth : NSObject, CBCentralManagerDelegate {
+    let queue = DispatchQueue(label: "Bluetooth", attributes: [])
     var central : CBCentralManager!
-    var nodes : [NSUUID: LoraNode] = [:]
+    var nodes : [UUID: LoraNode] = [:]
     var disposeObserver: Disposable?
     
-    public init(savedIdentifiers: [NSUUID]) {
+    public init(savedIdentifiers: [UUID]) {
         super.init()
         self.central = CBCentralManager.init(delegate: self, queue: self.queue,
                                              options: [CBCentralManagerOptionRestoreIdentifierKey: "MapTheThingsManager"])
         
-        dispatch_after(
-            dispatch_time(DISPATCH_TIME_NOW, (Int64)(5 * NSEC_PER_SEC)),
-            dispatch_get_main_queue(), {
+        DispatchQueue.main.asyncAfter(
+            deadline: DispatchTime.now() + Double((Int64)(5 * NSEC_PER_SEC)) / Double(NSEC_PER_SEC), execute: {
                 let knownPeripherals =
-                    self.central.retrievePeripheralsWithIdentifiers(savedIdentifiers)
+                    self.central.retrievePeripherals(withIdentifiers: savedIdentifiers)
                 if !knownPeripherals.isEmpty {
                     knownPeripherals.forEach({ (p) in
 //                        self.central!.connectPeripheral(p, options: nil)
-                        self.centralManager(self.central, didDiscoverPeripheral: p, advertisementData: [:], RSSI: 0)
+                        self.centralManager(self.central, didDiscover: p, advertisementData: [:], rssi: 0)
                     })
                 }
                 else {
                     self.rescan()
                 }
             })
-        self.disposeObserver = appStateObservable.observeNext({ update in
+        self.disposeObserver = appStateObservable.observeValues({ update in
             if let activeID = update.new.viewDetailDeviceID,
-                node = self.nodes[activeID] {
+                let node = self.nodes[activeID] {
 
                 if stateValChanged(update, access: {$0.connectToDevice}) {
                     node.requestConnection(self.central)
@@ -506,41 +504,40 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
             
             if stateValChanged(update, access: {$0.assignProvisioning}) {
                 if let (_, deviceID) = update.new.assignProvisioning,
-                    node = self.nodes[deviceID],
-                    device = update.new.bluetooth[deviceID],
-                    appKey = device.appKey,
-                    appEUI = device.appEUI,
-                    devEUI = device.devEUI {
+                    let node = self.nodes[deviceID],
+                    let device = update.new.bluetooth[deviceID],
+                    let appKey = device.appKey,
+                    let appEUI = device.appEUI,
+                    let devEUI = device.devEUI {
                     node.assignOTAA(appKey, appEUI: appEUI, devEUI: devEUI)
                 }
             }
         })
     }
     
-    public func addFakeNode() -> FakeBluetoothNode {
+    open func addFakeNode() -> Void {
         let fake = FakeBluetoothNode()
-        discoveredNode(fake, name: fake.identifier.UUIDString)
-        return fake
+        discoveredNode(fake, name: fake.identifier.uuidString)
     }
     
-    public func rescan() {
-        self.central.scanForPeripheralsWithServices(nodeServices, options: nil)
+    open func rescan() {
+        self.central.scanForPeripherals(withServices: nodeServices, options: nil)
     }
     
-    var nodeIdentifiers : [NSUUID] {
+    var nodeIdentifiers : [UUID] {
         return Array(nodes.keys)
     }
-    public func node(id: NSUUID) -> LoraNode? {
+    open func node(_ id: UUID) -> LoraNode? {
         return nodes[id]
     }
-    @objc public func centralManagerDidUpdateState(central: CBCentralManager) {
+    @objc open func centralManagerDidUpdateState(_ central: CBCentralManager) {
         debugPrint("centralManagerDidUpdateState", central.state)
     }
-    @objc public func centralManager(central: CBCentralManager, willRestoreState dict: [String : AnyObject]) {
+    @objc open func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
         debugPrint("centralManager willRestoreState")
     }
-    @objc public func centralManager(central: CBCentralManager, didDiscoverPeripheral peripheral: CBPeripheral, advertisementData: [String : AnyObject], RSSI: NSNumber) {
-        debugPrint("centralManager didDiscoverPeripheral", peripheral.name, advertisementData, RSSI)
+    @objc open func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        debugPrint("centralManager didDiscoverPeripheral", peripheral.name ?? "-", advertisementData, RSSI)
         if nodes[peripheral.identifier]==nil {
             let node = BluetoothNode(peripheral: peripheral)
             discoveredNode(node, name: peripheral.name)
@@ -550,15 +547,15 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
         }
     }
 
-    @objc public func centralManager(central: CBCentralManager, didConnectPeripheral peripheral: CBPeripheral) {
-        debugPrint("centralManager didConnectPeripheral", peripheral.name)
+    @objc open func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        debugPrint("centralManager didConnectPeripheral", peripheral.name ?? "-")
         
         if let node = nodes[peripheral.identifier] {
             node.onConnect()
         }
     }
     
-    public func discoveredNode(node: LoraNode, name: String?) {
+    open func discoveredNode(_ node: LoraNode, name: String?) {
         self.nodes[node.identifier] = node
 
         updateAppState { (old) -> AppState in
@@ -567,7 +564,7 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
             var dev = Device(uuid: node.identifier, name: devName)
             if let known = state.bluetooth[node.identifier] {
                 dev = known
-                assert(dev.identifier.isEqual(node.identifier), "Device id should be same as peripheral id")
+                assert(dev.identifier == node.identifier, "Device id should be same as peripheral id")
             }
             dev.connected = false // Just discovered, not yet connected
             state.bluetooth[node.identifier] = dev
@@ -575,13 +572,13 @@ public class Bluetooth : NSObject, CBCentralManagerDelegate {
         }
     }
     
-    @objc public func centralManager(central: CBCentralManager, didFailToConnectPeripheral peripheral: CBPeripheral, error: NSError?) {
-        debugPrint("centralManager didFailToConnectPeripheral", peripheral.name, error)
+    @objc open func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+        debugPrint("centralManager didFailToConnectPeripheral", peripheral.name ?? "-", error ?? "-")
     }
     
-    @objc public func centralManager(central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
+    @objc open func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         // Ensure that when bluetooth device is disconnected, the device.connected = false
-        debugPrint("centralManager didDisconnectPeripheral", peripheral.name, error)
+        debugPrint("centralManager didDisconnectPeripheral", peripheral.name ?? "-", error ?? "-")
         if let node = self.nodes[peripheral.identifier] {
             node.onDisconnect()
         }

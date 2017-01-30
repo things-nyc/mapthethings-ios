@@ -12,14 +12,14 @@
 //  - On successful transmit mark
 
 import CoreLocation
-//import ReactiveCocoa
+//import ReactiveSwift
 
 let CURRENT_LOCATION_EXPIRY = 15.0  // How many seconds a current location remains valid
 let DISTANCE_BETWEEN_SAMPLES = 10.0 // Don't report samples closer than this number of meters
 let TIME_BETWEEN_SAMPLES = 12.0     // Don't report samples more often than this number of seconds
 
 extension CLLocation {
-    var data48: NSData? {
+    var data48: Data? {
         let ilon = Int32(self.coordinate.longitude * 46603)
         var lon = UInt32(ilon < 0 ? (UINT32_MAX-UInt32(abs(ilon))+1) : UInt32(ilon)) // Expand +/-180 coordinate to fill 24bits
         let ilat = Int32(self.coordinate.latitude * 93206)
@@ -28,24 +28,26 @@ extension CLLocation {
         lon = NSSwapHostIntToLittle(lon)
         if let data = NSMutableData(capacity: 6) {
             // Append each coordinate. Post conversion to little endian, lower 24 bits are all we need.
-            data.appendData(NSData(bytes: &lat, length: 3))
-            data.appendData(NSData(bytes: &lon, length: 3))
-            return data
+            let latBytes = UnsafeBufferPointer(start: &lat, count: 3)
+            data.append(Data(buffer: latBytes))
+            let lonBytes = UnsafeBufferPointer(start: &lon, count: 3)
+            data.append(Data(buffer: lonBytes))
+            return data as Data
         }
         return nil
     }
 }
 
-public class Tracking {
+open class Tracking {
 //    var sendDisposer: Disposable?
     
-    private static func makePacket(version: UInt8, location: CLLocation) -> NSData? {
+    fileprivate static func makePacket(_ version: UInt8, location: CLLocation) -> Data? {
         if let data = NSMutableData(capacity: 7) {
-            data.appendData(version.data)
+            data.append(version.data as Data)
             if let ld = location.data48 {
-                data.appendData(ld)
+                data.append(ld)
                 assert(7==data.length, "Expected to make 7 byte coordinate")
-                return data
+                return data as Data
             }
         }
         else {
@@ -54,12 +56,12 @@ public class Tracking {
         return nil
     }
     
-    private static func sendPacket(device: Device, location: CLLocation, bluetooth: Bluetooth, dataController: DataController) -> Void {
+    fileprivate static func sendPacket(_ device: Device, location: CLLocation, bluetooth: Bluetooth, dataController: DataController) -> Void {
         // Send it to the Bluetooth peripheral
         let deviceId = device.identifier
         if let v2data = Tracking.makePacket(2, location: location),
-            v1data = Tracking.makePacket(1, location: location),
-            node = bluetooth.node(deviceId) {
+            let v1data = Tracking.makePacket(1, location: location),
+            let node = bluetooth.node(deviceId) {
             do {
                 var sent = false
                 var ble_seq:UInt8? = nil
@@ -106,7 +108,7 @@ public class Tracking {
         }
     }
     
-    public static func shouldSend(device: Device, location currentLocation: CLLocation) -> Bool {
+    open static func shouldSend(_ device: Device, location currentLocation: CLLocation) -> Bool {
         // Sampled in last 15 seconds. We don't want to be moving, get a location, and attempt to transmit it
         // when we've moved to a different location.
         let isCurrentLocation = fabs(currentLocation.timestamp.timeIntervalSinceNow) < CURRENT_LOCATION_EXPIRY
@@ -114,17 +116,17 @@ public class Tracking {
         // Confirm different in time and distance
         var movedSignificantly = true // If first location
         if let lastLoc = device.lastLocation {
-            let d = lastLoc.distanceFromLocation(currentLocation) // in meters
-            let t = lastLoc.timestamp.timeIntervalSinceDate(currentLocation.timestamp)
+            let d = lastLoc.distance(from: currentLocation) // in meters
+            let t = lastLoc.timestamp.timeIntervalSince(currentLocation.timestamp)
             movedSignificantly = d > DISTANCE_BETWEEN_SAMPLES && fabs(t) > TIME_BETWEEN_SAMPLES
         }
-        return isCurrentLocation && movedSignificantly && device.mode==SamplingMode.Play
+        return isCurrentLocation && movedSignificantly && device.mode==SamplingMode.play
     }
     
     public init(bluetooth: Bluetooth, dataController: DataController) {
         // Listen for app state changes...
 //        self.sendDisposer =
-        appStateObservable.observeNext { update in
+        appStateObservable.observeValues { update in
             let manualSend: Bool = stateValChanged(update) {$0.sendPacket}
             if let location = update.new.map.currentLocation {
                 // Send to all connected devices

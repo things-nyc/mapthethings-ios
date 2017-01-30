@@ -7,19 +7,19 @@ target 'MapTheThings' do
 
   # Pods for MapTheThings
   pod 'ReactiveCocoa'
-  pod 'HanekeSwift'
-  pod 'Alamofire', '~> 3'
   pod 'OAuthSwift'
+  pod 'HanekeSwift', :git => 'https://github.com/Haneke/HanekeSwift.git', :branch => 'feature/swift-3'
+  pod 'Alamofire'
   #pod 'PromiseKit/Alamofire', '~> 4.0'
-  pod 'PromiseKit', '~> 3.2'
+  pod 'PromiseKit'
   #pod 'Reachability'
   #pod 'CocoaLumberjack'
   #pod 'JustPromises'
   pod 'Underscore.m'
   #pod 'Masonry'
   pod 'Fabric'
-  pod 'Crashlytics', '3.8.3'
-  pod 'BLEHelper'
+  pod 'Crashlytics'
+  #pod 'BLEHelper'
 
   target 'MapTheThingsTests' do
     inherit! :search_paths

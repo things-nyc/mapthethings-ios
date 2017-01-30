@@ -19,12 +19,12 @@ class Authentication: NSObject {
     )
     public func authorize(viewController: UIViewController) {
         oauthswift.authorizeURLHandler = SafariURLHandler(viewController: viewController, oauthSwift: oauthswift)
-        let handle = oauthswift.authorize(
+        let _ = oauthswift.authorize(
             withCallbackURL: URL(string: "mapthethings://oauth-callback/twitter")!,
             success: { credential, response, parameters in
-                print(credential.oauth_token)
-                print(credential.oauth_token_secret)
-                print(parameters["user_id"])
+                print(credential.oauthToken)
+                print(credential.oauthTokenSecret)
+                print(parameters["user_id"] ?? "-")
             },
             failure: { error in
                 print(error.localizedDescription)
@@ -56,10 +56,11 @@ class Authentication: NSObject {
 //    }
     
     public func get(url: String) {
-        oauthswift.client.get(url,
+        let _ = oauthswift.client.get(url,
                               success: { response in
-                                let dataString = response.string
-                                print(dataString)
+                                if let dataString = response.string {
+                                    print(dataString)
+                                }
             },
                               failure: { error in
                                 print(error)
