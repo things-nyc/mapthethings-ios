@@ -8,6 +8,8 @@ target 'MapTheThings' do
   # Pods for MapTheThings
   pod 'ReactiveCocoa'
   pod 'OAuthSwift'
+  #pod 'Strongbox'
+  pod 'KeychainSwift', '~> 7.0'
   pod 'HanekeSwift', :git => 'https://github.com/Haneke/HanekeSwift.git', :branch => 'feature/swift-3'
   pod 'Alamofire'
   #pod 'PromiseKit/Alamofire', '~> 4.0'

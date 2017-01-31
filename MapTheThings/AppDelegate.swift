@@ -10,11 +10,13 @@ import UIKit
 import CoreData
 import Fabric
 import Crashlytics
+import OAuthSwift
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     var timer: Timer?
+    var auth: Authentication!
     var loader: SampleLoader?
     var bluetooth: Bluetooth!
     var location: Location?
@@ -33,8 +35,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         Fabric.with([Crashlytics.self])
 
+        // Requires iOS 10.0
+        //Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { (timer) in
+        //    self.onTick()
+        //}
         self.timer = Timer(timeInterval: 1.0, target: self, selector: #selector(AppDelegate.onTick), userInfo: nil, repeats: true)
         RunLoop.current.add(timer!, forMode: RunLoopMode.commonModes)
+        
+        self.auth = Authentication()
+        // May need to delay loadAuth because secure storage is flakey around app startup
+        // DispatchQueue.global(qos: DispatchQoS.QoSClass.background).asyncAfter(deadline: .now() + 0.5)
+        if let auth = self.auth.loadAuth() {
+            updateAppState({ (old) -> AppState in
+                var state = old
+                state.authState = auth
+                return state
+            })
+        }
         
         self.loader = SampleLoader()
         self.bluetooth = Bluetooth(savedIdentifiers: [])
@@ -58,7 +75,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if let source = options[UIApplicationOpenURLOptionsKey.sourceApplication] as? String,
             (source == "com.apple.SafariViewService") {
             if (url.host == "oauth-callback") {
-//                OAuthSwift.handle(url: url)
+                OAuthSwift.handle(url: url)
                 return true
             }
         }

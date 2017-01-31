@@ -51,6 +51,14 @@ public struct MapState {
     var transmissions: [TransSample]
 }
 
+public struct AuthState {
+    var provider: String
+    var user_id: String
+    var user_name: String
+    var oauth_token: String
+    var oauth_secret: String
+}
+
 public enum SamplingStrategy {
     case connectedNode // Bluetooth connected node is directed by app to send TTN message
     //case Periodic // Node sends message periodically.
@@ -115,6 +123,8 @@ public struct AppState {
     var sendPacket: UUID? = nil
     var requestProvisioning: (UUID, UUID)? = nil // (click ID, device ID)
     var assignProvisioning: (UUID, UUID)? = nil // (click ID, device ID)
+    
+    var authState: AuthState?
 }
 
 private func defaultAppState() -> AppState {
@@ -144,7 +154,8 @@ private func defaultAppState() -> AppState {
         disconnectDevice: nil,
         sendPacket: nil,
         requestProvisioning: nil,
-        assignProvisioning: nil
+        assignProvisioning: nil,
+        authState: nil
     )
 }
 
