@@ -11,6 +11,24 @@ import CoreLocation
 @testable import MapTheThings
 
 class TrackingTests: XCTestCase {
+    func testEncoding() {
+        let loc1 = CLLocation(latitude: 0, longitude: 0)
+        let exp1 = Data.dataWithHexString("000000000000")
+        XCTAssertEqual(exp1, loc1.data48)
+
+        let loc2 = CLLocation(latitude: 10, longitude: 10)
+        let exp2 = Data.dataWithHexString("dc380e6e1c07")
+        XCTAssertEqual(exp2, loc2.data48)
+        
+        let loc3 = CLLocation(latitude: 89, longitude: 179)
+        let exp3 = Data.dataWithHexString("a6937eb1497f")
+        XCTAssertEqual(exp3, loc3.data48)
+        
+        let loc4 = CLLocation(latitude: -89, longitude: -179)
+        let exp4 = Data.dataWithHexString("5a6c814fb680")
+        XCTAssertEqual(exp4, loc4.data48)
+    }
+    
     func testShouldSend() {
         let now = Date()
         let coordinate = CLLocationCoordinate2D(latitude: 10, longitude: 10)
