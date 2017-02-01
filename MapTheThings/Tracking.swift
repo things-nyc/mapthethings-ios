@@ -28,10 +28,10 @@ extension CLLocation {
         lon = NSSwapHostIntToLittle(lon)
         if let data = NSMutableData(capacity: 6) {
             // Append each coordinate. Post conversion to little endian, lower 24 bits are all we need.
-            let latBytes = UnsafeBufferPointer(start: &lat, count: 3)
-            data.append(Data(buffer: latBytes))
-            let lonBytes = UnsafeBufferPointer(start: &lon, count: 3)
-            data.append(Data(buffer: lonBytes))
+            let latBytes = UnsafeBufferPointer(start: &lat, count: 1)
+            data.append(Data(buffer: latBytes).subdata(in: 0..<3))
+            let lonBytes = UnsafeBufferPointer(start: &lon, count: 1)
+            data.append(Data(buffer: lonBytes).subdata(in: 0..<3))
             return data as Data
         }
         return nil

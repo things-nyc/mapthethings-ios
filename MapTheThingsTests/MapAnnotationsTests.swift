@@ -15,8 +15,8 @@ class MapAnnotationsTests: XCTestCase {
     func testSetOperations() {
         // Ensure that SampleAnnotation works correctly within a Set
         let l1: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 10, longitude: 10)
-        let s1 = SampleAnnotation(coordinate: l1, type: .summary)
-        let s2 = SampleAnnotation(coordinate: l1, type: .summary)
+        let s1 = SampleAnnotation(coordinate: l1, type: .summary, details: "Summary")
+        let s2 = SampleAnnotation(coordinate: l1, type: .summary, details: "Summary")
         XCTAssert(s1==s2)
         XCTAssertEqual(s1.hashValue, s2.hashValue)
         let set1 = Set<SampleAnnotation>([s1])
