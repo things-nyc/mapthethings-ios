@@ -62,9 +62,10 @@ open class Transmission: NSManagedObject {
         // explicitly support the pattern when I get a chance.
         
         // Recognize that there is work to do and flag that it should happen
-        self.syncWorkDisposer = appStateObservable.observeValues { signal in
-            if (!signal.new.syncState.syncWorking
-                && signal.new.syncState.syncPendingCount>0) {
+        self.syncWorkDisposer = appStateObservable.observeValues { (_, new) in
+            if new.authState != nil,
+                (!new.syncState.syncWorking
+                && new.syncState.syncPendingCount>0) {
                 // Don't just start async work here. There's a chance with 
                 // multiple enqueued updates to AppState that this method will be called 
                 // many times in the same state of needing to start work. We wouldn't want to 
@@ -80,8 +81,8 @@ open class Transmission: NSManagedObject {
         // Recognize that the work flag went up and do the work.
         self.syncDisposer = appStateObservable.observeValues { signal in
             if (!signal.old.syncState.syncWorking && signal.new.syncState.syncWorking) {
-                syncOneTransmission(data, host: signal.new.host)
                 //debugPrint("Sync one: \(signal.new.syncState)")
+                syncOneTransmission(data, host: signal.new.host, authorization: signal.new.authState!)
             }
         }
 
@@ -147,7 +148,7 @@ open class Transmission: NSManagedObject {
         }
     }
     
-    static func recordOneLoraSeqNo(_ data: DataController, update: [(NSManagedObjectID, UInt32)]) {
+    static private func recordOneLoraSeqNo(_ data: DataController, update: [(NSManagedObjectID, UInt32)]) {
         if (update.isEmpty) {
             return
         }
@@ -171,6 +172,7 @@ open class Transmission: NSManagedObject {
                 state.syncState.recordLoraToObject = state.syncState.recordLoraToObject.filter({ pair -> Bool in
                     return pair.0 != objID
                 })
+                state.syncState.syncPendingCount += 1;
                 return state
             })
         }
@@ -184,7 +186,7 @@ open class Transmission: NSManagedObject {
         return formatter
     }
 
-    open static func syncOneTransmission(_ data: DataController, host: String) {
+    open static func syncOneTransmission(_ data: DataController, host: String, authorization: AuthState) {
         data.performInContext() { moc in
             do {
                 let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Transmission")
@@ -192,7 +194,7 @@ open class Transmission: NSManagedObject {
                 fetch.fetchLimit = 1
                 let transmissions = try moc.fetch(fetch) as! [Transmission]
                 if (transmissions.count>=1) {
-                    postTransmission(transmissions[0], data: data, host: host)
+                    postTransmission(transmissions[0], data: data, host: host, authorization: authorization)
                 }
             }
             catch let error as NSError {
@@ -205,7 +207,11 @@ open class Transmission: NSManagedObject {
         }
     }
 
-    open static func postTransmission(_ tx: Transmission, data: DataController, host: String) {
+    open static func postTransmission(
+        _ tx: Transmission,
+        data: DataController,
+        host: String,
+        authorization auth: AuthState) {
         let formatter = formatterForJSONDate()
         let params = Promise<[String:AnyObject]>{ fulfill, reject in
             data.performInContext() { _ in
@@ -226,9 +232,11 @@ open class Transmission: NSManagedObject {
             let url = "http://\(host)/api/v0/transmissions"
             debugPrint("URL: \(url)")
             let rsp = Promise<NSDictionary> { fulfill, reject in
+                let authorization = "TwitterAuth username=\"\(auth.user_name)\" token=\"\(auth.oauth_token)\" token-secret=\"\(auth.oauth_secret)\" realm=\"api\""
+                let headers = ["Authorization" : authorization]
                 request(url, method: .post,
                     parameters: parameters,
-                    encoding: JSONEncoding())
+                    encoding: JSONEncoding(), headers: headers)
                 .responseJSON(queue: nil, options: .allowFragments, completionHandler: { response in
                     switch response.result {
                     case .success(let value):
