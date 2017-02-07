@@ -80,8 +80,8 @@ open class Transmission: NSManagedObject {
         // Recognize that the work flag went up and do the work.
         self.syncDisposer = appStateObservable.observeValues { signal in
             if (!signal.old.syncState.syncWorking && signal.new.syncState.syncWorking) {
-                debugPrint("Sync one: \(signal.new.syncState)")
                 syncOneTransmission(data, host: signal.new.host)
+                //debugPrint("Sync one: \(signal.new.syncState)")
             }
         }
 
@@ -100,7 +100,7 @@ open class Transmission: NSManagedObject {
         // Recognize that the work flag went up and do the work.
         self.recordDisposer = appStateObservable.observeValues { signal in
             if (!signal.old.syncState.recordWorking && signal.new.syncState.recordWorking) {
-                debugPrint("Record one: \(signal.new.syncState)")
+                //debugPrint("Record one: \(signal.new.syncState)")
                 recordOneLoraSeqNo(data, update: signal.new.syncState.recordLoraToObject)
             }
         }
@@ -222,7 +222,7 @@ open class Transmission: NSManagedObject {
             }
         }
         params.then { parameters -> Promise<NSDictionary> in
-            debugPrint("Params: \(parameters)")
+            //debugPrint("Params: \(parameters)")
             let url = "http://\(host)/api/v0/transmissions"
             debugPrint("URL: \(url)")
             let rsp = Promise<NSDictionary> { fulfill, reject in
@@ -240,7 +240,7 @@ open class Transmission: NSManagedObject {
             }
             return rsp
         }.then { jsonResponse -> Void in
-            debugPrint(jsonResponse)
+            //debugPrint(jsonResponse)
             // Write sync time to tx
             try data.performAndWaitInContext() { moc in
                 let now = Date()

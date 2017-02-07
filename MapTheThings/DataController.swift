@@ -59,9 +59,9 @@ open class DataController: NSObject {
     open func performAndWaitInContext<T : Any>(_ get: @escaping (_ moc: NSManagedObjectContext) throws -> T) throws -> T {
         var result: T?
         var throwError: Error?
-        print("performBlockAndWait outer: \(self.currentQueueName())")
+        //print("performBlockAndWait outer: \(self.currentQueueName())")
         managedObjectContext.performAndWait {
-            print("performBlockAndWait inner: \(self.currentQueueName())")
+            //print("performBlockAndWait inner: \(self.currentQueueName())")
             do {
                 result = try get(self.managedObjectContext)
             }

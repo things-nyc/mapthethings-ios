@@ -121,14 +121,14 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate, UIGestureR
             let add = new.subtracting(same)
             let remove = last.subtracting(same)
             if !remove.isEmpty {
-                debugPrint("Removing", remove.count)
+                //debugPrint("Removing", remove.count)
                 switch remove.count {
                 case 1: self.mapView.removeAnnotation(remove.first!)
                 default: self.mapView.removeAnnotations([SampleAnnotation](remove))
                 }
             }
             if !add.isEmpty {
-                debugPrint("Adding", add.count)
+                //debugPrint("Adding", add.count)
                 self.mapView.addAnnotations([SampleAnnotation](add))
             }
             self.lastSamples = same.union(add)

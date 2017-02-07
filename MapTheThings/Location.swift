@@ -63,7 +63,7 @@ open class Location : NSObject, CLLocationManagerDelegate {
         // Ignore updates that aren't at least accurate to 25 meters
         if let location = locations.last {
             if (location.horizontalAccuracy<MINIMUM_HORIZONTAL_ACCURACY_METERS) {
-                debugPrint("Got lat/lon", location)
+                //debugPrint("Got lat/lon", location)
                 updateAppState { (old) -> AppState in
                     var state = old
                     state.map.currentLocation = location
