@@ -51,6 +51,14 @@ public struct MapState {
     var transmissions: [TransSample]
 }
 
+public struct AuthState {
+    var provider: String
+    var user_id: String
+    var user_name: String
+    var oauth_token: String
+    var oauth_secret: String
+}
+
 public enum SamplingStrategy {
     case connectedNode // Bluetooth connected node is directed by app to send TTN message
     //case Periodic // Node sends message periodically.
@@ -115,6 +123,8 @@ public struct AppState {
     var sendPacket: UUID? = nil
     var requestProvisioning: (UUID, UUID)? = nil // (click ID, device ID)
     var assignProvisioning: (UUID, UUID)? = nil // (click ID, device ID)
+    
+    var authState: AuthState?
 }
 
 private func defaultAppState() -> AppState {
@@ -144,7 +154,8 @@ private func defaultAppState() -> AppState {
         disconnectDevice: nil,
         sendPacket: nil,
         requestProvisioning: nil,
-        assignProvisioning: nil
+        assignProvisioning: nil,
+        authState: nil
     )
 }
 
@@ -153,20 +164,56 @@ public typealias AppStateSignal = (old: AppState, new: AppState)
 public var appStateProperty = MutableProperty<AppStateSignal>((old: defaultState, new: defaultState))
 public var appStateObservable = appStateProperty.signal
 
-let sq = DispatchQueue(label: "AppState", attributes: [])
+let sq = DispatchQueue(label: "AppState")
+
+var countSubmitted : Int32 = 0
+var countHandled : Int32 = 0
 
 // Update app state in serial queue to avoid threading conflicts
 public typealias AppStateUpdateFn = (AppState) -> AppState
 public func updateAppState(_ fn: @escaping AppStateUpdateFn) {
+    OSAtomicIncrement32(&countSubmitted)
     sq.async {
         appStateProperty.modify({ (mutable) -> Void in
             mutable.old = mutable.new
             mutable.new = fn(mutable.new)
+            OSAtomicIncrement32(&countHandled)
+            let lag = countSubmitted - countHandled
+            if (lag>10) {
+                debugPrint("Lag: ", lag)
+            }
         })
     }
 }
 
 public func stateValChanged<T : Equatable>(_ state: AppStateSignal, access: (AppState) -> T?) -> Bool {
+    let new = access(state.new)
+    let old = access(state.old)
+    var changed = false
+    if let newValue = new {
+        if let oldValue = old {
+            changed = !(newValue==oldValue) // Different from last one?
+        }
+        else {
+            changed = true // New this state!
+        }
+    }
+    else if (old != nil) {
+        changed = true // Was set, now it isn't
+    }
+    return changed
+}
+
+extension AuthState: Equatable {}
+public func ==(lhs: AuthState, rhs: AuthState) -> Bool {
+    return lhs.user_id == rhs.user_id &&
+        lhs.user_name == rhs.user_name &&
+        lhs.provider == rhs.provider &&
+        lhs.oauth_token == rhs.oauth_token &&
+        lhs.oauth_secret == rhs.oauth_secret
+}
+
+public func stateValChanged(_ state: AppStateSignal, access: (AppState) -> AuthState?) -> Bool {
     let new = access(state.new)
     let old = access(state.old)
     var changed = false

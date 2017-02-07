@@ -48,7 +48,7 @@ class SampleLoader {
         let apiurl = "http://\(host)/api/v0/grids" +
             "/\(fmt(bounds.ne.latitude))/\(fmt(bounds.sw.longitude))" +
             "/\(fmt(bounds.sw.latitude))/\(fmt(bounds.ne.longitude))"
-        debugPrint("Fetching grids for \(apiurl)")
+        //debugPrint("Fetching grids for \(apiurl)")
         let requestURL: URL = URL(string: apiurl)!
         jsonCache.fetch(URL: requestURL).onSuccess { json in
             //debugPrint("JSON", json)

@@ -28,8 +28,7 @@ global coverage map for The Things Network (TTN).
 
 ## Developer Notes
 - We use [Cocoapods](https://cocoapods.org/). You'll need to install it and run ```pod install``` to bring in all the dependencies.
-- We are still on Swift 2.7. Don't let Xcode upgrade to Swift 3.0. If you do, you're on your own.
-- The Haneke pod has some errors in Swift 2.7. Add ! unwrapping as appropriate after allowing Xcode to Unlock the files. Yes, this is not ideal but it makes things work for now.
+- We are now using the latest version of Swift.
 - Fake a Device - Set FakeDevice=1 in ```Info.plist``` to fake a device when you don't have a hardware node. The app will act like it has a MapTheThings node to talk to. Set it to a bigger number to debug behavior when there are more nodes around.
 - Test Host - Use a test host server by setting TestHost="localhost:3000" in ```Info.plist```.
 - Enable Fabric by defining FABRIC_API_KEY=xyz and FABRIC_BUILD_SECRET=abc in ```private.env```.
