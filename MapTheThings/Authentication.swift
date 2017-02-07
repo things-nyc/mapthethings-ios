@@ -64,10 +64,10 @@ class Authentication: NSObject {
     }
     
     let oauthswift = OAuth1Swift(
-        consumerKey:    "fBOTUUtjGUAGERlMrHDIFyEwO",
-        consumerSecret: "OHSgEG4ua9BtYIKFIzkjrjJsQwjeOt7u1wQGIUuO1YuPJOFxep",
+        consumerKey:    PrivateConfig.TwitterConsumerKey,
+        consumerSecret: PrivateConfig.TwitterConsumerSecret,
         requestTokenUrl: "https://api.twitter.com/oauth/request_token",
-        authorizeUrl:    "https://api.twitter.com/oauth/authorize", // authenticate", // authorize always asks
+        authorizeUrl:    "https://api.twitter.com/oauth/authenticate", // authorize always asks
         accessTokenUrl:  "https://api.twitter.com/oauth/access_token"
     )
     public func authorize(viewController: UIViewController) {

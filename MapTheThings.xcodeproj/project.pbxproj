@@ -31,6 +31,7 @@
 		0144500A1E1BF2EF00CDB5AF /* secondary_first_sub_category.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FF31E1BF2EF00CDB5AF /* secondary_first_sub_category.txt */; };
 		0144500B1E1BF2EF00CDB5AF /* secondary_second_sub_category.txt in Resources */ = {isa = PBXBuildFile; fileRef = 01444FF41E1BF2EF00CDB5AF /* secondary_second_sub_category.txt */; };
 		0145C2911E3FB689009FBFEB /* AccountViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0145C2901E3FB689009FBFEB /* AccountViewController.swift */; };
+		0147A9461E491A400063F40A /* PrivateConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0147A9451E491A400063F40A /* PrivateConfig.swift */; };
 		015A6B7E1D29FD13001B5E44 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 015A6B7D1D29FD13001B5E44 /* AppState.swift */; };
 		015A6B801D2A0BC8001B5E44 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 015A6B7F1D2A0BC8001B5E44 /* MapKit.framework */; };
 		015A6B8A1D2A12AA001B5E44 /* AppStateUIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 015A6B891D2A12AA001B5E44 /* AppStateUIViewController.swift */; };
@@ -102,6 +103,7 @@
 		01444FF41E1BF2EF00CDB5AF /* secondary_second_sub_category.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = secondary_second_sub_category.txt; sourceTree = "<group>"; };
 		01444FF51E1BF2EF00CDB5AF /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		0145C2901E3FB689009FBFEB /* AccountViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountViewController.swift; sourceTree = "<group>"; };
+		0147A9451E491A400063F40A /* PrivateConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrivateConfig.swift; sourceTree = "<group>"; };
 		015A6B7D1D29FD13001B5E44 /* AppState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		015A6B7F1D2A0BC8001B5E44 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		015A6B811D2A0F8B001B5E44 /* BLEHelper.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BLEHelper.framework; path = "../../../Library/Developer/Xcode/DerivedData/MapTheThings-csldoafshwlhbscqdgzsdydcrxvi/Build/Products/Debug-iphonesimulator/BLEHelper/BLEHelper.framework"; sourceTree = "<group>"; };
@@ -288,8 +290,9 @@
 				0165DCEF1D2552F900FFB1A1 /* Main.storyboard */,
 				011AC5C71E1EA0D9002446FF /* main.swift */,
 				01B542C41D35F17A00DE443B /* MapAnnotations.swift */,
-				0160735B1E4238A4008CFD8F /* PaintCode */,
 				0165DCEB1D2552F900FFB1A1 /* MapViewController.swift */,
+				0160735B1E4238A4008CFD8F /* PaintCode */,
+				0147A9451E491A400063F40A /* PrivateConfig.swift */,
 				01C84F8A1E2AD33E00419472 /* Provisioning.swift */,
 				017D67981D2DF187002FF061 /* SampleLoader.swift */,
 				011AC5C51E1EA0B0002446FF /* TestingAppDelegate.swift */,
@@ -685,6 +688,7 @@
 				011AC5C81E1EA0D9002446FF /* main.swift in Sources */,
 				0165DCEC1D2552F900FFB1A1 /* MapViewController.swift in Sources */,
 				0145C2911E3FB689009FBFEB /* AccountViewController.swift in Sources */,
+				0147A9461E491A400063F40A /* PrivateConfig.swift in Sources */,
 				015A6B7E1D29FD13001B5E44 /* AppState.swift in Sources */,
 				01C84F8B1E2AD33E00419472 /* Provisioning.swift in Sources */,
 				01444FE11E1A04EE00CDB5AF /* DataController.swift in Sources */,
