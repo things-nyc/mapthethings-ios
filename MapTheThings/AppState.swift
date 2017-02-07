@@ -204,6 +204,33 @@ public func stateValChanged<T : Equatable>(_ state: AppStateSignal, access: (App
     return changed
 }
 
+extension AuthState: Equatable {}
+public func ==(lhs: AuthState, rhs: AuthState) -> Bool {
+    return lhs.user_id == rhs.user_id &&
+        lhs.user_name == rhs.user_name &&
+        lhs.provider == rhs.provider &&
+        lhs.oauth_token == rhs.oauth_token &&
+        lhs.oauth_secret == rhs.oauth_secret
+}
+
+public func stateValChanged(_ state: AppStateSignal, access: (AppState) -> AuthState?) -> Bool {
+    let new = access(state.new)
+    let old = access(state.old)
+    var changed = false
+    if let newValue = new {
+        if let oldValue = old {
+            changed = !(newValue==oldValue) // Different from last one?
+        }
+        else {
+            changed = true // New this state!
+        }
+    }
+    else if (old != nil) {
+        changed = true // Was set, now it isn't
+    }
+    return changed
+}
+
 public func stateValChanged<T1 : Equatable, T2 : Equatable>(_ state: AppStateSignal, access: (AppState) -> (T1, T2)?) -> Bool {
     let new = access(state.new)
     let old = access(state.old)

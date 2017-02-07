@@ -38,8 +38,21 @@
 import UIKit
 import OAuthSwift
 import KeychainSwift
+import ReactiveSwift
 
-class Authentication: NSObject {
+class Authentication {
+    var stateDisposer: Disposable?
+
+    public init() {
+        self.stateDisposer = appStateObservable.observeValues({ signal in
+            let authChange : Bool = stateValChanged(signal, access: {$0.authState})
+            if signal.new.authState==nil, authChange {
+                // Now it is nil
+                self.eraseAuth()
+            }
+        })
+    }
+    
     public func storeAuth(auth: AuthState) {
         let keychain = KeychainSwift()
         keychain.set(auth.provider, forKey: "auth_provider")
@@ -47,6 +60,15 @@ class Authentication: NSObject {
         keychain.set(auth.user_name, forKey: "auth_user_name")
         keychain.set(auth.oauth_token, forKey: "oauth_token")
         keychain.set(auth.oauth_secret, forKey: "oauth_secret")
+    }
+    
+    public func eraseAuth() {
+        let keychain = KeychainSwift()
+        keychain.delete("auth_provider")
+        keychain.delete("auth_user_id")
+        keychain.delete("auth_user_name")
+        keychain.delete("oauth_token")
+        keychain.delete("oauth_secret")
     }
     
     public func loadAuth() -> AuthState? {
