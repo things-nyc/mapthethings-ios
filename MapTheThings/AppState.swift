@@ -164,15 +164,24 @@ public typealias AppStateSignal = (old: AppState, new: AppState)
 public var appStateProperty = MutableProperty<AppStateSignal>((old: defaultState, new: defaultState))
 public var appStateObservable = appStateProperty.signal
 
-let sq = DispatchQueue(label: "AppState", attributes: [])
+let sq = DispatchQueue(label: "AppState")
+
+var countSubmitted : Int32 = 0
+var countHandled : Int32 = 0
 
 // Update app state in serial queue to avoid threading conflicts
 public typealias AppStateUpdateFn = (AppState) -> AppState
 public func updateAppState(_ fn: @escaping AppStateUpdateFn) {
+    OSAtomicIncrement32(&countSubmitted)
     sq.async {
         appStateProperty.modify({ (mutable) -> Void in
             mutable.old = mutable.new
             mutable.new = fn(mutable.new)
+            OSAtomicIncrement32(&countHandled)
+            let lag = countSubmitted - countHandled
+            if (lag>10) {
+                debugPrint("Lag: ", lag)
+            }
         })
     }
 }
