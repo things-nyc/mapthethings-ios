@@ -22,10 +22,10 @@ extension Data {
     /// - returns: Data represented by this hexadecimal string.
     
     static func dataWithHexString(_ s: String) -> Data? {
-        let data = NSMutableData(capacity: s.characters.count / 2)
+        let data = NSMutableData(capacity: s.count / 2)
         
         let regex = try! NSRegularExpression(pattern: "[0-9a-f]{1,2}", options: .caseInsensitive)
-        regex.enumerateMatches(in: s, options: [], range: NSMakeRange(0, s.characters.count)) { match, flags, stop in
+        regex.enumerateMatches(in: s, options: [], range: NSMakeRange(0, s.count)) { match, flags, stop in
             let byteString = (s as NSString).substring(with: match!.range)
             var num = UInt8(byteString, radix: 16)
             data?.append(&num, length: 1)

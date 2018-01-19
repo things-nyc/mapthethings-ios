@@ -109,7 +109,7 @@ class SampleLoader {
     }
     
     fileprivate func hashToGridCell(_ hash: String) -> GridCell {
-        let hexhash = hash.substring(from: hash.characters.index(hash.startIndex, offsetBy: 1))
+        let hexhash = hash.substring(from: hash.index(hash.startIndex, offsetBy: 1))
 
         // Based on https://github.com/kungfoo/geohash-java/blob/master/src/main/java/ch/hsr/geohash/GeoHash.java#L95
         
@@ -128,7 +128,7 @@ class SampleLoader {
         let startLongitudeRange = [ -180.0, 180.0 ]
         var isEvenBit = true;
         // TODO: have to prefix binary string with 0 bits as determined by hash prefix character
-        let (latitudeRange, longitudeRange) = hexhash.characters.reduce(
+        let (latitudeRange, longitudeRange) = hexhash.reduce(
             (startLatitudeRange, startLongitudeRange),
             { (latLon, hexChar) -> ([Double], [Double]) in
             let cd = Int("\(hexChar)", radix: 16)!
@@ -161,11 +161,11 @@ class SampleLoader {
             // https://s3.amazonaws.com/nyc.thethings.map.grids/ED2791W-v0
             let regex = try! NSRegularExpression(pattern: "/([^/]+)-v\\d$", options: [])
             let matches = regex.matches(in: gridUrlString,
-                options: [], range: NSMakeRange(0, gridUrlString.characters.count))
+                options: [], range: NSMakeRange(0, gridUrlString.count))
             let range = matches.first!.rangeAt(1) // Group
-            let r = gridUrlString.characters.index(gridUrlString.startIndex, offsetBy: range.location) ..<
-                gridUrlString.characters.index(gridUrlString.startIndex, offsetBy: range.location+range.length)
-            let hash = String(gridUrlString.substring(with: r).characters.reversed())
+            let r = gridUrlString.index(gridUrlString.startIndex, offsetBy: range.location) ..<
+                gridUrlString.index(gridUrlString.startIndex, offsetBy: range.location+range.length)
+            let hash = String(gridUrlString.substring(with: r).reversed())
             return self.hashToGridCell(hash)
         })
         updateAppState { (old) -> AppState in
