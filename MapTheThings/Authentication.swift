@@ -113,7 +113,7 @@ class Authentication {
                             oauth_token: credential.oauthToken,
                             oauth_secret: credential.oauthTokenSecret)
                         state.authState = auth
-                        print("Authenticated: \(state.authState)")
+                        print("Authenticated: \(String(describing: state.authState))")
                         self.storeAuth(auth: auth)
                     }
                     return state

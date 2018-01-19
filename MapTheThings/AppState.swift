@@ -12,7 +12,6 @@ import ReactiveSwift
 import enum Result.NoError
 import Crashlytics
 
-
 typealias Edges = (ne: CLLocationCoordinate2D, sw: CLLocationCoordinate2D)
 
 public struct Sample {
@@ -186,7 +185,7 @@ public func updateAppState(_ fn: @escaping AppStateUpdateFn) {
     }
 }
 
-public func stateValChanged<T : Equatable>(_ state: AppStateSignal, access: (AppState) -> T?) -> Bool {
+public func stateValChanged<T>(_ state: AppStateSignal, access: (AppState) -> T?) -> Bool where T : Equatable {
     let new = access(state.new)
     let old = access(state.old)
     var changed = false
@@ -211,24 +210,6 @@ public func ==(lhs: AuthState, rhs: AuthState) -> Bool {
         lhs.provider == rhs.provider &&
         lhs.oauth_token == rhs.oauth_token &&
         lhs.oauth_secret == rhs.oauth_secret
-}
-
-public func stateValChanged(_ state: AppStateSignal, access: (AppState) -> AuthState?) -> Bool {
-    let new = access(state.new)
-    let old = access(state.old)
-    var changed = false
-    if let newValue = new {
-        if let oldValue = old {
-            changed = !(newValue==oldValue) // Different from last one?
-        }
-        else {
-            changed = true // New this state!
-        }
-    }
-    else if (old != nil) {
-        changed = true // Was set, now it isn't
-    }
-    return changed
 }
 
 public func stateValChanged<T1 : Equatable, T2 : Equatable>(_ state: AppStateSignal, access: (AppState) -> (T1, T2)?) -> Bool {

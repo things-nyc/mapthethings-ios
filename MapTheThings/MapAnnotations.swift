@@ -153,7 +153,7 @@ open class SampleAnnotation : NSObject, MKAnnotation {
     static let lowSnrImage = createMarker(color: StyleKit.lowSNR)
 }
 func dEq(_ a: Double, b: Double) -> Bool {
-    return fabs(a - b) < DBL_EPSILON
+    return fabs(a - b) < Double.ulpOfOne
 }
 public func ==(lhs: SampleAnnotation, rhs: SampleAnnotation) -> Bool {
     let eq = dEq(lhs.coordinate.latitude, b: rhs.coordinate.latitude) &&

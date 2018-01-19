@@ -425,7 +425,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0820;
+				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = "The Things Network New York";
 				TargetAttributes = {
 					0165DCE51D2552F900FFB1A1 = {
@@ -850,7 +850,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CD64B5812031722A79AF578B /* Pods-MapTheThings.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = AKU2ZDCF98;
 				INFOPLIST_FILE = MapTheThings/Info.plist;
@@ -866,7 +866,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A7FF93EE5357805E5BC5EA7A /* Pods-MapTheThings.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = AKU2ZDCF98;
 				INFOPLIST_FILE = MapTheThings/Info.plist;
