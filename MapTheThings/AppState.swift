@@ -45,6 +45,7 @@ public struct MapState {
     var updated: Date
     var bounds: Edges
     var tracking: Bool
+    var locationAuthStatus: CLAuthorizationStatus
     var samples: [Sample]
     var cells: [GridCell]
     var transmissions: [TransSample]
@@ -132,7 +133,7 @@ private func defaultAppState() -> AppState {
     let transmissions = [TransSample]()
     let nyNE = CLLocationCoordinate2D(latitude: 40.8476, longitude: -73.0543)
     let nySW = CLLocationCoordinate2D(latitude: 40.4976, longitude: -73.8631)
-    let mapState = MapState(currentLocation: nil, updated: Date(), bounds: (ne: nyNE, sw: nySW), tracking: true, samples: samples, cells: cells, transmissions: transmissions)
+    let mapState = MapState(currentLocation: nil, updated: Date(), bounds: (ne: nyNE, sw: nySW), tracking: true, locationAuthStatus: CLAuthorizationStatus.notDetermined, samples: samples, cells: cells, transmissions: transmissions)
     let samplingState = SamplingState(strategy: SamplingStrategy.connectedNode, mode: SamplingMode.stop, mostRecentSample: nil)
 
     var host = "map.thethings.nyc"

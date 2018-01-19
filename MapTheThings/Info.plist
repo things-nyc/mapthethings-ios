@@ -30,7 +30,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>201701110217</string>
+	<string>201702070558</string>
 	<key>Fabric</key>
 	<dict>
 		<key>APIKey</key>
@@ -68,6 +68,8 @@
 	<string>MapTheThings uses Bluetooth to communicate with the mapping node hardware.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Get current location for sample</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string></string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We don't use Photos but I haven't figured out how to not require this.</string>
 	<key>UIBackgroundModes</key>

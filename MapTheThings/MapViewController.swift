@@ -40,6 +40,7 @@ extension MKMapView {
 class MapViewController: AppStateUIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
     @IBOutlet weak var timestamp: UILabel!
     @IBOutlet weak var toggle: UIButton!
+    @IBOutlet weak var notice: UILabel!
     @IBOutlet weak var mapView: MKMapView!
     var lastSamples: Set<SampleAnnotation>?
     var mapDragRecognizer: UIPanGestureRecognizer!
@@ -104,6 +105,20 @@ class MapViewController: AppStateUIViewController, MKMapViewDelegate, UIGestureR
         }
         else {
             mapView.setUserTrackingMode(MKUserTrackingMode.none, animated:true)
+        }
+        var ls: String? = Optional.none
+        switch state.map.locationAuthStatus {
+        case .authorizedAlways, .authorizedWhenInUse: break;
+        case .denied: ls = String("Denied"); break;
+        case .restricted: ls = String("Restricted"); break;
+        case .notDetermined: ls = String("Unknown"); break;
+        }
+        if let status = ls {
+            notice.text = "Location Services \(status)"
+            notice.isHidden = false
+        }
+        else {
+            notice.isHidden = true
         }
         
         // TODO
